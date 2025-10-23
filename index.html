@@ -1,324 +1,71 @@
-import { ChangeDetectionStrategy, Component, computed, signal, WritableSignal, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-// --- Globale variabler fra miljøet ---
-declare var __firebase_config: string;
-declare var __initial_auth_token: string;
-declare var __app_id: string;
-
-// --- Typer for Firebase (v9+) ---
-type Firestore = any;
-type Auth = any;
-type FirebaseApp = any;
-type Unsubscribe = () => void;
-
-// --- Dynamiske import-stier (CDN) ---
-const FIREBASE_APP_URL = "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-const FIREBASE_AUTH_URL = "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-const FIREBASE_FIRESTORE_URL = "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-
-// --- Datastrukturer ---
-interface NewEntry {
-  age: number | null;
-  gender: 'Mann' | 'Kvinne' | 'Annet';
-  area: number | null;
-  diff: number | null;
-}
-
-interface BalanceEntry extends NewEntry {
-  id: string; // Lagt til for sporing i tabellen
-  testleder: string; // Lagt til for sporing
-}
-
-interface AgeGroup {
-  label: string;
-  count: number;
-}
-
-// --- Funksjoner som skal importeres dynamisk ---
-// Disse vil bli fylt ut av den dynamiske importen
-let initializeApp: any;
-let getFirestore: any, setLogLevel: any, collection: any, onSnapshot: any, addDoc: any, doc: any, deleteDoc: any, updateDoc: any;
-let getAuth: any, signInWithCustomToken: any, signInAnonymously: any, onAuthStateChanged: any;
-
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-    <!-- Hoved-wrapper med mørk bakgrunn og fontstil -->
-    <div class="bg-black text-white min-h-screen font-['Helvetica_Neue',_Arial,_sans-serif] p-6">
-      <div class="max-w-7xl mx-auto relative">
-        
-        <!-- Header fra designmalen -->
-        <img src="https://storage.googleapis.com/files_webpage/narrow.png" class="h-8 w-auto mb-6" alt="Logo">
-        <h1 class="text-3xl text-center text-white mb-8 font-light">Balanse Data</h1>
-
-        <!-- Hovedlayout: 1 kolonne på mobil, 2 på større skjermer -->
-        <div class="flex flex-col lg:flex-row gap-8">
-
-          <!-- Venstre kolonne: Skjema, Instruksjoner, Statistikk -->
-          <div class="flex flex-col gap-8 lg:w-1/3">
-          
-            <!-- NYTT Panel: Testleder (flyttet hit) -->
-            <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full space-y-2">
-              <h3 class="text-lg text-white font-semibold mb-2">Testleder</h3>
-              <input 
-                type="text" 
-                [value]="currentTestleder()"
-                (input)="updateTestleder($event)"
-                class="name-input" 
-                placeholder="Testleders navn...">
-              <p class="text-xs text-gray-400">Navnet lagres med hver ny oppføring.</p>
-            </div>
-
-            <!-- Panel: Legg til data -->
-            <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full space-y-4">
-              <h3 class="text-lg text-white font-semibold mb-0">Legg til data</h3>
-
-              <!-- Indre panel for selve skjemaet -->
-              <div class="bg-gray-800/40 p-4 rounded-lg space-y-4">
-                <h4 class="text-base text-white font-medium -mt-1">Testperson-data</h4>
-                <div>
-                  <label class="block text-sm text-white font-medium mb-1">Alder</label>
-                  <input 
-                    type="number" 
-                    [value]="newEntry().age ?? ''"
-                    (input)="updateNewEntry('age', $event)"
-                    class="name-input" 
-                    placeholder="Alder...">
-                </div>
-                <div>
-                  <label class="block text-sm text-white font-medium mb-1">Kjønn</label>
-                  <select 
-                    [value]="newEntry().gender"
-                    (change)="updateNewEntry('gender', $event)"
-                    class="name-input">
-                    <option value="Mann">Mann</option>
-                    <option value="Kvinne">Kvinne</option>
-                    <option value="Annet">Annet</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm text-white font-medium mb-1">Arealet (cm²)</label>
-                  <input 
-                    type="number" 
-                    [value]="newEntry().area ?? ''"
-                    (input)="updateNewEntry('area', $event)"
-                    class="name-input" 
-                    placeholder="Arealet...">
-                </div>
-                <div>
-                  <label class="block text-sm text-white font-medium mb-1">Diff. (cm)</label>
-                  <input 
-                    type="number" 
-                    [value]="newEntry().diff ?? ''"
-                    (input)="updateNewEntry('diff', $event)"
-                    class="name-input" 
-                    placeholder="Differanse...">
-                </div>
-                <button 
-                  (click)="addEntry()"
-                  [disabled]="!isFirebaseReady() || !currentTestleder() || !newEntry().age"
-                  class="filter-button active w-full disabled:opacity-50 disabled:bg-gray-500 disabled:border-gray-500">
-                  Lagre data
-                </button>
-              </div>
-            </div>
-
-            <!-- Panel: Instruksjoner -->
-            <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full">
-              <h3 class="text-lg text-white font-semibold mb-4">Instruksjoner til balansetest</h3>
-              <div class="bg-gray-800/40 p-4 rounded-lg space-y-3 text-gray-300 text-sm">
-                <p>Uten sko:</p>
-                <ul class="list-disc list-inside space-y-2">
-                  <li>Løft foten ca. 10 cm fra bakken.</li>
-                  <li>Hold armene ned langs siden av kroppen.</li>
-                  <li>Se rett frem og stå så stille som mulig.</li>
-                  <li>Stå i <strong>30 sekunder</strong> på høyre fot.</li>
-                  <li>Stå deretter i <strong>30 sekunder</strong> på venstre fot.</li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Panel: Statistikk -->
-            <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full">
-              <h3 class="text-lg text-white font-semibold mb-4">Statistikk</h3>
-              <div class="bg-gray-800/40 p-4 rounded-lg space-y-2 text-gray-300">
-                <p class="text-white text-lg font-medium">Totalt antall: {{ totalCount() }}</p>
-                <hr class="border-gray-600 my-2">
-                <h4 class="text-white font-medium mb-1">Aldersgrupper:</h4>
-                @if (isAuthReady()) {
-                  @for (group of ageGroups(); track group.label) {
-                    <p class="text-sm">{{ group.label }}: {{ group.count }}</p>
-                  }
-                  @if (ageGroups().length === 0) {
-                    <p class="text-sm text-gray-400">Ingen data å gruppere.</p>
-                  }
-                } @else {
-                  <p class="text-sm text-gray-400">Laster statistikk...</p>
-                }
-              </div>
-            </div>
-
-          </div><!-- Slutt venstre kolonne -->
-
-          <!-- Høyre kolonne: Datatabell -->
-          <div class="lg:w-2/3 w-full">
-            <!-- Panel: Tabell -->
-            <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full">
-              <h3 class="text-lg text-white font-semibold mb-4">Datatabell</h3>
-              
-              <!-- Filter-input -->
-              <input 
-                type="text" 
-                class="name-input w-full mb-4" 
-                placeholder="Filtrer på testleder..."
-                [value]="nameFilter()"
-                (input)="updateFilter($event)">
-
-              <!-- Tabell-container for horisontal scrolling på små skjermer -->
-              <div class="overflow-x-auto">
-                <table class="w-full min-w-[700px] text-left text-sm text-gray-300">
-                  <thead class="bg-gray-800/40 text-xs uppercase text-gray-400">
-                    <tr>
-                      <th class="px-4 py-3">Testleder</th>
-                      <th class="px-4 py-3">Alder</th>
-                      <th class="px-4 py-3">Kjønn</th>
-                      <th class="px-4 py-3">Arealet (cm²)</th>
-                      <th class="px-4 py-3">Diff. (cm)</th>
-                      <th class="px-4 py-3 text-center">Handlinger</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @if (isAuthReady()) {
-                      @for (entry of filteredEntries(); track entry.id) {
-                        <!-- Visningsmodus -->
-                        @if (editingEntryId() !== entry.id) {
-                          <tr class="border-b border-gray-700 hover:bg-gray-800/60">
-                            <td class="px-4 py-3 text-white">{{ entry.testleder }}</td>
-                            <td class="px-4 py-3">{{ entry.age }}</td>
-                            <td class="px-4 py-3">{{ entry.gender }}</td>
-                            <td class="px-4 py-3">{{ entry.area }}</td>
-                            <td class="px-4 py-3">{{ entry.diff }}</td>
-                            <td class="px-4 py-3 flex justify-center items-center gap-2">
-                              <button (click)="startEditing(entry)" class="action-button">✎</button>
-                              <button (click)="deleteEntry(entry.id)" class="action-button-delete">✗</button>
-                            </td>
-                          </tr>
-                        } @else {
-                          <!-- Redigeringsmodus -->
-                          <tr class="border-b border-gray-700 bg-gray-800/80">
-                            <td class="px-2 py-2">
-                              <input type="text" [value]="editBuffer()?.testleder ?? ''" (input)="updateEditBuffer('testleder', $event)" class="name-input p-1">
-                            </td>
-                            <td class="px-2 py-2">
-                              <input type="number" [value]="editBuffer()?.age ?? ''" (input)="updateEditBuffer('age', $event)" class="name-input p-1 w-20">
-                            </td>
-                            <td class="px-2 py-2">
-                              <select [value]="editBuffer()?.gender" (change)="updateEditBuffer('gender', $event)" class="name-input p-1">
-                                <option value="Mann">Mann</option>
-                                <option value="Kvinne">Kvinne</option>
-                                <option value="Annet">Annet</option>
-                              </select>
-                            </td>
-                            <td class="px-2 py-2">
-                              <input type="number" [value]="editBuffer()?.area ?? ''" (input)="updateEditBuffer('area', $event)" class="name-input p-1 w-24">
-                            </td>
-                            <td class="px-2 py-2">
-                              <input type="number" [value]="editBuffer()?.diff ?? ''" (input)="updateEditBuffer('diff', $event)" class="name-input p-1 w-24">
-                            </td>
-                            <td class="px-2 py-2 flex justify-center items-center gap-2">
-                              <button (click)="saveEdit(entry.id)" class="action-button-save">✓</button>
-                              <button (click)="cancelEdit()" class="action-button">↲</button>
-                            </td>
-                          </tr>
-                        }
-                      }
-                      @if (filteredEntries().length === 0) {
-                        <tr>
-                          <td colspan="6" class="text-center py-6 text-gray-400">
-                            @if (entries().length > 0) {
-                              Ingen treff for filteret "{{ nameFilter() }}".
-                            } @else {
-                              Ingen data lagret ennå.
-                            }
-                          </td>
-                        </tr>
-                      }
-                    } @else {
-                      <!-- Laster data... -->
-                      <tr>
-                        <td colspan="6" class="text-center py-6 text-gray-400">
-                          @if(firebaseError()) {
-                            <span class="text-red-400">Feil ved lasting av Firebase: {{ firebaseError() }}</span>
-                          } @else {
-                            <span>Venter på at Firebase skal lastes...</span>
-                          }
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div><!-- Slutt tabell-scroll -->
-            </div><!-- Slutt tabell-panel -->
-          </div><!-- Slutt høyre kolonne -->
-        </div><!-- Slutt hovedlayout -->
-      </div>
-    </div>
-  `,
-  styles: [
-    // --- Egendefinert CSS fra Dash-appen for å matche stilen ---
-    `
-    :host {
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Balanse Data</title>
+  <!-- Laster inn Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Egendefinert CSS fra Dash-appen for å matche stilen -->
+  <style>
+    body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
     }
 
     /* Standard knappestil */
-    .filter-button { 
-      background-color: transparent; 
-      color: #fff; 
-      border: 1px solid rgba(255, 255, 255, 0.3); 
-      padding: 5px 14px; 
-      border-radius: 9999px; 
-      font-size: 13px; 
-      font-weight: 500; 
-      transition: all 0.2s ease; 
-      cursor: pointer; 
-      white-space: nowrap; 
-      text-align: center; 
+    .filter-button {
+      background-color: transparent;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+      /* For å justere høyden likt som input-feltet */
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
-    .filter-button:hover { 
-      background-color: rgba(255, 255, 255, 0.1); 
+    .filter-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
     /* Aktiv/uthevet knappestil (brukes for Lagre) */
-    .filter-button.active { 
+    .filter-button.active {
       background-color: #10b981; /* Grønnfarge fra malen */
-      color: white; 
-      border-color: transparent; 
+      color: white;
+      border-color: transparent;
     }
     .filter-button.active:hover {
       background-color: #059669;
     }
     .filter-button:disabled {
       cursor: not-allowed;
+      opacity: 0.5;
+      background-color: #4a5568;
+      border-color: #4a5568;
     }
 
     /* Stil for input-felter og select */
-    .name-input { 
-      background-color: #2d3748; 
-      border: 1px solid #4a5568; 
-      color: white; 
+    .name-input {
+      background-color: #2d3748;
+      border: 1px solid #4a5568;
+      color: white;
       border-radius: 0.375rem; /* rounded-md */
       padding: 0.5rem 0.75rem; /* padding-2 padding-x-3 */
-      width: 100%; 
+      width: 100%;
       font-size: 0.875rem; /* text-sm */
       transition: border-color 0.2s ease;
+      /* Sørger for at høyden er konsistent */
+      height: 38px;
     }
-    .name-input:focus { 
-      outline: none; 
+    .name-input:focus {
+      outline: none;
       border-color: #10b981; /* Grønnfarge fra malen */
       box-shadow: 0 0 0 1px #10b981;
     }
@@ -338,7 +85,7 @@ let getAuth: any, signInWithCustomToken: any, signInAnonymously: any, onAuthStat
       color: white;
     }
 
-    /* Tabell-handlingsknapper (mindre versjoner av filter-button) */
+    /* Tabell-handlingsknapper */
     .action-button, .action-button-delete, .action-button-save {
       background-color: transparent;
       color: #9ca3af; /* gray-400 */
@@ -370,399 +117,597 @@ let getAuth: any, signInWithCustomToken: any, signInAnonymously: any, onAuthStat
       background-color: rgba(239, 68, 68, 0.1);
       color: white;
     }
-    `
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class App implements AfterViewInit {
-  // --- Firebase-tilstand ---
-  private app: FirebaseApp;
-  private db: Firestore;
-  private auth: Auth;
-  private appId: string;
-  private dbCollectionPath: string;
-  private unsubscribeFromEntries: Unsubscribe | null = null;
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen">
 
-  // --- App-tilstand (signaler) ---
-  isFirebaseReady = signal(false);
-  isAuthReady = signal(false);
-  firebaseError = signal<string | null>(null);
-  
-  entries: WritableSignal<BalanceEntry[]> = signal([]);
-  nameFilter = signal('');
-  
-  // Eget signal for testleder-navnet
-  currentTestleder = signal('');
-  
-  newEntry: WritableSignal<NewEntry> = signal({
-    age: null,
-    gender: 'Mann',
-    area: null,
-    diff: null,
-  });
+  <!-- Hoved-wrapper -->
+  <div class="max-w-7xl mx-auto p-6 relative">
 
-  editingEntryId = signal<string | null>(null);
-  editBuffer: WritableSignal<Partial<BalanceEntry> | null> = signal(null);
+    <!-- Header fra designmalen -->
+    <img src="https://storage.googleapis.com/files_webpage/narrow.png" class="h-8 w-auto mb-6" alt="Logo">
+    <h1 class="text-3xl text-center text-white mb-8 font-light">Balanse Data</h1>
 
-  // --- Avledet tilstand (Computed Signals) ---
-  
-  // Filtrert liste for tabellen
-  filteredEntries = computed(() => {
-    const allEntries = this.entries();
-    const filter = this.nameFilter().toLowerCase();
+    <!-- Hovedlayout: 1 kolonne på mobil, 2 på større skjermer -->
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- Venstre kolonne: Skjema, Instruksjoner, Statistikk -->
+      <div class="flex flex-col gap-8 lg:w-1/3">
+
+        <!-- Panel: Testleder -->
+        <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full space-y-2">
+          <h3 class="text-lg text-white font-semibold mb-2">Testleder</h3>
+          <input 
+            type="text"
+            id="testleder-input"
+            class="name-input"
+            placeholder="Testleders navn...">
+          <p class="text-xs text-gray-400">Navnet lagres med hver ny oppføring.</p>
+        </div>
+
+        <!-- Panel: Legg til data -->
+        <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full space-y-4">
+          <h3 class="text-lg text-white font-semibold mb-0">Legg til data</h3>
+
+          <!-- Indre panel for selve skjemaet -->
+          <div class="bg-gray-800/40 p-4 rounded-lg space-y-4">
+            <h4 class="text-base text-white font-medium -mt-1">Testperson-data</h4>
+            <div>
+              <label class="block text-sm text-white font-medium mb-1">Alder</label>
+              <input type="number" id="age-input" class="name-input" placeholder="Alder...">
+            </div>
+            <div>
+              <label class="block text-sm text-white font-medium mb-1">Kjønn</label>
+              <select id="gender-input" class="name-input">
+                <option value="Mann">Mann</option>
+                <option value="Kvinne">Kvinne</option>
+                <option value="Annet">Annet</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-white font-medium mb-1">Arealet (cm²)</label>
+              <input type="number" id="area-input" class="name-input" placeholder="Arealet...">
+            </div>
+            <div>
+              <label class="block text-sm text-white font-medium mb-1">Diff. (cm)</label>
+              <input type="number" id="diff-input" class="name-input" placeholder="Differanse...">
+            </div>
+            <button id="add-entry-button" class="filter-button active w-full" disabled>
+              Lagre data
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel: Instruksjoner -->
+        <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full">
+          <h3 class="text-lg text-white font-semibold mb-4">Instruksjoner til balansetest</h3>
+          <div class="bg-gray-800/40 p-4 rounded-lg space-y-3 text-gray-300 text-sm">
+            <p>Uten sko:</p>
+            <ul class="list-disc list-inside space-y-2">
+              <li>Løft foten ca. 10 cm fra bakken.</li>
+              <li>Hold armene ned langs siden av kroppen.</li>
+              <li>Se rett frem og stå så stille som mulig.</li>
+              <li>Stå i <strong>30 sekunder</strong> på høyre fot.</li>
+              <li>Stå deretter i <strong>30 sekunder</strong> på venstre fot.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Panel: Statistikk -->
+        <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full">
+          <h3 class="text-lg text-white font-semibold mb-4">Statistikk</h3>
+          <div class="bg-gray-800/40 p-4 rounded-lg space-y-2 text-gray-300">
+            <p class="text-white text-lg font-medium">
+              Totalt antall: <span id="total-count">0</span>
+            </p>
+            <hr class="border-gray-600 my-2">
+            <h4 class="text-white font-medium mb-1">Aldersgrupper:</h4>
+            <div id="age-groups-container">
+              <p class="text-sm text-gray-400">Laster statistikk...</p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- Slutt venstre kolonne -->
+
+      <!-- Høyre kolonne: Datatabell -->
+      <div class="lg:w-2/3 w-full">
+        <!-- Panel: Tabell -->
+        <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg w-full">
+          <h3 class="text-lg text-white font-semibold mb-4">Datatabell</h3>
+
+          <!-- Container for filter og nedlastingsknapp -->
+          <div class="flex flex-col sm:flex-row gap-4 mb-4">
+            <!-- Filter-input -->
+            <input
+              type="text"
+              id="filter-input"
+              class="name-input w-full sm:flex-grow"
+              placeholder="Filtrer på testleder...">
+
+            <!-- NY KNAPP: Last ned CSV -->
+            <button
+              id="download-csv-button"
+              class="filter-button active w-full sm:w-auto"
+              disabled>
+              Last ned CSV
+            </button>
+          </div>
+
+          <!-- Tabell-container -->
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[700px] text-left text-sm text-gray-300">
+              <thead class="bg-gray-800/40 text-xs uppercase text-gray-400">
+                <tr>
+                  <th class="px-4 py-3">Testleder</th>
+                  <th class="px-4 py-3">Alder</th>
+                  <th class="px-4 py-3">Kjønn</th>
+                  <th class="px-4 py-3">Arealet (cm²)</th>
+                  <th class="px-4 py-3">Diff. (cm)</th>
+                  <th class="px-4 py-3 text-center">Handlinger</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Innhold genereres av JavaScript -->
+                <tr>
+                  <td colspan="6" class="text-center py-6 text-gray-400" id="table-loading-state">
+                    Venter på at Firebase skal lastes...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div><!-- Slutt tabell-scroll -->
+        </div><!-- Slutt tabell-panel -->
+      </div><!-- Slutt høyre kolonne -->
+    </div><!-- Slutt hovedlayout -->
+  </div>
+
+  <!-- Firebase og App Logikk -->
+  <script type="module">
+    // --- Importer Firebase-funksjoner ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithCustomToken, 
+      signInAnonymously, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      setLogLevel, 
+      collection, 
+      onSnapshot, 
+      addDoc, 
+      doc, 
+      deleteDoc, 
+      updateDoc 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Globale variabler for tilstand ---
+    let db;
+    let auth;
+    let dbCollectionPath;
+    let isAuthReady = false;
     
-    if (!filter) {
-      return allEntries;
-    }
-    
-    return allEntries.filter(entry => 
-      entry.testleder.toLowerCase().includes(filter)
-    );
-  });
+    let allEntries = []; // Kilden til sannhet
+    let currentTestleder = "";
+    let nameFilter = "";
+    let editingEntryId = null;
 
-  // Teller for totalt antall
-  totalCount = computed(() => this.entries().length);
+    // --- DOM-element referanser ---
+    const testlederInput = document.getElementById('testleder-input');
+    const ageInput = document.getElementById('age-input');
+    const genderInput = document.getElementById('gender-input');
+    const areaInput = document.getElementById('area-input');
+    const diffInput = document.getElementById('diff-input');
+    const addEntryButton = document.getElementById('add-entry-button');
+    const filterInput = document.getElementById('filter-input');
+    const downloadCsvButton = document.getElementById('download-csv-button');
+    const tableBody = document.getElementById('table-body');
+    const tableLoadingState = document.getElementById('table-loading-state');
+    const totalCountEl = document.getElementById('total-count');
+    const ageGroupsContainer = document.getElementById('age-groups-container');
 
-  // Teller for aldersgrupper
-  ageGroups = computed(() => {
-    const groups: { [key: string]: number } = {
-      'Ukjent': 0,
-      '< 20': 0,
-      '20-29': 0,
-      '30-39': 0,
-      '40-49': 0,
-      '50-59': 0,
-      '60-69': 0,
-      '70+': 0,
-    };
+    /**
+     * Hovedfunksjon som kjører når siden laster.
+     */
+    function main() {
+      console.log("App initialiserer...");
+      setupEventListeners();
 
-    for (const entry of this.entries()) {
-      const age = entry.age;
-      if (age === null || age === undefined) {
-        groups['Ukjent']++;
-      } else if (age < 20) {
-        groups['< 20']++;
-      } else if (age >= 20 && age <= 29) {
-        groups['20-29']++;
-      } else if (age >= 30 && age <= 39) {
-        groups['30-39']++;
-      } else if (age >= 40 && age <= 49) {
-        groups['40-49']++;
-      } else if (age >= 50 && age <= 59) {
-        groups['50-59']++;
-      } else if (age >= 60 && age <= 69) {
-        groups['60-69']++;
-      } else if (age >= 70) {
-        groups['70+']++;
-      }
-    }
-
-    // Konverter til array for @for-løkken og filtrer bort tomme grupper
-    return Object.entries(groups)
-      .map(([label, count]) => ({ label, count }))
-      .filter(group => group.count > 0);
-  });
-
-
-  constructor() {
-    // Bruk __app_id fra miljøet, med fallback til prosjekt-ID
-    this.appId = typeof __app_id !== 'undefined' ? __app_id : 'balanse-data';
-    
-    // Definer databasestien for offentlige data
-    this.dbCollectionPath = `/artifacts/${this.appId}/public/data/entries`;
-  }
-
-  /**
-   * Kjører etter at Angular har initialisert viewet.
-   * Vi starter innlastingen av Firebase-modulene.
-   */
-  async ngAfterViewInit() {
-    console.log("ngAfterViewInit: Laster Firebase-moduler...");
-    try {
-      // "Skjul" dynamisk import() fra den statiske analysatoren ved å bruke new Function
-      // Dette er en workaround for kompilatorfeilen.
-      const dynamicImport = new Function('url', 'return import(url);');
-
-      // Bruker den nye funksjonen til å laste modulene
-      const appModule = await dynamicImport(FIREBASE_APP_URL);
-      const firestoreModule = await dynamicImport(FIREBASE_FIRESTORE_URL);
-      const authModule = await dynamicImport(FIREBASE_AUTH_URL);
-
-      // Tilordne de importerte funksjonene til globale variabler
-      initializeApp = appModule.initializeApp;
-      
-      getFirestore = firestoreModule.getFirestore;
-      setLogLevel = firestoreModule.setLogLevel;
-      collection = firestoreModule.collection;
-      onSnapshot = firestoreModule.onSnapshot;
-      addDoc = firestoreModule.addDoc;
-      doc = firestoreModule.doc;
-      deleteDoc = firestoreModule.deleteDoc;
-      updateDoc = firestoreModule.updateDoc;
-      
-      getAuth = authModule.getAuth;
-      signInWithCustomToken = authModule.signInWithCustomToken;
-      signInAnonymously = authModule.signInAnonymously;
-      onAuthStateChanged = authModule.onAuthStateChanged;
-      
-
-      console.log("Firebase-moduler lastet.");
-      this.initializeFirebase();
-    } catch (e: any) {
-      console.error("Feil ved dynamisk lasting av Firebase-moduler:", e);
-      this.firebaseError.set(e.message || 'Lastefeil for moduler');
-    }
-  }
-
-
-  /**
-   * Initialiserer Firebase. Kalles NÅR modulene er lastet.
-   */
-  private initializeFirebase() {
-    try {
-      // Hent Firebase-konfigurasjon fra miljøet
-      const firebaseConfig = JSON.parse(
-        typeof __firebase_config !== 'undefined' ? __firebase_config : '{}'
-      );
-      
-      this.app = initializeApp(firebaseConfig);
-      this.db = getFirestore(this.app);
-      this.auth = getAuth(this.app);
-      
-      setLogLevel('debug');
-      
-      this.isFirebaseReady.set(true);
-      // Start autentisering og datainnlasting
-      this.setupAuthListener();
-
-    } catch (e: any) {
-      console.error("Feil ved initialisering av Firebase:", e);
-      this.firebaseError.set(e.message || 'Initialiseringsfeil');
-    }
-  }
-
-
-  /**
-   * Setter opp en lytter for autentisering og logger inn brukeren.
-   */
-  private async setupAuthListener() {
-    if (!this.auth) {
-      console.error("Auth-objektet er ikke initialisert.");
-      return;
-    }
-    
-    onAuthStateChanged(this.auth, async (user: any) => {
-      if (!user) {
-        try {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(this.auth, __initial_auth_token);
-          } else {
-            await signInAnonymously(this.auth);
-          }
-        } catch (authError: any) {
-          console.error('Feil under innlogging:', authError);
-          this.firebaseError.set(authError.message || 'Innloggingsfeil');
-        }
-      } else {
-        if (!this.isAuthReady()) {
-          console.log("Bruker er autentisert, laster data...");
-          this.isAuthReady.set(true);
-          this.loadEntries();
-        }
-      }
-    });
-  }
-
-  /**
-   * Setter opp en sanntids-lytter (onSnapshot) til Firebase-samlingen.
-   */
-  private loadEntries() {
-    if (this.unsubscribeFromEntries) {
-      this.unsubscribeFromEntries(); 
-    }
-    if (!this.db) {
-      console.error("Firestore (db) er ikke initialisert.");
-      return;
-    }
-
-    try {
-      const entriesCollectionRef = collection(this.db, this.dbCollectionPath);
-      
-      this.unsubscribeFromEntries = onSnapshot(entriesCollectionRef, (snapshot: any) => {
-        const data = snapshot.docs.map((doc: any) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as BalanceEntry[];
+      try {
+        // Hent Firebase-konfigurasjon fra miljøet
+        const firebaseConfig = JSON.parse(
+          typeof __firebase_config !== 'undefined' ? __firebase_config : '{}'
+        );
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'balanse-data';
         
-        console.log(`Mottok ${data.length} oppføringer fra Firebase.`);
-        this.entries.set(data);
-      }, (error: any) => {
-        console.error("Feil ved henting av data:", error);
-        this.firebaseError.set(error.message || 'Databaselesefeil');
+        // Definer databasestien
+        dbCollectionPath = `/artifacts/${appId}/public/data/entries`;
+        
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        setLogLevel('debug');
+        
+        // Start autentisering
+        setupAuthListener();
+
+      } catch (e) {
+        console.error("Feil ved initialisering av Firebase:", e);
+        tableLoadingState.innerHTML = `<span class="text-red-400">Feil ved initialisering av Firebase: ${e.message}</span>`;
+      }
+    }
+
+    /**
+     * Setter opp alle event listeners for appen.
+     */
+    function setupEventListeners() {
+      testlederInput.addEventListener('input', (e) => {
+        currentTestleder = e.target.value;
+        validateAddButton();
       });
-    } catch (e: any) {
-      console.error("Feil ved oppsett av onSnapshot:", e);
-      this.firebaseError.set(e.message || 'onSnapshot-feil');
-    }
-  }
 
-  /**
-   * Oppdaterer filter-signalet når brukeren skriver i filter-feltet.
-   */
-  updateFilter(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.nameFilter.set(value);
-  }
+      ageInput.addEventListener('input', validateAddButton);
 
-  /**
-   * Oppdaterer testleder-signalet.
-   */
-  updateTestleder(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.currentTestleder.set(value);
-  }
-
-  /**
-   * Oppdaterer 'newEntry'-signalet når brukeren endrer et skjemafelt.
-   */
-  updateNewEntry(field: keyof NewEntry, event: Event) {
-    const input = event.target as HTMLInputElement | HTMLSelectElement;
-    let value: string | number | null = input.value;
-
-    if (field === 'age' || field === 'area' || field === 'diff') {
-      value = value ? parseFloat(value) : null;
-    }
-
-    this.newEntry.update(entry => ({
-      ...entry,
-      [field]: value
-    }));
-  }
-
-  /**
-   * Legger til en ny oppføring i Firebase.
-   */
-  async addEntry() {
-    if (!this.db) {
-      console.error("Databasen er ikke klar. Kan ikke legge til oppføring.");
-      return;
-    }
-
-    const entryData = this.newEntry();
-    const testleder = this.currentTestleder();
-    
-    if (!testleder || entryData.age === null) {
-      console.warn("Testleder og alder må fylles ut.");
-      return;
-    }
-
-    try {
-      const collectionRef = collection(this.db, this.dbCollectionPath);
-      // Legg til testleder-navnet i objektet som lagres
-      await addDoc(collectionRef, {
-        ...entryData,
-        testleder: testleder 
-      });
+      addEntryButton.addEventListener('click', addEntry);
       
-      // Tøm skjemaet
-      this.newEntry.set({
-        age: null,
-        gender: 'Mann',
-        area: null,
-        diff: null,
+      filterInput.addEventListener('input', (e) => {
+        nameFilter = e.target.value.toLowerCase();
+        renderTable();
       });
-    } catch (e: any) {
-      console.error("Feil ved lagring av ny oppføring:", e);
-      this.firebaseError.set(e.message || 'Lagringsfeil');
-    }
-  }
 
-  /**
-   * Sletter en oppføring fra Firebase.
-   */
-  async deleteEntry(id: string) {
-    if (!this.db) {
-      console.error("Databasen er ikke klar. Kan ikke slette oppføring.");
-      return;
-    }
+      downloadCsvButton.addEventListener('click', downloadCSV);
 
-    try {
-      const docRef = doc(this.db, this.dbCollectionPath, id);
-      await deleteDoc(docRef);
-    } catch (e: any) {
-      console.error("Feil ved sletting av oppføring:", e);
-      this.firebaseError.set(e.message || 'Slettefeil');
-    }
-  }
+      // Event delegation for tabellknapper (rediger, slett, lagre, avbryt)
+      tableBody.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (!button) return;
 
-  // --- Redigeringsfunksjoner ---
-
-  /**
-   * Setter en oppføring i redigeringsmodus og lager en kopi (buffer).
-   */
-  startEditing(entry: BalanceEntry) {
-    this.editingEntryId.set(entry.id);
-    this.editBuffer.set({ ...entry }); // Lag en kopi
-  }
-
-  /**
-   * Avbryter redigeringsmodus.
-   */
-  cancelEdit() {
-    this.editingEntryId.set(null);
-    this.editBuffer.set(null);
-  }
-
-  /**
-   * Oppdaterer redigerings-bufferet når brukeren endrer et felt i tabellen.
-   */
-  updateEditBuffer(field: keyof BalanceEntry, event: Event) {
-    const input = event.target as HTMLInputElement | HTMLSelectElement;
-    let value: string | number | null = input.value;
-
-    if (field === 'age' || field === 'area' || field === 'diff') {
-      value = value ? parseFloat(value) : null;
-    }
-    
-    // Spesialhåndtering for 'testleder'
-    if (field === 'testleder') {
-      value = input.value;
+        const id = button.dataset.id;
+        if (button.classList.contains('action-button-delete')) {
+          deleteEntry(id);
+        } else if (button.classList.contains('action-button-edit')) {
+          startEditing(id);
+        } else if (button.classList.contains('action-button-save')) {
+          saveEdit(id);
+        } else if (button.classList.contains('action-button-cancel')) {
+          cancelEdit();
+        }
+      });
     }
 
-    this.editBuffer.update(entry => {
-      if (!entry) return null;
-      return {
-        ...entry,
-        [field]: value
+    /**
+     * Sjekker om lagre-knappen skal være aktiv.
+     */
+    function validateAddButton() {
+      const isTestlederValid = currentTestleder.trim() !== "";
+      const isAgeValid = ageInput.value.trim() !== "";
+      const canAdd = isAuthReady && isTestlederValid && isAgeValid;
+      
+      addEntryButton.disabled = !canAdd;
+    }
+
+    /**
+     * Setter opp Firebase Auth-lytter.
+     */
+    async function setupAuthListener() {
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          try {
+            const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            if (token) {
+              await signInWithCustomToken(auth, token);
+            } else {
+              await signInAnonymously(auth);
+            }
+          } catch (authError) {
+            console.error('Feil under innlogging:', authError);
+            tableLoadingState.innerHTML = `<span class="text-red-400">Innloggingsfeil: ${authError.message}</span>`;
+          }
+        } else {
+          if (!isAuthReady) {
+            console.log("Bruker er autentisert, laster data...");
+            isAuthReady = true;
+            tableLoadingState.innerHTML = 'Laster data...';
+            validateAddButton();
+            loadEntries();
+          }
+        }
+      });
+    }
+
+    /**
+     * Laster data fra Firestore med en sanntids-lytter.
+     */
+    function loadEntries() {
+      try {
+        const entriesCollectionRef = collection(db, dbCollectionPath);
+        
+        onSnapshot(entriesCollectionRef, (snapshot) => {
+          allEntries = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          
+          console.log(`Mottok ${allEntries.length} oppføringer fra Firebase.`);
+          renderTable();
+          renderStats();
+
+        }, (error) => {
+          console.error("Feil ved henting av data:", error);
+          tableLoadingState.innerHTML = `<span class="text-red-400">Databaselesefeil: ${error.message}</span>`;
+        });
+      } catch (e) {
+        console.error("Feil ved oppsett av onSnapshot:", e);
+        tableLoadingState.innerHTML = `<span class="text-red-400">onSnapshot-feil: ${e.message}</span>`;
+      }
+    }
+
+    /**
+     * Gjengir tabellen på nytt basert på gjeldende tilstand.
+     */
+    function renderTable() {
+      // 1. Filtrer data
+      const filteredEntries = allEntries.filter(entry => 
+        entry.testleder.toLowerCase().includes(nameFilter)
+      );
+
+      // 2. Tøm tabellen
+      tableBody.innerHTML = '';
+      
+      // 3. Håndter tom tilstand
+      if (filteredEntries.length === 0) {
+        downloadCsvButton.disabled = true;
+        let message = "Ingen data lagret ennå.";
+        if (allEntries.length > 0) {
+          message = `Ingen treff for filteret "${nameFilter}".`;
+        }
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">${message}</td></tr>`;
+        return;
+      }
+
+      // 4. Bygg HTML-rader
+      downloadCsvButton.disabled = false;
+      const rowsHtml = filteredEntries.map(entry => {
+        // Er denne raden i redigeringsmodus?
+        if (entry.id === editingEntryId) {
+          return `
+            <tr class="border-b border-gray-700 bg-gray-800/80">
+              <td class="px-2 py-2">
+                <input type="text" id="edit-testleder-${entry.id}" value="${entry.testleder}" class="name-input p-1">
+              </td>
+              <td class="px-2 py-2">
+                <input type="number" id="edit-age-${entry.id}" value="${entry.age ?? ''}" class="name-input p-1 w-20">
+              </td>
+              <td class="px-2 py-2">
+                <select id="edit-gender-${entry.id}" value="${entry.gender}" class="name-input p-1">
+                  <option value="Mann" ${entry.gender === 'Mann' ? 'selected' : ''}>Mann</option>
+                  <option value="Kvinne" ${entry.gender === 'Kvinne' ? 'selected' : ''}>Kvinne</option>
+                  <option value="Annet" ${entry.gender === 'Annet' ? 'selected' : ''}>Annet</option>
+                </select>
+              </td>
+              <td class="px-2 py-2">
+                <input type="number" id="edit-area-${entry.id}" value="${entry.area ?? ''}" class="name-input p-1 w-24">
+              </td>
+              <td class="px-2 py-2">
+                <input type="number" id="edit-diff-${entry.id}" value="${entry.diff ?? ''}" class="name-input p-1 w-24">
+              </td>
+              <td class="px-2 py-2 flex justify-center items-center gap-2">
+                <button data-id="${entry.id}" class="action-button-save">✓</button>
+                <button data-id="${entry.id}" class="action-button-cancel">↲</button>
+              </td>
+            </tr>
+          `;
+        } else {
+          // Visningsmodus
+          return `
+            <tr class="border-b border-gray-700 hover:bg-gray-800/60">
+              <td class="px-4 py-3 text-white">${entry.testleder}</td>
+              <td class="px-4 py-3">${entry.age ?? '-'}</td>
+              <td class="px-4 py-3">${entry.gender ?? '-'}</td>
+              <td class="px-4 py-3">${entry.area ?? '-'}</td>
+              <td class="px-4 py-3">${entry.diff ?? '-'}</td>
+              <td class="px-4 py-3 flex justify-center items-center gap-2">
+                <button data-id="${entry.id}" class="action-button action-button-edit">✎</button>
+                <button data-id="${entry.id}" class="action-button-delete">✗</button>
+              </td>
+            </tr>
+          `;
+        }
+      }).join('');
+
+      tableBody.innerHTML = rowsHtml;
+    }
+
+    /**
+     * Beregner og gjengir statistikk-panelet.
+     */
+    function renderStats() {
+      // 1. Totalt antall
+      totalCountEl.textContent = allEntries.length;
+
+      // 2. Aldersgrupper
+      const groups = {
+        'Ukjent': 0, '< 20': 0, '20-29': 0, '30-39': 0, '40-49': 0,
+        '50-59': 0, '60-69': 0, '70+': 0,
       };
-    });
-  }
 
-  /**
-   * Lagrer endringene fra redigerings-bufferet til Firebase.
-   */
-  async saveEdit(id: string) {
-    if (!this.db) {
-      console.error("Databasen er ikke klar. Kan ikke lagre endringer.");
-      return;
+      for (const entry of allEntries) {
+        const age = entry.age;
+        if (age === null || age === undefined) groups['Ukjent']++;
+        else if (age < 20) groups['< 20']++;
+        else if (age <= 29) groups['20-29']++;
+        else if (age <= 39) groups['30-39']++;
+        else if (age <= 49) groups['40-49']++;
+        else if (age <= 59) groups['50-59']++;
+        else if (age <= 69) groups['60-69']++;
+        else groups['70+']++;
+      }
+
+      ageGroupsContainer.innerHTML = ''; // Tøm container
+      let hasGroups = false;
+      for (const [label, count] of Object.entries(groups)) {
+        if (count > 0) {
+          hasGroups = true;
+          const p = document.createElement('p');
+          p.className = 'text-sm';
+          p.textContent = `${label}: ${count}`;
+          ageGroupsContainer.appendChild(p);
+        }
+      }
+
+      if (!hasGroups) {
+        ageGroupsContainer.innerHTML = '<p class="text-sm text-gray-400">Ingen data å gruppere.</p>';
+      }
     }
 
-    const updatedData = this.editBuffer();
-    if (!updatedData) return;
+    /**
+     * Legger til en ny oppføring i Firebase.
+     */
+    async function addEntry() {
+      const entryData = {
+        age: ageInput.value ? parseFloat(ageInput.value) : null,
+        gender: genderInput.value,
+        area: areaInput.value ? parseFloat(areaInput.value) : null,
+        diff: diffInput.value ? parseFloat(diffInput.value) : null,
+        testleder: currentTestleder,
+      };
 
-    // Fjern 'id' fra objektet som skal lagres
-    const { id: entryId, ...dataToSave } = updatedData;
+      // Validering (allerede gjort i validateAddButton, men dobbeltsjekk)
+      if (!entryData.testleder || entryData.age === null) {
+        console.warn("Testleder og alder må fylles ut.");
+        return;
+      }
 
-    try {
-      const docRef = doc(this.db, this.dbCollectionPath, id);
-      await updateDoc(docRef, dataToSave);
+      addEntryButton.disabled = true;
+      addEntryButton.textContent = "Lagrer...";
+
+      try {
+        const collectionRef = collection(db, dbCollectionPath);
+        await addDoc(collectionRef, entryData);
+        
+        // Tøm skjemaet
+        ageInput.value = '';
+        genderInput.value = 'Mann';
+        areaInput.value = '';
+        diffInput.value = '';
+        
+      } catch (e) {
+        console.error("Feil ved lagring av ny oppføring:", e);
+        alert(`Lagringsfeil: ${e.message}`); // Bruker alert som nødløsning
+      } finally {
+        addEntryButton.textContent = "Lagre data";
+        validateAddButton();
+      }
+    }
+
+    /**
+     * Sletter en oppføring.
+     */
+    async function deleteEntry(id) {
+      if (!id) return;
+      // Bekreftelse er lurt, men dropper for enkelhet
+      // if (!confirm("Er du sikker på at du vil slette denne oppføringen?")) return;
+
+      try {
+        const docRef = doc(db, dbCollectionPath, id);
+        await deleteDoc(docRef);
+      } catch (e) {
+        console.error("Feil ved sletting av oppføring:", e);
+        alert(`Slettefeil: ${e.message}`);
+      }
+    }
+
+    /**
+     * Setter en rad i redigeringsmodus.
+     */
+    function startEditing(id) {
+      editingEntryId = id;
+      renderTable(); // Tegn tabellen på nytt
+    }
+
+    /**
+     * Avbryter redigeringsmodus.
+     */
+    function cancelEdit() {
+      editingEntryId = null;
+      renderTable(); // Tegn tabellen på nytt
+    }
+
+    /**
+     * Lagrer endringer i en oppføring.
+     */
+    async function saveEdit(id) {
+      if (!id) return;
+
+      // Hent verdier fra redigeringsfeltene
+      const updatedData = {
+        testleder: document.getElementById(`edit-testleder-${id}`).value,
+        age: parseFloat(document.getElementById(`edit-age-${id}`).value) || null,
+        gender: document.getElementById(`edit-gender-${id}`).value,
+        area: parseFloat(document.getElementById(`edit-area-${id}`).value) || null,
+        diff: parseFloat(document.getElementById(`edit-diff-${id}`).value) || null,
+      };
+
+      try {
+        const docRef = doc(db, dbCollectionPath, id);
+        await updateDoc(docRef, updatedData);
+        
+        // Avslutt redigeringsmodus
+        cancelEdit();
+      } catch (e) {
+        console.error("Feil ved oppdatering av oppføring:", e);
+        alert(`Oppdateringsfeil: ${e.message}`);
+      }
+    }
+
+    /**
+     * Laster ned de filtrerte dataene som en CSV-fil.
+     */
+    function downloadCSV() {
+      const dataToDownload = allEntries.filter(entry => 
+        entry.testleder.toLowerCase().includes(nameFilter)
+      );
+
+      if (dataToDownload.length === 0) return;
+
+      const headers = ['id', 'testleder', 'age', 'gender', 'area', 'diff'];
+      const headerRow = headers.join(',') + '\n';
+
+      const sanitize = (val) => {
+        let str = String(val ?? '');
+        str = str.replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      const csvContent = dataToDownload.reduce((acc, entry) => {
+        const row = headers.map(header => sanitize(entry[header])).join(',');
+        return acc + row + '\n';
+      }, headerRow);
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      const filename = `balanse_data_${new Date().toISOString().split('T')[0]}.csv`;
+      link.setAttribute('download', filename);
       
-      // Avslutt redigeringsmodus
-      this.cancelEdit();
-    } catch (e: any) {
-      console.error("Feil ved oppdatering av oppføring:", e);
-      this.firebaseError.set(e.message || 'Oppdateringsfeil');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
-  }
-}
 
+    // --- Start appen ---
+    // Vent til DOM er lastet før vi kjører main-funksjonen
+    document.addEventListener('DOMContentLoaded', main);
+
+  </script>
+
+</body>
+</html>
