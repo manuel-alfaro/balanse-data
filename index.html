@@ -317,10 +317,25 @@
 
       try {
         // Hent Firebase-konfigurasjon fra miljøet
-        const firebaseConfig = JSON.parse(
-          typeof __firebase_config !== 'undefined' ? __firebase_config : '{}'
-        );
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'balanse-data';
+        const fallbackConfig = {
+          apiKey: "AIzaSyCIYqq1_2eKdBw3u_FYUIFvo6VnJcLVliA",
+          authDomain: "balanse-data.firebaseapp.com",
+          projectId: "balanse-data",
+          storageBucket: "balanse-data.firebasestorage.app",
+          messagingSenderId: "582679675587",
+          appId: "1:582679675587:web:65e683192e7afca4799876",
+          measurementId: "G-4RZ4FV30VF"
+        };
+        
+        const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config)
+          ? JSON.parse(__firebase_config)
+          : fallbackConfig;
+
+        if (!firebaseConfig.projectId) {
+          throw new Error('"projectId" mangler i Firebase-konfigurasjonen.');
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.projectId;
         
         // Definer databasestien
         dbCollectionPath = `/artifacts/${appId}/public/data/entries`;
@@ -711,3 +726,4 @@
 
 </body>
 </html>
+
