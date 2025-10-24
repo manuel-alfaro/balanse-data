@@ -344,7 +344,8 @@
                 }
 
                 // NY KODE: Beregn og vis balansealder
-                const balanseAlder = calculateBalanceAge(kjonn, areal);
+                // Sender nå inn 'alder' (faktisk alder) i funksjonen
+                const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
                 
                 if (!isNaN(balanseAlder)) {
                     showModal(
@@ -395,24 +396,43 @@
         
         /**
          * Beregner balansealder basert på kjønn og CoP-areal.
+         * @param {number} realAge - Testpersonens faktiske alder
          * @param {string} sex - "Mann" eller "Kvinne"
          * @param {number} copArea - CoP Areal i cm²
          * @returns {number} - Estimert balansealder
          */
-        function calculateBalanceAge(sex, copArea) {
+        function calculateBalanceAge(realAge, sex, copArea) {
             const area = parseFloat(copArea);
             if (!isFinite(area)) return NaN;
-            // Klipper arealet til en minimumsverdi på 3.0
-            const clippedArea = Math.max(3.0, area);
+            
+            // NY LOGIKK: Velg formel basert på testpersonens faktiske alder
+            if (realAge <= 35) {
+                // METODE 1 (Alder <= 35): 3.13 areal gir 21 år
+                const minArea = 3.13;
+                const clippedArea = Math.max(minArea, area);
+                
+                const kvinneBaseAlder = 21 - (2.36 * minArea); // ca. 13.61
+                const mannBaseAlder = 21 - (2.41 * minArea);   // ca. 13.46
 
-            if (sex.toLowerCase() === "kvinne") {
-                // Formel for kvinner
-                return 26.11 + 2.36 * clippedArea;
+                if (sex.toLowerCase() === "kvinne") {
+                    return kvinneBaseAlder + 2.36 * clippedArea;
+                }
+                return mannBaseAlder + 2.41 * clippedArea;
+
+            } else {
+                // METODE 2 (Alder > 35): Den "originale" formelen (3.0 areal gir ~33 år)
+                const minArea = 3.0;
+                const clippedArea = Math.max(minArea, area);
+
+                if (sex.toLowerCase() === "kvinne") {
+                    return 26.11 + 2.36 * clippedArea;
+                }
+                return 25.47 + 2.41 * clippedArea;
             }
-            // Formel for menn (og 'Annet' som default)
-            return 25.47 + 2.41 * clippedArea;
         }
         
+        // --- START PÅ GJENINNSATT KODE ---
+
         /**
          * Setter opp sanntids-lytteren til Firestore
          */
@@ -452,6 +472,10 @@
          * Oppdaterer tabellen og statistikken basert på filter
          */
         function renderTableAndStats(filterText = '') {
+            if (!allEntries) { // Sikkerhetssjekk
+                console.warn("renderTableAndStats kalt før allEntries er definert.");
+                allEntries = [];
+            }
             const normalizedFilter = filterText.toLowerCase().trim();
             const filteredEntries = allEntries.filter(entry => 
                 entry.testleder?.toLowerCase().includes(normalizedFilter)
@@ -534,7 +558,9 @@
                 ageGroupStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
             }
         }
-        
+
+        // --- SLUTT PÅ GJENINNSATT KODE ---
+
         /**
          * Sletter en oppføring
          */
