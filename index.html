@@ -62,8 +62,8 @@
     <!-- Balansealder Modal -->
     <div id="age-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-sm w-full text-center shadow-2xl">
-            <h3 class="text-2xl text-white font-semibold mb-4">Balansealder Beregnet</h3>
-            <p class="text-lg text-gray-300 mb-2">Din estimerte balansealder er:</p>
+            <h3 id="modal-title" class="text-2xl text-white font-semibold mb-4">Balansealder Beregnet</h3>
+            <p id="modal-message" class="text-lg text-gray-300 mb-2">Din estimerte balansealder er:</p>
             <p id="modal-balance-age" class="text-5xl font-bold text-emerald-400 mb-6"></p>
             <button id="close-modal-btn" class="filter-button active w-full">Lukk</button>
         </div>
@@ -242,10 +242,40 @@
         const totalCountEl = document.getElementById('total-count');
         const ageGroupStatsEl = document.getElementById('age-group-stats');
         const downloadCsvButton = document.getElementById('download-csv-button');
-        // NYE UI-ELEMENTER FOR MODAL
+        // UI-elementer for Modal
         const ageModal = document.getElementById('age-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
         const modalBalanceAge = document.getElementById('modal-balance-age');
         const closeModalBtn = document.getElementById('close-modal-btn');
+
+        /**
+         * Viser en popup-modal med tilpasset innhold.
+         * @param {string} title - Tittelen på modalen
+         * @param {string} message - Hovedmeldingen
+         * @param {string} value - Verdien som skal vises (f.eks. alder eller emoji)
+         * @param {string} type - 'success', 'error', 'warning', 'info'
+         */
+        function showModal(title, message, value, type = 'success') {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalBalanceAge.textContent = value;
+            
+            // Tilbakestill farger
+            modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400');
+
+            if (type === 'success') {
+                modalBalanceAge.classList.add('text-emerald-400');
+            } else if (type === 'error') {
+                modalBalanceAge.classList.add('text-red-500');
+            } else if (type === 'warning') {
+                modalBalanceAge.classList.add('text-yellow-400');
+            } else if (type === 'info') {
+                modalBalanceAge.classList.add('text-blue-400');
+            }
+            
+            ageModal.classList.remove('hidden');
+        }
 
         /**
          * Hovedfunksjon som kjører når dokumentet er lastet
@@ -261,13 +291,13 @@
                 db = getFirestore(app);
                 
                 // 3. Definer database-stien (MÅ matche Firestore-reglene)
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const dbPath = `/artifacts/${appId}/public/data/entries`;
+                // Denne er nå hardkodet slik at alle ser de samme dataene.
+                const dbPath = 'balanse-data-entries';
                 entriesCollection = collection(db, dbPath);
 
                 console.log(`Koblet til. Lytter til database-sti: ${dbPath}`);
 
-                // 4. Sett opp sanntids-lytter NÅ
+                // 4. Sett opp sanntids-lytter
                 setupSnapshots();
                 
                 // 5. Sett opp hendelseslyttere for UI
@@ -293,39 +323,36 @@
                 const diff = parseFloat(document.getElementById('diff').value);
 
                 if (!testleder) {
-                    // Bruker custom modal for feilmelding
-                    modalBalanceAge.parentElement.querySelector('h3').textContent = "Mangler Testleder";
-                    modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = "Vennligst fyll inn 'Testleder'-navnet ditt.";
-                    modalBalanceAge.textContent = "⚠️";
-                    modalBalanceAge.classList.remove("text-emerald-400");
-                    modalBalanceAge.classList.add("text-yellow-400");
-                    ageModal.classList.remove('hidden');
+                    showModal(
+                        "Mangler Testleder", 
+                        "Vennligst fyll inn 'Testleder'-navnet ditt.", 
+                        "⚠️", 
+                        "warning"
+                    );
                     testlederInput.focus();
                     return;
                 }
                 
                 if (isNaN(alder) || isNaN(areal) || isNaN(diff)) {
-                    // Bruker custom modal for feilmelding
-                    modalBalanceAge.parentElement.querySelector('h3').textContent = "Ugyldig Data";
-                    modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = "Alder, Areal og Diff må være gyldige tall.";
-                    modalBalanceAge.textContent = "⚠️";
-                    modalBalanceAge.classList.remove("text-emerald-400");
-                    modalBalanceAge.classList.add("text-yellow-400");
-                    ageModal.classList.remove('hidden');
+                    showModal(
+                        "Ugyldig Data", 
+                        "Alder, Areal og Diff må være gyldige tall.", 
+                        "⚠️", 
+                        "warning"
+                    );
                     return;
                 }
 
                 // NY KODE: Beregn og vis balansealder
                 const balanseAlder = calculateBalanceAge(kjonn, areal);
+                
                 if (!isNaN(balanseAlder)) {
-                    // Gjenopprett normal modal-tekst
-                    modalBalanceAge.parentElement.querySelector('h3').textContent = "Balansealder Beregnet";
-                    modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = "Din estimerte balansealder er:";
-                    modalBalanceAge.classList.add("text-emerald-400");
-                    modalBalanceAge.classList.remove("text-yellow-400");
-                    // Vis alder
-                    modalBalanceAge.textContent = balanseAlder.toFixed(1);
-                    ageModal.classList.remove('hidden');
+                    showModal(
+                        "Balansealder Beregnet", 
+                        "Din estimerte balansealder er:", 
+                        balanseAlder.toFixed(1), 
+                        "success"
+                    );
                 } else {
                     console.warn("Kunne ikke beregne balansealder.");
                 }
@@ -343,13 +370,12 @@
                     addForm.reset();
                 } catch (error) {
                     console.error("Feil ved lagring av data:", error);
-                    // Viser feil i modalen
-                    modalBalanceAge.parentElement.querySelector('h3').textContent = "Lagringsfeil";
-                    modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = `Kunne ikke lagre data: ${error.message}`;
-                    modalBalanceAge.textContent = "❌";
-                    modalBalanceAge.classList.remove("text-emerald-400");
-                    modalBalanceAge.classList.add("text-red-500");
-                    ageModal.classList.remove('hidden');
+                    showModal(
+                        "Lagringsfeil", 
+                        `Kunne ikke lagre data: ${error.message}`, 
+                        "❌", 
+                        "error"
+                    );
                 }
             });
 
@@ -361,13 +387,12 @@
             // Lytter på CSV-nedlastingsknapp
             downloadCsvButton.addEventListener('click', downloadCSV);
 
-            // NY LYTTER: Lukk modal-knapp
+            // Lytter: Lukk modal-knapp
             closeModalBtn.addEventListener('click', () => {
                 ageModal.classList.add('hidden');
             });
         }
         
-        // NY FUNKSJON: Hentet fra din andre fil
         /**
          * Beregner balansealder basert på kjønn og CoP-areal.
          * @param {string} sex - "Mann" eller "Kvinne"
@@ -392,7 +417,6 @@
          * Setter opp sanntids-lytteren til Firestore
          */
         function setupSnapshots() {
-            // ... (resten av koden er uendret) ...
             if (unsubscribeEntries) unsubscribeEntries(); // Avslutt gammel lytter
 
             loadingMessage.textContent = 'Henter data...';
@@ -415,6 +439,12 @@
                 console.error("Feil ved henting av data:", error);
                 loadingMessage.textContent = `Feil ved henting av data: ${error.message}`;
                 dataTableBody.innerHTML = `<tr><td colspan="6" class="py-4 px-6 text-center text-red-500">Feil: ${error.message}</td></tr>`;
+                
+                // Vis feil i overlay hvis den feiler første gang
+                if (loadingOverlay.style.display !== 'none') {
+                    loadingMessage.textContent = "Feil: Klarte ikke hente data. Sjekk Firestore-reglene.";
+                    // Ikke skjul overlay
+                }
             });
         }
         
@@ -518,13 +548,7 @@
                 await deleteDoc(docRef);
             } catch (error) {
                 console.error("Feil ved sletting:", error);
-                // Viser feil i modalen
-                modalBalanceAge.parentElement.querySelector('h3').textContent = "Slettefeil";
-                modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = `Kunne ikke slette: ${error.message}`;
-                modalBalanceAge.textContent = "❌";
-                modalBalanceAge.classList.remove("text-emerald-400");
-                modalBalanceAge.classList.add("text-red-500");
-                ageModal.classList.remove('hidden');
+                showModal("Slettefeil", `Kunne ikke slette: ${error.message}`, "❌", "error");
             }
         }
 
@@ -608,13 +632,7 @@
                     await updateDoc(docRef, updates);
                 } catch (error) {
                     console.error("Feil ved oppdatering:", error);
-                    // Viser feil i modalen
-                    modalBalanceAge.parentElement.querySelector('h3').textContent = "Oppdateringsfeil";
-                    modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = `Kunne ikke oppdatere: ${error.message}`;
-                    modalBalanceAge.textContent = "❌";
-                    modalBalanceAge.classList.remove("text-emerald-400");
-                    modalBalanceAge.classList.add("text-red-500");
-                    ageModal.classList.remove('hidden');
+                    showModal("Oppdateringsfeil", `Kunne ikke oppdatere: ${error.message}`, "❌", "error");
                 }
             }
         }
@@ -629,13 +647,7 @@
             );
             
             if (filteredEntries.length === 0) {
-                // Viser feil i modalen
-                modalBalanceAge.parentElement.querySelector('h3').textContent = "Tomt Filter";
-                modalBalanceAge.parentElement.querySelector('p:nth-of-type(1)').textContent = "Ingen data å laste ned for det valgte filteret.";
-                modalBalanceAge.textContent = "ℹ️";
-                modalBalanceAge.classList.remove("text-emerald-400");
-                modalBalanceAge.classList.add("text-blue-400");
-                ageModal.classList.remove('hidden');
+                showModal("Tomt Filter", "Ingen data å laste ned for det valgte filteret.", "ℹ️", "info");
                 return;
             }
 
