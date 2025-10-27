@@ -147,6 +147,15 @@
                             <span class="font-medium text-white">Totalt antall:</span>
                             <span id="total-count" class="font-bold text-xl text-emerald-400 ml-2">0</span>
                         </div>
+                        
+                        <!-- NYTT: Kjønnsstatistikk -->
+                        <div class="border-t border-gray-600 pt-3">
+                            <h5 class="text-sm text-white font-medium mb-2">Kjønnsfordeling:</h5>
+                            <div id="gender-stats" class="text-sm space-y-1">
+                                <p class="text-gray-400">Laster data...</p>
+                            </div>
+                        </div>
+                        
                         <div class="border-t border-gray-600 pt-3">
                             <h5 class="text-sm text-white font-medium mb-2">Aldersgrupper:</h5>
                             <div id="age-group-stats" class="text-sm space-y-1">
@@ -182,13 +191,16 @@
                                     <th scope="col" class="py-3 px-4">Kjønn</th>
                                     <th scope="col" class="py-3 px-4">Areal (cm²)</th>
                                     <th scope="col" class="py-3 px-4">Diff (cm)</th>
+                                    <!-- NYTT: Tidsstempel-kolonne -->
+                                    <th scope="col" class="py-3 px-4">Tidsstempel</th>
                                     <th scope="col" class="py-3 px-4 text-center">Handling</th>
                                 </tr>
                             </thead>
                             <tbody id="data-table-body" class="divide-y divide-gray-700">
                                 <!-- Fylles av JS -->
                                 <tr>
-                                    <td colspan="6" class="py-4 px-6 text-center text-gray-500">
+                                    <!-- OPPDATERT: colspan="7" -->
+                                    <td colspan="7" class="py-4 px-6 text-center text-gray-500">
                                         Laster data...
                                     </td>
                                 </tr>
@@ -240,6 +252,8 @@
         const addForm = document.getElementById('add-entry-form');
         const testlederInput = document.getElementById('testleder-input');
         const totalCountEl = document.getElementById('total-count');
+        // NYTT: UI-element for kjønn
+        const genderStatsEl = document.getElementById('gender-stats');
         const ageGroupStatsEl = document.getElementById('age-group-stats');
         const downloadCsvButton = document.getElementById('download-csv-button');
         // UI-elementer for Modal
@@ -360,13 +374,14 @@
 
                 try {
                     // Lagre data til databasen (balanseAlder lagres IKKE)
+                    // serverTimestamp() legger til tidsstempel
                     await addDoc(entriesCollection, {
                         testleder: testleder,
                         alder: alder,
                         kjonn: kjonn,
                         areal: areal,
                         diff: diff,
-                        createdAt: serverTimestamp()
+                        createdAt: serverTimestamp() // <-- DENNE LEGGER TIL TIDSSTEMPEL
                     });
                     addForm.reset();
                 } catch (error) {
@@ -447,7 +462,7 @@
                     ...doc.data()
                 }));
                 
-                // Sorter data, nyeste først
+                // Sorter data, nyeste først (basert på createdAt)
                 allEntries.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 
                 renderTableAndStats(filterInput.value);
@@ -458,7 +473,8 @@
             }, (error) => {
                 console.error("Feil ved henting av data:", error);
                 loadingMessage.textContent = `Feil ved henting av data: ${error.message}`;
-                dataTableBody.innerHTML = `<tr><td colspan="6" class="py-4 px-6 text-center text-red-500">Feil: ${error.message}</td></tr>`;
+                // OPPDATERT: colspan="7"
+                dataTableBody.innerHTML = `<tr><td colspan="7" class="py-4 px-6 text-center text-red-500">Feil: ${error.message}</td></tr>`;
                 
                 // Vis feil i overlay hvis den feiler første gang
                 if (loadingOverlay.style.display !== 'none') {
@@ -492,7 +508,8 @@
             dataTableBody.innerHTML = ''; // Tøm tabellen
 
             if (entries.length === 0) {
-                dataTableBody.innerHTML = `<tr><td colspan="6" class="py-4 px-6 text-center text-gray-500">Ingen data funnet.</td></tr>`;
+                // OPPDATERT: colspan="7"
+                dataTableBody.innerHTML = `<tr><td colspan="7" class="py-4 px-6 text-center text-gray-500">Ingen data funnet.</td></tr>`;
                 return;
             }
 
@@ -501,12 +518,19 @@
                 tr.className = `bg-[#1a1c1f] hover:bg-gray-800/40 border-b border-gray-700`;
                 tr.dataset.id = entry.id;
 
+                // NYTT: Formater tidsstempel
+                const timestamp = entry.createdAt?.seconds 
+                    ? new Date(entry.createdAt.seconds * 1000).toLocaleString('no-NO') 
+                    : 'N/A';
+
+                // OPPDATERT: Lagt til <td> for tidsstempel
                 tr.innerHTML = `
                     <td class="py-3 px-4" data-field="testleder">${entry.testleder || ''}</td>
                     <td class="py-3 px-4" data-field="alder">${entry.alder}</td>
                     <td class="py-3 px-4" data-field="kjonn">${entry.kjonn}</td>
                     <td class="py-3 px-4" data-field="areal">${entry.areal}</td>
                     <td class="py-3 px-4" data-field="diff">${entry.diff}</td>
+                    <td class="py-3 px-4 text-xs">${timestamp}</td> <!-- NYTT -->
                     <td class="py-3 px-4 text-center space-x-2">
                         <button class="icon-button" data-action="edit" title="Rediger">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
@@ -531,31 +555,119 @@
         function renderStats(entries) {
             totalCountEl.textContent = entries.length;
 
+            // OPPDATERT: Lagt til kjønnstelling
+            const genderCounts = {
+                'Mann': 0,
+                'Kvinne': 0,
+                'Annet': 0
+            };
+            // OPPDATERT: Endret datastruktur for å holde kjønn per gruppe
             const ageGroups = {
-                '0-19': 0, '20-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60-69': 0, '70+': 0
+                '0-19': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '20-29': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '30-39': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '40-49': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '50-59': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '60-69': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '70+': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 }
             };
 
             entries.forEach(entry => {
+                // Tell alder og kjønn
                 const alder = entry.alder;
-                if (alder <= 19) ageGroups['0-19']++;
-                else if (alder <= 29) ageGroups['20-29']++;
-                else if (alder <= 39) ageGroups['30-39']++;
-                else if (alder <= 49) ageGroups['40-49']++;
-                else if (alder <= 59) ageGroups['50-59']++;
-                else if (alder <= 69) ageGroups['60-69']++;
-                else ageGroups['70+']++;
+                const kjonn = entry.kjonn; // 'Mann', 'Kvinne', eller 'Annet'
+
+                // --- 1. Aldersgruppe-logikk (med kjønn) ---
+                let groupKey;
+                if (alder <= 19) groupKey = '0-19';
+                else if (alder <= 29) groupKey = '20-29';
+                else if (alder <= 39) groupKey = '30-39';
+                else if (alder <= 49) groupKey = '40-49';
+                else if (alder <= 59) groupKey = '50-59';
+                else if (alder <= 69) groupKey = '60-69';
+                else groupKey = '70+';
+
+                // Oppdater total og kjønn for aldersgruppen
+                ageGroups[groupKey].total++;
+                if (kjonn === 'Mann' || kjonn === 'Kvinne' || kjonn === 'Annet') {
+                    ageGroups[groupKey][kjonn]++;
+                }
+
+                // --- 2. Total Kjønn-logikk (som før) ---
+                if (kjonn === 'Mann') genderCounts['Mann']++;
+                else if (kjonn === 'Kvinne') genderCounts['Kvinne']++;
+                else if (kjonn === 'Annet') genderCounts['Annet']++;
             });
 
-            ageGroupStatsEl.innerHTML = '';
-            for (const [group, count] of Object.entries(ageGroups)) {
+            // NYTT: Render kjønnsstatistikk
+            genderStatsEl.innerHTML = '';
+            let totalGenders = 0;
+            for (const [group, count] of Object.entries(genderCounts)) {
                 if (count > 0) {
                     const p = document.createElement('p');
                     p.innerHTML = `<span class="text-gray-400">${group}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
-                    ageGroupStatsEl.appendChild(p);
+                    genderStatsEl.appendChild(p);
+                    totalGenders += count;
                 }
             }
+            if (totalGenders === 0 && entries.length > 0) {
+                 genderStatsEl.innerHTML = '<p class="text-gray-400">Ingen data m/kjønn.</p>';
+            }
+
+            // Render aldersstatistikk
+            ageGroupStatsEl.innerHTML = '';
+            let totalAges = 0;
+            
+            // NYTT: Bygg tabellstruktur for aldersgrupper
+            const table = document.createElement('table');
+            table.className = 'w-full text-left text-xs'; // Bruker mindre tekststørrelse
+            
+            const thead = document.createElement('thead');
+            thead.className = 'text-gray-400 uppercase text-[0.65rem]'; // Ekstra liten header
+            thead.innerHTML = `
+                <tr>
+                    <th class="pb-1 font-medium">Gruppe</th>
+                    <th class="pb-1 font-medium text-center">Totalt</th>
+                    <th class="pb-1 font-medium text-center">Menn</th>
+                    <th class="pb-1 font-medium text-center">Kvinner</th>
+                    <th class="pb-1 font-medium text-center">Annet</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            tbody.className = 'divide-y divide-gray-700/50'; // Mykere skillelinje
+
+            for (const [group, groupData] of Object.entries(ageGroups)) {
+                if (groupData.total > 0) {
+                    totalAges += groupData.total;
+
+                    // Hovedlinje (f.eks. 20-29: 5)
+                    const tr = document.createElement('tr');
+                    // Legg til data for raden
+                    tr.innerHTML = `
+                        <td class="py-1.5 text-gray-300">${group}</td>
+                        <td class="py-1.5 text-center font-bold text-white">${groupData.total}</td>
+                        <td class="py-1.5 text-center text-gray-300">${groupData.Mann}</td>
+                        <td class="py-1.5 text-center text-gray-300">${groupData.Kvinne}</td>
+                        <td class="py-1.5 text-center text-gray-300">${groupData.Annet}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+            table.appendChild(tbody);
+
+
+            // Felles "ingen data" melding
             if (entries.length === 0) {
+                genderStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
                 ageGroupStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
+            } else if (totalAges > 0) {
+                // Kun legg til tabellen hvis det faktisk er aldersdata
+                ageGroupStatsEl.appendChild(table);
+            } else {
+                // Data finnes, men ingen har alder
+                ageGroupStatsEl.innerHTML = '<p class="text-gray-400">Ingen data m/alder.</p>';
             }
         }
 
@@ -677,6 +789,7 @@
                 return;
             }
 
+            // OPPDATERT: La til Tidsstempel i header
             const headers = ["Testleder", "Alder", "Kjønn", "Areal (cm²)", "Diff (cm)", "Tidsstempel"];
             const rows = filteredEntries.map(entry => {
                 const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('no-NO') : 'N/A';
@@ -709,4 +822,5 @@
 
 </body>
 </html>
+
 
