@@ -320,42 +320,42 @@
 
         // --- START: INNPORTET LOGIKK FOR FITNESS AGE ---
         const JUMP_DATA_MENN = [
-             // DATA OPPDATERT BASERT PÅ BILDE (2025-10-28)
-             { label:"8–9",   p5:17.0, p25:20.6, p50:23.8, p75:27.4, p95:32.5 },
-             { label:"10–11", p5:18.8, p25:23.4, p50:27.2, p75:31.4, p95:35.9 },
-             { label:"12–13", p5:20.8, p25:26.6, p50:30.7, p75:35.4, p95:43.6 },
-             { label:"14–15", p5:22.4, p25:29.6, p50:34.1, p75:38.8, p95:46.0 },
-             { label:"16–17", p5:22.8, p25:31.6, p50:37.3, p75:42.1, p95:50.4 },
-             { label:"18–19", p5:25.2, p25:33.0, p50:38.6, p75:44.2, p95:52.2 },
-             { label:"20–24", p5:23.8, p25:31.8, p50:37.4, p75:43.0, p95:51.2 },
-             { label:"25–29", p5:22.5, p25:30.2, p50:35.4, p75:40.6, p95:48.1 },
-             { label:"30–34", p5:21.2, p25:28.2, p50:33.0, p75:37.6, p95:44.8 },
-             { label:"35–39", p5:19.8, p25:26.0, p50:30.6, p75:34.9, p95:41.4 },
-             { label:"40–44", p5:18.6, p25:24.2, p50:28.1, p75:32.1, p95:38.2 },
-             { label:"45–49", p5:13.1, p25:22.3, p50:25.8, p75:29.9, p95:35.6 },
-             // GAMLE FALLBACK-DATA FOR ALDRE OVER 49 (IKKE I BILDET)
-             { label:"50–59", p5:10.8, p25:14.2,  p50:17.7, p75:20.8, p95:26.7 },
-             { label:"60–69", p5:9.7,  p25:12.6,  p50:15.15,p75:17.9, p95:23.2 },
-             { label:"70–80", p5:0.0,  p25:10.9,  p50:12.7, p75:16.0, p95:20.6 }
+             // DATA OPPDATERT BASERT PÅ BILDE (2025-10-28) - OG REDUSERT MED 3 CM
+             { label:"8–9",   p5:14.0, p25:17.6, p50:20.8, p75:24.4, p95:29.5 },
+             { label:"10–11", p5:15.8, p25:20.4, p50:24.2, p75:28.4, p95:32.9 },
+             { label:"12–13", p5:17.8, p25:23.6, p50:27.7, p75:32.4, p95:40.6 },
+             { label:"14–15", p5:19.4, p25:26.6, p50:31.1, p75:35.8, p95:43.0 },
+             { label:"16–17", p5:19.8, p25:28.6, p50:34.3, p75:39.1, p95:47.4 },
+             { label:"18–19", p5:22.2, p25:30.0, p50:35.6, p75:41.2, p95:49.2 },
+             { label:"20–24", p5:20.8, p25:28.8, p50:34.4, p75:40.0, p95:48.2 },
+             { label:"25–29", p5:19.5, p25:27.2, p50:32.4, p75:37.6, p95:45.1 },
+             { label:"30–34", p5:18.2, p25:25.2, p50:30.0, p75:34.6, p95:41.8 },
+             { label:"35–39", p5:16.8, p25:23.0, p50:27.6, p75:31.9, p95:38.4 },
+             { label:"40–44", p5:15.6, p25:21.2, p50:25.1, p75:29.1, p95:35.2 },
+             { label:"45–49", p5:10.1, p25:19.3, p50:22.8, p75:26.9, p95:32.6 },
+             // GAMLE FALLBACK-DATA FOR ALDRE OVER 49 (IKKE I BILDET) - OG REDUSERT MED 3 CM
+             { label:"50–59", p5:7.8,  p25:11.2,  p50:14.7, p75:17.8, p95:23.7 },
+             { label:"60–69", p5:6.7,  p25:9.6,   p50:12.15,p75:14.9, p95:20.2 },
+             { label:"70–80", p5:0.0,  p25:7.9,   p50:9.7,  p75:13.0, p95:17.6 } // p5 cappeet på 0
         ];
         const JUMP_DATA_KVINNER = [
-             // DATA OPPDATERT BASERT PÅ BILDE (2025-10-28)
-             { label:"8–9",   p5:16.0, p25:19.8, p50:22.4, p75:25.3, p95:29.4 },
-             { label:"10–11", p5:18.5, p25:22.2, p50:25.8, p75:28.9, p95:33.2 },
-             { label:"12–13", p5:18.8, p25:23.4, p50:26.6, p75:30.0, p95:35.0 },
-             { label:"14–15", p5:18.5, p25:23.5, p50:26.6, p75:29.9, p95:34.6 },
-             { label:"16–17", p5:18.0, p25:22.4, p50:25.8, p75:29.2, p95:34.3 },
-             { label:"18–19", p5:17.9, p25:22.2, p50:25.3, p75:28.6, p95:33.4 },
-             { label:"20–24", p5:17.0, p25:21.0, p50:24.4, p75:27.8, p95:32.5 },
-             { label:"25–29", p5:16.2, p25:20.0, p50:23.2, p75:26.4, p95:31.4 },
-             { label:"30–34", p5:15.6, p25:19.2, p50:22.2, p75:25.2, p95:30.0 },
-             { label:"35–39", p5:15.0, p25:18.4, p50:21.2, p75:24.2, p95:28.8 },
-             { label:"40–44", p5:10.0, p25:17.5, p50:20.0, p75:22.9, p95:27.6 },
-             { label:"45–49", p5:9.5,  p25:16.8, p50:19.4, p75:21.9, p95:26.2 },
-             // GAMLE FALLBACK-DATA FOR ALDRE OVER 49 (IKKE I BILDET)
-             { label:"50–59", p5:9.0,  p25:12.0, p50:15.5, p75:19.0, p95:23.0 },
-             { label:"60–69", p5:8.0,  p25:10.5, p50:13.0, p75:16.0, p95:20.0 },
-             { label:"70–80", p5:0.0,  p25:8.5,  p50:10.5, p75:13.5, p95:17.0 }
+             // DATA OPPDATERT BASERT PÅ BILDE (2025-10-28) - OG REDUSERT MED 3 CM
+             { label:"8–9",   p5:13.0, p25:16.8, p50:19.4, p75:22.3, p95:26.4 },
+             { label:"10–11", p5:15.5, p25:19.2, p50:22.8, p75:25.9, p95:30.2 },
+             { label:"12–13", p5:15.8, p25:20.4, p50:23.6, p75:27.0, p95:32.0 },
+             { label:"14–15", p5:15.5, p25:20.5, p50:23.6, p75:26.9, p95:31.6 },
+             { label:"16–17", p5:15.0, p25:19.4, p50:22.8, p75:26.2, p95:31.3 },
+             { label:"18–19", p5:14.9, p25:19.2, p50:22.3, p75:25.6, p95:30.4 },
+             { label:"20–24", p5:14.0, p25:18.0, p50:21.4, p75:24.8, p95:29.5 },
+             { label:"25–29", p5:13.2, p25:17.0, p50:20.2, p75:23.4, p95:28.4 },
+             { label:"30–34", p5:12.6, p25:16.2, p50:19.2, p75:22.2, p95:27.0 },
+             { label:"35–39", p5:12.0, p25:15.4, p50:18.2, p75:21.2, p95:25.8 },
+             { label:"40–44", p5:7.0,  p25:14.5, p50:17.0, p75:19.9, p95:24.6 },
+             { label:"45–49", p5:6.5,  p25:13.8, p50:16.4, p75:18.9, p95:23.2 },
+             // GAMLE FALLBACK-DATA FOR ALDRE OVER 49 (IKKE I BILDET) - OG REDUSERT MED 3 CM
+             { label:"50–59", p5:6.0,  p25:9.0,  p50:12.5, p75:16.0, p95:20.0 },
+             { label:"60–69", p5:5.0,  p25:7.5,  p50:10.0, p75:13.0, p95:17.0 },
+             { label:"70–80", p5:0.0,  p25:5.5,  p50:7.5,  p75:10.5, p95:14.0 } // p5 cappeet på 0
         ];
 
         const STRENGTH_MODEL = {
@@ -376,6 +376,7 @@
           overall: { mean: 1.0168, stdDev: 0.1808 }
         };
         
+        // Denne funksjonen bruker P5, P25, P50, P75, P95
         function getAgeGroupData(age, sex) {
             const dataSet = sex.toLowerCase() === 'kvinne' ? JUMP_DATA_KVINNER : JUMP_DATA_MENN;
              // OPPDATERT LOGIKK FOR Å MATCHE NYE JUMP_DATA
@@ -397,39 +398,57 @@
              return dataSet[14]; // 70+
         }
 
+        // Denne funksjonen bruker P5, P25, P50, P75, P95
         function calculateJumpPercentile(age, sex, jumpHeight) {
              if (!isFinite(jumpHeight) || !isFinite(age)) return NaN;
              const g = getAgeGroupData(age, sex);
              const pts = [ {p:5, x:g.p5}, {p:25, x:g.p25}, {p:50, x:g.p50}, {p:75, x:g.p75}, {p:95, x:g.p95} ];
-             if (jumpHeight <= pts[0].x) {
+             
+             // Interpolerer mellom alle punktene
+             if (jumpHeight <= pts[0].x) { // Under P5
                  const m = (pts[1].p - pts[0].p) / (pts[1].x - pts[0].x || 1e-6);
                  return Math.max(0.1, pts[0].p + (jumpHeight - pts[0].x) * m);
              }
-             for (let i = 0; i < pts.length - 1; i++) {
+             for (let i = 0; i < pts.length - 1; i++) { // Mellom P5 og P95
                  if (jumpHeight <= pts[i+1].x) {
                      const m = (pts[i+1].p - pts[i].p) / (pts[i+1].x - pts[i].x || 1e-6);
                      return pts[i].p + (jumpHeight - pts[i].x) * m;
                  }
              }
+             // Over P95
              const m = (pts[pts.length-1].p - pts[pts.length-2].p) / (pts[pts.length-1].x - pts[pts.length-2].x || 1e-6);
              return Math.min(99.9, pts[pts.length-1].p + (jumpHeight - pts[pts.length-1].x) * m);
         }
-
-        function calculateJumpAge(realAge, sex, jumpHeight) {
-            if (!isFinite(realAge) || !isFinite(jumpHeight)) return NaN;
-            const percentile = calculateJumpPercentile(realAge, sex, jumpHeight);
-            if (!isFinite(percentile)) return NaN;
+        
+        // --- NY LOGIKK FOR ALDER-BEREGNING (v11) ---
+        // Denne funksjonen oversetter persentil til alder
+        function calculateAgeFromPercentile(percentile, realAge) {
             const p = Math.max(0, Math.min(100, percentile));
-            const minAge = 18, maxAge = 85;
-            if (p === 50) return realAge;
+            const minAge = 21; // P100 (best)
+            const midAge = realAge; // P50 (snitt)
+            const maxAge = realAge + 5; // P0 (verst)
+
+            if (p === 50) return midAge;
             if (p > 50) {
-                const factor = (p - 50) / 50;
-                return Math.max(minAge, realAge - factor * Math.max(0, realAge - minAge));
+                // Lineær interpolering mellom P50 (midAge) og P100 (minAge)
+                const factor = (p - 50) / 50; // Går fra 0 til 1
+                return midAge - factor * (midAge - minAge);
             } else {
-                const factor = (50 - p) / 50;
-                return Math.min(maxAge, realAge + factor * Math.max(0, maxAge - realAge));
+                // Lineær interpolering mellom P0 (maxAge) og P50 (midAge)
+                const factor = p / 50; // Går fra 0 til 1
+                return maxAge - factor * (maxAge - midAge);
             }
         }
+        
+        function calculateJumpAge(realAge, sex, jumpHeight) {
+            if (!isFinite(realAge) || !isFinite(jumpHeight)) return NaN;
+            // Steg 1: Bruk alle persentilene for å finne score
+            const percentile = calculateJumpPercentile(realAge, sex, jumpHeight);
+            if (!isFinite(percentile)) return NaN;
+            // Steg 2: Oversett score til alder
+            return calculateAgeFromPercentile(percentile, realAge);
+        }
+        // --- SLUTT PÅ NY LOGIKK ---
 
         function getStrengthAgeGroup(age) {
             if (age < 10) return 'Under 10'; if (age < 20) return '10-19';
@@ -472,12 +491,12 @@
                 
                 // Tilnærmet Z-score til Persentil
                 const percentile = 50 * (1 + Math.tanh(zScore / Math.sqrt(2 * Math.PI / Math.log(2))));
-                const clampedPercentile = Math.max(0, Math.min(100, percentile)); // Riktig variabelnavn
+                const clampedPercentile = Math.max(0, Math.min(100, percentile));
 
                  let finalScore = 50 + (zScore * 15);
                  finalScore = Math.max(0, Math.min(100, finalScore));
                  
-                return { score: finalScore, percentile: clampedPercentile }; // Riktig variabelnavn
+                return { score: finalScore, percentile: clampedPercentile };
             } catch (error) {
                  return { score: NaN, percentile: NaN, error: "Calculation failed" };
             }
@@ -485,19 +504,8 @@
         
         function calculateStrengthAgeFromPercentile(percentile, realAge) {
             if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
-            const p = Math.max(0, Math.min(100, percentile));
-            const minAge = 21; // Specific minimum for strength
-            const maxAge = 85; // Shared maximum
-
-            if (p === 50) {
-                return realAge;
-            } else if (p > 50) {
-                const factor = (p - 50) / 50; 
-                return Math.max(minAge, realAge - factor * Math.max(0, realAge - minAge));
-            } else { // p < 50
-                const factor = (50 - p) / 50; 
-                return Math.min(maxAge, realAge + factor * Math.max(0, maxAge - realAge));
-            }
+            // Steg 2: Oversett score til alder (bruker samme logikk som hopp)
+             return calculateAgeFromPercentile(percentile, realAge);
         }
         // --- SLUTT: INNPORTET LOGIKK FOR FITNESS AGE ---
         
@@ -1129,4 +1137,5 @@
 
 </body>
 </html>
+
 
