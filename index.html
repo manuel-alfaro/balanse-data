@@ -49,6 +49,29 @@
             color: white;
             font-size: 1.2rem;
         }
+        
+        /* NY STIL FOR ALDER-KORT I MODAL */
+        .age-card {
+            background-color: #2d3748; /* gray-800 */
+            border: 1px solid #4a5568; /* gray-700 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1rem; /* p-4 */
+            text-align: center;
+        }
+        .age-card-title {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            color: #9ca3af; /* text-gray-400 */
+            margin-bottom: 0.25rem; /* mb-1 */
+        }
+        .age-card-value {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 700; /* font-bold */
+        }
+        .text-balance { color: #34d399; } /* emerald-400 */
+        .text-function { color: #60a5fa; } /* blue-400 */
+        .text-strength { color: #a78bfa; } /* purple-400 */
+        
     </style>
 </head>
 <body class="h-full bg-black text-gray-300">
@@ -61,18 +84,17 @@
 
     <!-- Balansealder Modal -->
     <div id="age-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <!-- OPPDATERT MODAL-INNHOLD -->
-        <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-sm w-full text-center shadow-2xl">
+        <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-lg w-full text-center shadow-2xl">
             <h3 id="modal-title" class="text-2xl text-white font-semibold mb-4">Balansealder Beregnet</h3>
             <p id="modal-message" class="text-lg text-gray-300 mb-2">Din estimerte balansealder er:</p>
-            <p id="modal-balance-age" class="text-5xl font-bold text-emerald-400 mb-2"></p>
+            <p id="modal-balance-age" class="text-5xl font-bold text-emerald-400 mb-4"></p>
             
-            <!-- NY DIV FOR DETALJER -->
-            <div id="modal-details" class="text-left text-lg text-gray-300 mb-6 space-y-2 w-full max-w-xs mx-auto">
+            <!-- NYTT: Seksjon for detaljerte aldre -->
+            <div id="modal-details" class="w-full">
                 <!-- Fylles av JS -->
             </div>
             
-            <button id="close-modal-btn" class="filter-button active w-full">Lukk</button>
+            <button id="close-modal-btn" class="filter-button active w-full !mt-6">Lukk</button>
         </div>
     </div>
 
@@ -124,28 +146,28 @@
                                 <label for="diff" class="block text-sm text-white font-medium mb-2">Diff (cm)</label>
                                 <input type="number" step="0.01" id="diff" class="name-input" placeholder="F.eks. 1.20" required>
                             </div>
-
-                            <!-- NY KNAPP OG SKJULTE FELTER -->
-                            <button type="button" id="toggle-fitness-report-btn" class="filter-button w-full !mt-6">
+                            
+                            <!-- NYTT: Knapp for full rapport -->
+                            <button type="button" id="toggle-full-report-btn" class="filter-button w-full !mt-6">
                                 Full Fitness Age Report
                             </button>
                             
-                            <div id="fitness-report-fields" class="hidden space-y-4 pt-4 border-t border-gray-700">
+                            <!-- NYTT: Skjulte felter for full rapport -->
+                            <div id="full-report-fields" class="hidden space-y-4 pt-4 border-t border-gray-700/50">
                                 <div>
-                                    <label for="hopphoyde" class="block text-sm text-white font-medium mb-2">Hopphøyde (cm)</label>
-                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="F.eks. 45.5">
+                                    <label for="hopp" class="block text-sm text-white font-medium mb-2">Hopphøyde (cm)</label>
+                                    <input type="number" step="0.1" id="hopp" class="name-input" placeholder="F.eks. 45.5">
                                 </div>
                                 <div>
                                     <label for="vekt" class="block text-sm text-white font-medium mb-2">Kroppsvekt (kg)</label>
-                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="F.eks. 80">
+                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="F.eks. 80.0">
                                 </div>
                                 <div>
-                                    <label for="pullresultat" class="block text-sm text-white font-medium mb-2">Pull Resultat (kg)</label>
-                                    <input type="number" step="0.1" id="pullresultat" class="name-input" placeholder="F.eks. 180">
+                                    <label for="pull" class="block text-sm text-white font-medium mb-2">Pull Resultat (kg)</label>
+                                    <input type="number" step="0.1" id="pull" class="name-input" placeholder="F.eks. 180.0">
                                 </div>
                             </div>
-                            <!-- SLUTT PÅ NYE FELTER -->
-
+                            
                             <button type="submit" id="submit-button" class="filter-button active w-full !mt-6">
                                 Legg til oppføring
                             </button>
@@ -171,7 +193,7 @@
                 <!-- Panel: Statistikk -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Statistikk</h3>
-                    <div class="bg-gray-800/40 p-4 rounded-lg space-y-3">
+                    <div class="bg-gray-800/40 p-4 rounded-lg space-y-4">
                         <div>
                             <span class="font-medium text-white">Totalt antall:</span>
                             <span id="total-count" class="font-bold text-xl text-emerald-400 ml-2">0</span>
@@ -181,13 +203,15 @@
                         <div class="border-t border-gray-600 pt-3">
                             <h5 class="text-sm text-white font-medium mb-2">Kjønnsfordeling:</h5>
                             <div id="gender-stats" class="text-sm space-y-1">
+                                <!-- Fylles av JS -->
                                 <p class="text-gray-400">Laster data...</p>
                             </div>
                         </div>
                         
+                        <!-- Aldersstatistikk -->
                         <div class="border-t border-gray-600 pt-3">
                             <h5 class="text-sm text-white font-medium mb-2">Aldersgrupper:</h5>
-                            <div id="age-group-stats" class="text-sm space-y-1">
+                            <div id="age-group-stats" class="text-sm space-y-1 overflow-x-auto">
                                 <!-- Fylles av JS -->
                                 <p class="text-gray-400">Laster data...</p>
                             </div>
@@ -268,8 +292,8 @@
         // Globale variabler
         let db;
         let entriesCollection;
-        let allEntries = []; 
-        let unsubscribeEntries = null; 
+        let allEntries = []; // Sørger for at den er en liste fra start
+        let unsubscribeEntries = null; // For å stoppe lytteren
 
         // UI-elementer
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -287,11 +311,11 @@
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
         const modalBalanceAge = document.getElementById('modal-balance-age');
-        const modalDetails = document.getElementById('modal-details'); // NYTT
+        const modalDetails = document.getElementById('modal-details'); // NY: For de tre boksene
         const closeModalBtn = document.getElementById('close-modal-btn');
-        // NYE UI-elementer for Fitness Report
-        const toggleFitnessReportBtn = document.getElementById('toggle-fitness-report-btn');
-        const fitnessReportFields = document.getElementById('fitness-report-fields');
+        // UI-elementer for Full Rapport
+        const toggleFullReportBtn = document.getElementById('toggle-full-report-btn');
+        const fullReportFields = document.getElementById('full-report-fields');
 
 
         // --- START: INNPORTET LOGIKK FOR FITNESS AGE ---
@@ -307,7 +331,12 @@
              { label:"25–29", p5:22.5, p25:30.2, p50:35.4, p75:40.6, p95:48.1 },
              { label:"30–34", p5:21.2, p25:28.2, p50:33.0, p75:37.6, p95:44.8 },
              { label:"35–39", p5:19.8, p25:26.0, p50:30.6, p75:34.9, p95:41.4 },
-              { label:"70–80", p5:0.0,  p25:10.9,  p50:12.7, p75:16.0, p95:20.6 }
+             { label:"40–44", p5:18.6, p25:24.2, p50:28.1, p75:32.1, p95:38.2 },
+             { label:"45–49", p5:13.1, p25:22.3, p50:25.8, p75:29.9, p95:35.6 },
+             // GAMLE FALLBACK-DATA FOR ALDRE OVER 49 (IKKE I BILDET)
+             { label:"50–59", p5:10.8, p25:14.2,  p50:17.7, p75:20.8, p95:26.7 },
+             { label:"60–69", p5:9.7,  p25:12.6,  p50:15.15,p75:17.9, p95:23.2 },
+             { label:"70–80", p5:0.0,  p25:10.9,  p50:12.7, p75:16.0, p95:20.6 }
         ];
         const JUMP_DATA_KVINNER = [
              // DATA OPPDATERT BASERT PÅ BILDE (2025-10-28)
@@ -337,7 +366,7 @@
             "20-29_m": { mean: 1.0554, stdDev: 0.1545 }, "30-39_m": { mean: 1.0463, stdDev: 0.1411 },
             "40-49_m": { mean: 1.0234, stdDev: 0.1382 }, "50-59_m": { mean: 0.9800, stdDev: 0.1626 },
             "60-69_m": { mean: 0.8587, stdDev: 0.1127 }, "70-79_m": { mean: 0.7195, stdDev: 0.1766 },
-             "80+_m": { mean: 0.69, stdDev: 0.17 }, 
+             "80+_m": { mean: 0.69, stdDev: 0.17 }, // Added estimate for 80+ male
             "Under 10_f": { mean: 0.8631, stdDev: 0.1100 }, "10-19_f": { mean: 1.0489, stdDev: 0.1200 },
             "20-29_f": { mean: 1.1283, stdDev: 0.1625 }, "30-39_f": { mean: 1.1265, stdDev: 0.1728 },
             "40-49_f": { mean: 1.1329, stdDev: 0.2453 }, "50-59_f": { mean: 1.0346, stdDev: 0.1595 },
@@ -346,10 +375,10 @@
           },
           overall: { mean: 1.0168, stdDev: 0.1808 }
         };
-
+        
         function getAgeGroupData(age, sex) {
             const dataSet = sex.toLowerCase() === 'kvinne' ? JUMP_DATA_KVINNER : JUMP_DATA_MENN;
-             // OPPDATERT LOGIKK FOR Å MATCHE NYE JUMP_DATA_MENN
+             // OPPDATERT LOGIKK FOR Å MATCHE NYE JUMP_DATA
              if (age <= 9) return dataSet[0];   // 8-9
              if (age <= 11) return dataSet[1];  // 10-11
              if (age <= 13) return dataSet[2];  // 12-13
@@ -417,29 +446,38 @@
             try {
                 const genderKey = gender.toLowerCase() === 'kvinne' ? 'female' : 'male';
                 const model = STRENGTH_MODEL[genderKey];
+
                 const expectedLogPull = model.intercept + model.slope * Math.log(weight);
                 const expectedPull = Math.exp(expectedLogPull);
+
                 if (!isFinite(expectedPull) || expectedPull <= 0) {
                      return { score: NaN, percentile: NaN, error: "Calculation error (expected pull)" };
                 }
+
                 const strengthRatio = pull / expectedPull;
+
                 const ageGroup = getStrengthAgeGroup(age);
                 const groupKey = `${ageGroup}_${genderKey === 'female' ? 'f' : 'm'}`;
                 let groupStats = STRENGTH_MODEL.ageGroupAdjustments[groupKey];
                 let zScore = 0;
+
                 if (groupStats && groupStats.stdDev > 0) {
                     zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
-                } else if (STRENGTH_MODEL.overall.stdDev > 0) {
+                } else if (STRENGTH_MODEL.overall.stdDev > 0) { // Fallback to overall
                     groupStats = STRENGTH_MODEL.overall;
                     zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
                 } else {
                      return { score: NaN, percentile: NaN, error: "Calculation error (std dev zero)" };
                 }
-                const percentile = Math.round(100 * (0.5 + 0.5 * Math.tanh(zScore * Math.sqrt(Math.PI) / Math.sqrt(8))));
-                 const clampedPercentile = Math.max(0, Math.min(100, percentile));
+                
+                // Tilnærmet Z-score til Persentil
+                const percentile = 50 * (1 + Math.tanh(zScore / Math.sqrt(2 * Math.PI / Math.log(2))));
+                const clampedPercentile = Math.max(0, Math.min(100, percentile)); // Riktig variabelnavn
+
                  let finalScore = 50 + (zScore * 15);
                  finalScore = Math.max(0, Math.min(100, finalScore));
-                return { score: finalScore, percentile: clampedPercentile };
+                 
+                return { score: finalScore, percentile: clampedPercentile }; // Riktig variabelnavn
             } catch (error) {
                  return { score: NaN, percentile: NaN, error: "Calculation failed" };
             }
@@ -448,31 +486,43 @@
         function calculateStrengthAgeFromPercentile(percentile, realAge) {
             if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
             const p = Math.max(0, Math.min(100, percentile));
-            const minAge = 21; 
-            const maxAge = 85; 
+            const minAge = 21; // Specific minimum for strength
+            const maxAge = 85; // Shared maximum
+
             if (p === 50) {
                 return realAge;
             } else if (p > 50) {
                 const factor = (p - 50) / 50; 
                 return Math.max(minAge, realAge - factor * Math.max(0, realAge - minAge));
-            } else { 
+            } else { // p < 50
                 const factor = (50 - p) / 50; 
                 return Math.min(maxAge, realAge + factor * Math.max(0, maxAge - realAge));
             }
         }
         // --- SLUTT: INNPORTET LOGIKK FOR FITNESS AGE ---
-
+        
 
         /**
          * Viser en popup-modal med tilpasset innhold.
+         * @param {string} title - Tittelen på modalen
+         * @param {string} message - Hovedmeldingen
+         * @param {string} value - Verdien som skal vises (f.eks. alder eller emoji)
+         * @param {string} type - 'success', 'error', 'warning', 'info'
+         * @param {string | null} detailsHtml - (NY) HTML for detalj-boksene
          */
-        function showModal(title, message, value, type = 'success') {
+        function showModal(title, message, value, type = 'success', detailsHtml = null) {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             modalBalanceAge.textContent = value;
-            modalDetails.innerHTML = ''; // Tøm detaljer HVER gang
             
-            // Tilbakestill farger
+            // Fyll eller tøm detalj-seksjonen
+            if (detailsHtml) {
+                modalDetails.innerHTML = detailsHtml;
+            } else {
+                modalDetails.innerHTML = '';
+            }
+            
+            // Tilbakestill farger (for hovedverdien)
             modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400');
 
             if (type === 'success') {
@@ -494,13 +544,25 @@
         async function main() {
             try {
                 console.log("App initialiserer...");
+                
+                // 1. Initialiser Firebase App
                 const app = initializeApp(firebaseConfig);
+                
+                // 2. Initialiser Firestore DB
                 db = getFirestore(app);
+                
+                // 3. Definer database-stien
                 const dbPath = 'balanse-data-entries';
                 entriesCollection = collection(db, dbPath);
+
                 console.log(`Koblet til. Lytter til database-sti: ${dbPath}`);
+
+                // 4. Sett opp sanntids-lytter
                 setupSnapshots();
+                
+                // 5. Sett opp hendelseslyttere for UI
                 setupEventListeners();
+
             } catch (error) {
                 console.error("Feil under initialisering:", error);
                 loadingMessage.textContent = `Feil ved oppstart: ${error.message}`;
@@ -511,127 +573,146 @@
          * Setter opp lyttere for UI-elementer
          */
         function setupEventListeners() {
+            
+            // Lytter på "Full rapport"-knappen
+            toggleFullReportBtn.addEventListener('click', () => {
+                const isHidden = fullReportFields.classList.toggle('hidden');
+                toggleFullReportBtn.classList.toggle('active', !isHidden);
+                
+                // Gjør de nye feltene påkrevd (eller ikke)
+                document.getElementById('hopp').required = !isHidden;
+                document.getElementById('vekt').required = !isHidden;
+                document.getElementById('pull').required = !isHidden;
+            });
+            
             // Lytter på 'Legg til'-skjemaet
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // Hent basis-data
                 const testleder = testlederInput.value.trim();
                 const alder = parseInt(document.getElementById('alder').value, 10);
                 const kjonn = document.getElementById('kjonn').value;
                 const areal = parseFloat(document.getElementById('areal').value);
                 const diff = parseFloat(document.getElementById('diff').value);
 
-                // Valider basis-data
                 if (!testleder) {
-                    showModal("Mangler Testleder", "Vennligst fyll inn 'Testleder'-navnet ditt.", "⚠️", "warning");
+                    showModal(
+                        "Mangler Testleder", 
+                        "Vennligst fyll inn 'Testleder'-navnet ditt.", 
+                        "⚠️", 
+                        "warning"
+                    );
                     testlederInput.focus();
                     return;
                 }
+                
                 if (isNaN(alder) || isNaN(areal) || isNaN(diff)) {
-                    showModal("Ugyldig Data", "Alder, Areal og Diff må være gyldige tall.", "⚠️", "warning");
+                    showModal(
+                        "Ugyldig Data", 
+                        "Alder, Areal og Diff må være gyldige tall.", 
+                        "⚠️", 
+                        "warning"
+                    );
                     return;
                 }
 
-                // Hent fitness-data
-                const hopphoydeVal = parseFloat(document.getElementById('hopphoyde').value);
-                const vektVal = parseFloat(document.getElementById('vekt').value);
-                const pullresultatVal = parseFloat(document.getElementById('pullresultat').value);
+                // Sjekk om vi kjører full rapport
+                const isFullReport = !fullReportFields.classList.contains('hidden');
+                let hopp, vekt, pull;
                 
-                // Sjekk om vi skal kjøre full rapport
-                const isFullReport = !fitnessReportFields.classList.contains('hidden');
-                const fullReportDataValid = isFullReport && !isNaN(hopphoydeVal) && !isNaN(vektVal) && !isNaN(pullresultatVal);
-
-                if (fullReportDataValid) {
-                    // --- KJØR FULL FITNESS RAPPORT ---
-                    console.log("Kjører full fitness rapport...");
-
-                    // 1. Balansealder (original funksjon)
-                    const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
-
-                    // 2. Funksjonsalder (Hopp) (ny funksjon)
-                    const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoydeVal);
-
-                    // 3. Styrkealder (ny funksjon)
-                    const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vektVal, pullresultatVal);
-                    const strengthPercentile = strengthResult.percentile;
-                    const styrkeAlder = calculateStrengthAgeFromPercentile(strengthPercentile, alder);
-
-                    // 4. Samlet Fitnessalder
-                    const ages = [balanseAlder, funksjonsAlder, styrkeAlder].filter(isFinite);
-                    let samletFitnessAge = NaN;
-                    if (ages.length > 0) {
-                        samletFitnessAge = ages.reduce((a, b) => a + b, 0) / ages.length;
-                    }
-
-                    // Vis modal med alle resultater
-                    if (!isNaN(samletFitnessAge)) {
-                        showModal(
-                            "Full Fitness Rapport", 
-                            "Din samlede fitnessalder er:", 
-                            samletFitnessAge.toFixed(1), 
-                            "success"
-                        );
-                        // Fyll inn detaljer ETTER showModal har tømt den
-                        modalDetails.innerHTML = `
-                            <div class="flex justify-between border-t border-gray-700/50 pt-2 mt-4"><span>Balansealder:</span> <strong class="ml-4">${balanseAlder.toFixed(1)} år</strong></div>
-                            <div class="flex justify-between border-t border-gray-700/50 pt-2"><span>Funksjonsalder (Hopp):</span> <strong class="ml-4">${funksjonsAlder.toFixed(1)} år</strong></div>
-                            <div class="flex justify-between border-t border-gray-700/50 pt-2"><span>Styrkealder:</span> <strong class="ml-4">${styrkeAlder.toFixed(1)} år</strong></div>
-                        `;
-                    } else {
-                        showModal("Rapportfeil", "Kunne ikke beregne samlet alder. Sjekk alle tall.", "⚠️", "warning");
-                    }
-
-                } else {
-                    // --- KJØR KUN BALANSEALDER (SOM FØR) ---
-                    console.log("Kjører kun balansealder.");
-                    const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
+                if (isFullReport) {
+                    hopp = parseFloat(document.getElementById('hopp').value);
+                    vekt = parseFloat(document.getElementById('vekt').value);
+                    pull = parseFloat(document.getElementById('pull').value);
                     
-                    if (!isNaN(balanseAlder)) {
-                        showModal(
-                            "Balansealder Beregnet", 
-                            "Din estimerte balansealder er:", 
-                            balanseAlder.toFixed(1), 
-                            "success"
+                    if (isNaN(hopp) || isNaN(vekt) || isNaN(pull)) {
+                         showModal(
+                            "Ugyldig Rapport-data", 
+                            "Hopphøyde, Vekt og Pull må være gyldige tall.", 
+                            "⚠️", 
+                            "warning"
                         );
-                        // modalDetails tømmes automatisk av showModal()
-                    } else {
-                        console.warn("Kunne ikke beregne balansealder.");
-                        showModal("Beregningsfeil", "Kunne ikke beregne balansealder.", "⚠️", "warning");
+                        return;
                     }
                 }
 
-                // --- Lagre KUN basis-data til databasen ---
                 try {
-                    // balanseAlder, funksjonsAlder etc lagres IKKE
+                    if (isFullReport) {
+                        // NY LOGIKK: Beregn alle 3 aldre + samlet
+                        const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
+                        const funksjonsAlder = calculateJumpAge(alder, kjonn, hopp);
+                        
+                        const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pull);
+                        const styrkeAlder = calculateStrengthAgeFromPercentile(strengthResult.percentile, alder);
+                        
+                        const ages = [balanseAlder, funksjonsAlder, styrkeAlder].filter(isFinite);
+                        const samletAlder = ages.reduce((sum, a) => sum + a, 0) / ages.length;
+
+                        // Bygg "sexy" HTML for detaljene
+                        const detailsHtml = `
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                            <div class="age-card">
+                                <h4 class="age-card-title">Balansealder</h4>
+                                <p class="age-card-value text-balance">${balanseAlder.toFixed(1)}</p>
+                            </div>
+                            <div class="age-card">
+                                <h4 class="age-card-title">Funksjonsalder</h4>
+                                <p class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</p>
+                            </div>
+                            <div class="age-card">
+                                <h4 class="age-card-title">Styrkealder</h4>
+                                <p class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</p>
+                            </div>
+                        </div>`;
+                        
+                        showModal(
+                            "Samlet Fitnessalder", 
+                            "Din estimerte samlede fitnessalder er:", 
+                            samletAlder.toFixed(1), 
+                            "success",
+                            detailsHtml // Send inn den nye HTML-en
+                        );
+
+                    } else {
+                        // GAMMEL LOGIKK: Beregn og vis kun balansealder
+                        const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
+                        
+                        if (!isNaN(balanseAlder)) {
+                            showModal(
+                                "Balansealder Beregnet", 
+                                "Din estimerte balansealder er:", 
+                                balanseAlder.toFixed(1), 
+                                "success" // Send ingen 'detailsHtml', så feltet tømmes
+                            );
+                        } else {
+                            console.warn("Kunne ikke beregne balansealder.");
+                        }
+                    }
+
+                    // Lagre data til databasen (kun de originale feltene)
                     await addDoc(entriesCollection, {
                         testleder: testleder,
                         alder: alder,
                         kjonn: kjonn,
                         areal: areal,
                         diff: diff,
-                        createdAt: serverTimestamp() 
+                        createdAt: serverTimestamp()
                     });
-                    addForm.reset(); // Resetter alle felt, inkludert de nye
-                    // Skjul feltene igjen etter reset
-                    fitnessReportFields.classList.add('hidden');
-                    toggleFitnessReportBtn.textContent = "Full Fitness Age Report";
-                    toggleFitnessReportBtn.classList.remove('active');
-
+                    addForm.reset();
+                    // Skjul rapport-feltene igjen
+                    fullReportFields.classList.add('hidden');
+                    toggleFullReportBtn.classList.remove('active');
+                    document.getElementById('hopp').required = false;
+                    document.getElementById('vekt').required = false;
+                    document.getElementById('pull').required = false;
+                    
                 } catch (error) {
                     console.error("Feil ved lagring av data:", error);
-                    showModal("Lagringsfeil", `Kunne ikke lagre data: ${error.message}`, "❌", "error");
-                }
-            });
-
-            // NY LYTTER: Veksle synlighet for fitness-rapport-felter
-            toggleFitnessReportBtn.addEventListener('click', () => {
-                const isHidden = fitnessReportFields.classList.toggle('hidden');
-                if (isHidden) {
-                    toggleFitnessReportBtn.textContent = "Full Fitness Age Report";
-                    toggleFitnessReportBtn.classList.remove('active'); // Bruk 'active'-stilen
-                } else {
-                    toggleFitnessReportBtn.textContent = "Skjul Full Report";
-                    toggleFitnessReportBtn.classList.add('active'); // Bruk 'active'-stilen
+                    showModal(
+                        "Lagringsfeil", 
+                        `Kunne ikke lagre data: ${error.message}`, 
+                        "❌", 
+                        "error"
+                    );
                 }
             });
 
@@ -650,12 +731,17 @@
         }
         
         /**
-         * Beregner balansealder (DEN ORIGINALE FUNKSJONEN)
+         * Beregner balansealder basert på kjønn og CoP-areal.
+         * @param {number} realAge - Testpersonens faktiske alder
+         * @param {string} sex - "Mann" eller "Kvinne"
+         * @param {number} copArea - CoP Areal i cm²
+         * @returns {number} - Estimert balansealder
          */
         function calculateBalanceAge(realAge, sex, copArea) {
             const area = parseFloat(copArea);
             if (!isFinite(area)) return NaN;
             
+            // NY LOGIKK: Velg formel basert på testpersonens faktiske alder
             if (realAge <= 35) {
                 // METODE 1 (Alder <= 35): 3.13 areal gir 21 år
                 const minArea = 3.13;
@@ -681,11 +767,14 @@
             }
         }
         
+        // --- START PÅ GJENINNSATT KODE ---
+
         /**
          * Setter opp sanntids-lytteren til Firestore
          */
         function setupSnapshots() {
-            if (unsubscribeEntries) unsubscribeEntries(); 
+            if (unsubscribeEntries) unsubscribeEntries(); // Avslutt gammel lytter
+
             loadingMessage.textContent = 'Henter data...';
 
             unsubscribeEntries = onSnapshot(entriesCollection, (snapshot) => {
@@ -693,7 +782,10 @@
                     id: doc.id,
                     ...doc.data()
                 }));
+                
+                // Sorter data, nyeste først
                 allEntries.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                
                 renderTableAndStats(filterInput.value);
                 
                 if (loadingOverlay.style.display !== 'none') {
@@ -703,6 +795,8 @@
                 console.error("Feil ved henting av data:", error);
                 loadingMessage.textContent = `Feil ved henting av data: ${error.message}`;
                 dataTableBody.innerHTML = `<tr><td colspan="7" class="py-4 px-6 text-center text-red-500">Feil: ${error.message}</td></tr>`;
+                
+                // Vis feil i overlay hvis den feiler første gang
                 if (loadingOverlay.style.display !== 'none') {
                     loadingMessage.textContent = "Feil: Klarte ikke hente data. Sjekk Firestore-reglene.";
                 }
@@ -713,7 +807,7 @@
          * Oppdaterer tabellen og statistikken basert på filter
          */
         function renderTableAndStats(filterText = '') {
-            if (!allEntries) { 
+            if (!allEntries) { // Sikkerhetssjekk
                 console.warn("renderTableAndStats kalt før allEntries er definert.");
                 allEntries = [];
             }
@@ -730,7 +824,7 @@
          * Tegner selve tabellen
          */
         function renderTable(entries) {
-            dataTableBody.innerHTML = ''; 
+            dataTableBody.innerHTML = ''; // Tøm tabellen
 
             if (entries.length === 0) {
                 dataTableBody.innerHTML = `<tr><td colspan="7" class="py-4 px-6 text-center text-gray-500">Ingen data funnet.</td></tr>`;
@@ -742,9 +836,22 @@
                 tr.className = `bg-[#1a1c1f] hover:bg-gray-800/40 border-b border-gray-700`;
                 tr.dataset.id = entry.id;
 
-                const timestamp = entry.createdAt?.seconds 
-                    ? new Date(entry.createdAt.seconds * 1000).toLocaleString('no-NO') 
-                    : 'N/A';
+                // Formater tidsstempel
+                let timestamp = 'N/A';
+                if (entry.createdAt && entry.createdAt.seconds) {
+                    try {
+                        timestamp = new Date(entry.createdAt.seconds * 1000).toLocaleString('no-NO', {
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        });
+                    } catch (e) {
+                        console.warn("Ugyldig datoformat:", entry.createdAt);
+                        timestamp = new Date(entry.createdAt.seconds * 1000).toString().substring(4, 21);
+                    }
+                }
 
                 tr.innerHTML = `
                     <td class="py-3 px-4" data-field="testleder">${entry.testleder || ''}</td>
@@ -752,7 +859,7 @@
                     <td class="py-3 px-4" data-field="kjonn">${entry.kjonn}</td>
                     <td class="py-3 px-4" data-field="areal">${entry.areal}</td>
                     <td class="py-3 px-4" data-field="diff">${entry.diff}</td>
-                    <td class="py-3 px-4 text-xs">${timestamp}</td>
+                    <td class="py-3 px-4 text-xs" data-field="createdAt">${timestamp}</td>
                     <td class="py-3 px-4 text-center space-x-2">
                         <button class="icon-button" data-action="edit" title="Rediger">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
@@ -763,6 +870,7 @@
                     </td>
                 `;
                 
+                // Legg til hendelseslyttere for knappene
                 tr.querySelector('[data-action="edit"]').addEventListener('click', () => toggleEditEntry(entry.id));
                 tr.querySelector('[data-action="delete"]').addEventListener('click', () => deleteEntry(entry.id));
 
@@ -776,104 +884,104 @@
         function renderStats(entries) {
             totalCountEl.textContent = entries.length;
 
+            // Kjønnsstatistikk
             const genderCounts = { 'Mann': 0, 'Kvinne': 0, 'Annet': 0 };
+            entries.forEach(entry => {
+                if (genderCounts.hasOwnProperty(entry.kjonn)) {
+                    genderCounts[entry.kjonn]++;
+                }
+            });
+            genderStatsEl.innerHTML = '';
+            let hasGenderData = false;
+            for (const [gender, count] of Object.entries(genderCounts)) {
+                if (count > 0) {
+                    hasGenderData = true;
+                    const p = document.createElement('p');
+                    p.innerHTML = `<span class="text-gray-400">${gender}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
+                    genderStatsEl.appendChild(p);
+                }
+            }
+            if (!hasGenderData) {
+                genderStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
+            }
+
+            // Aldersstatistikk (som tabell)
             const ageGroups = {
-                '0-19': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
-                '20-29': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
-                '30-39': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
-                '40-49': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
-                '50-59': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
-                '60-69': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
-                '70+': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 }
+                '0-19': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 },
+                '20-29': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 },
+                '30-39': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 },
+                '40-49': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 },
+                '50-59': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 },
+                '60-69': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 },
+                '70+': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 }
             };
 
             entries.forEach(entry => {
                 const alder = entry.alder;
-                const kjonn = entry.kjonn; 
-                let groupKey;
-                if (alder <= 19) groupKey = '0-19';
-                else if (alder <= 29) groupKey = '20-29';
-                else if (alder <= 39) groupKey = '30-39';
-                else if (alder <= 49) groupKey = '40-49';
-                else if (alder <= 59) groupKey = '50-59';
-                else if (alder <= 69) groupKey = '60-69';
-                else groupKey = '70+';
+                let group = '';
+                if (alder <= 19) group = '0-19';
+                else if (alder <= 29) group = '20-29';
+                else if (alder <= 39) group = '30-39';
+                else if (alder <= 49) group = '40-49';
+                else if (alder <= 59) group = '50-59';
+                else if (alder <= 69) group = '60-69';
+                else group = '70+';
 
-                ageGroups[groupKey].total++;
-                if (kjonn === 'Mann' || kjonn === 'Kvinne' || kjonn === 'Annet') {
-                    ageGroups[groupKey][kjonn]++;
+                if (group) {
+                    ageGroups[group].total++;
+                    if (ageGroups[group].hasOwnProperty(entry.kjonn)) {
+                        ageGroups[group][entry.kjonn]++;
+                    }
                 }
-                if (kjonn === 'Mann') genderCounts['Mann']++;
-                else if (kjonn === 'Kvinne') genderCounts['Kvinne']++;
-                else if (kjonn === 'Annet') genderCounts['Annet']++;
             });
 
-            // Render kjønnsstatistikk
-            genderStatsEl.innerHTML = '';
-            let totalGenders = 0;
-            for (const [group, count] of Object.entries(genderCounts)) {
-                if (count > 0) {
-                    const p = document.createElement('p');
-                    p.innerHTML = `<span class="text-gray-400">${group}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
-                    genderStatsEl.appendChild(p);
-                    totalGenders += count;
-                }
-            }
-            if (totalGenders === 0 && entries.length > 0) {
-                 genderStatsEl.innerHTML = '<p class="text-gray-400">Ingen data m/kjønn.</p>';
-            }
-
-            // Render aldersstatistikk
             ageGroupStatsEl.innerHTML = '';
-            let totalAges = 0;
+            if (entries.length === 0) {
+                ageGroupStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
+                return;
+            }
+            
+            // Bygg tabell
             const table = document.createElement('table');
-            table.className = 'w-full text-left text-xs'; 
-            const thead = document.createElement('thead');
-            thead.className = 'text-gray-400 uppercase text-[0.65rem]'; 
-            thead.innerHTML = `
-                <tr>
-                    <th class="pb-1 font-medium">Gruppe</th>
-                    <th class="pb-1 font-medium text-center">Totalt</th>
-                    <th class="pb-1 font-medium text-center">Menn</th>
-                    <th class="pb-1 font-medium text-center">Kvinner</th>
-                    <th class="pb-1 font-medium text-center">Annet</th>
-                </tr>
+            table.className = "w-full min-w-full text-left";
+            table.innerHTML = `
+                <thead class="text-xs text-gray-400 uppercase">
+                    <tr>
+                        <th class="py-2 pr-2">Alder</th>
+                        <th class="py-2 px-2 text-center">Tot</th>
+                        <th class="py-2 px-2 text-center">M</th>
+                        <th class="py-2 px-2 text-center">K</th>
+                        <th class="py-2 pl-2 text-center">A</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700/50"></tbody>
             `;
-            table.appendChild(thead);
-            const tbody = document.createElement('tbody');
-            tbody.className = 'divide-y divide-gray-700/50'; 
-
-            for (const [group, groupData] of Object.entries(ageGroups)) {
-                if (groupData.total > 0) {
-                    totalAges += groupData.total;
+            const tbody = table.querySelector('tbody');
+            
+            for (const [group, counts] of Object.entries(ageGroups)) {
+                if (counts.total > 0) {
                     const tr = document.createElement('tr');
+                    tr.className = "text-white";
                     tr.innerHTML = `
-                        <td class="py-1.5 text-gray-300">${group}</td>
-                        <td class="py-1.5 text-center font-bold text-white">${groupData.total}</td>
-                        <td class="py-1.5 text-center text-gray-300">${groupData.Mann}</td>
-                        <td class="py-1.5 text-center text-gray-300">${groupData.Kvinne}</td>
-                        <td class="py-1.5 text-center text-gray-300">${groupData.Annet}</td>
+                        <td class="py-1 pr-2 font-medium">${group}</td>
+                        <td class="py-1 px-2 text-center font-bold">${counts.total}</td>
+                        <td class="py-1 px-2 text-center text-gray-300">${counts.Mann}</td>
+                        <td class="py-1 px-2 text-center text-gray-300">${counts.Kvinne}</td>
+                        <td class="py-1 pl-2 text-center text-gray-300">${counts.Annet}</td>
                     `;
                     tbody.appendChild(tr);
                 }
             }
-            table.appendChild(tbody);
-
-            // Felles "ingen data" melding
-            if (entries.length === 0) {
-                genderStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
-                ageGroupStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
-            } else if (totalAges > 0) {
-                ageGroupStatsEl.appendChild(table);
-            } else {
-                ageGroupStatsEl.innerHTML = '<p class="text-gray-400">Ingen data m/alder.</p>';
-            }
+            ageGroupStatsEl.appendChild(table);
         }
+
+        // --- SLUTT PÅ GJENINNSATT KODE ---
 
         /**
          * Sletter en oppføring
          */
         async function deleteEntry(id) {
+            // Bruker den innebygde confirm-dialogen
             const isConfirmed = window.confirm("Er du sikker på at du vil slette denne oppføringen?");
             if (!isConfirmed) return;
             
@@ -897,11 +1005,14 @@
             const editButton = tr.querySelector('[data-action="edit"]');
 
             if (isEditing) {
+                // Bytt til redigeringsmodus
                 editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
                 editButton.title = "Lagre";
                 
                 tr.querySelectorAll('td[data-field]').forEach(td => {
                     const field = td.dataset.field;
+                    if (field === 'createdAt') return; // Ikke rediger tidsstempel
+                    
                     const value = td.textContent;
                     
                     if (field === 'kjonn') {
@@ -919,6 +1030,7 @@
                     }
                 });
             } else {
+                // Bytt tilbake (Lagre endringer)
                 saveEntryChanges(id);
             }
         }
@@ -938,9 +1050,12 @@
             let hasChanges = false;
             
             tr.querySelectorAll('td[data-field]').forEach(td => {
+                const field = td.dataset.field;
+                if (field === 'createdAt') return; // Hopp over
+
                 const input = td.querySelector('input, select');
                 if (!input) return;
-                const field = td.dataset.field;
+
                 const newValue = input.value;
                 const originalValue = input.dataset.originalValue;
 
@@ -951,9 +1066,12 @@
                     else if (field === 'diff') updates.diff = parseFloat(newValue);
                     else updates[field] = newValue;
                 }
+                
+                // Sett tilbake til vanlig tekst
                 td.textContent = newValue;
             });
             
+            // Hvis det er endringer, oppdater databasen
             if (hasChanges) {
                 try {
                     const docRef = doc(db, entriesCollection.path, id);
@@ -1000,7 +1118,7 @@
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", "balanse_data.csv");
-            document.body.appendChild(link); 
+            document.body.appendChild(link); // Nødvendig for Firefox
             link.click();
             document.body.removeChild(link);
         }
@@ -1011,7 +1129,4 @@
 
 </body>
 </html>
-
-
-
 
