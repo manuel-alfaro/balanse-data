@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="no" class="h-full bg-black">
+<html lang="en" class="h-full bg-black">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balanse Data</title>
-    <!-- Laster inn Tailwind CSS -->
+    <title>Balance Data</title>
+    <!-- Loading Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Egendefinert stil for å matche Dash-appen */
+        /* Custom style to match the Dash app */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; }
         .filter-button { background-color: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 5px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; transition: all 0.2s ease; cursor: pointer; white-space: nowrap; text-align: center; }
         .filter-button:hover { background-color: rgba(255, 255, 255, 0.1); }
@@ -20,7 +20,7 @@
         .icon-button:hover { color: #10b981; }
         .icon-button-delete:hover { color: #ef4444; }
         
-        /* Laster-spinner */
+        /* Loading spinner */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #10b981;
@@ -50,7 +50,7 @@
             font-size: 1.2rem;
         }
         
-        /* --- NY STYLING FOR MODAL --- */
+        /* --- NEW STYLING FOR MODAL --- */
         #modal-details {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -80,149 +80,149 @@
         .text-balance { color: #34d399; } /* emerald-400 */
         .text-function { color: #60a5fa; } /* blue-400 */
         .text-strength { color: #a78bfa; } /* purple-400 */
-        /* --- SLUTT PÅ NY STYLING --- */
+        /* --- END OF NEW STYLING --- */
 
     </style>
 </head>
 <body class="h-full bg-black text-gray-300">
 
-    <!-- Laste-overlay -->
+    <!-- Loading overlay -->
     <div id="loading-overlay">
         <div class="loader"></div>
-        <p id="loading-message">Kobler til database...</p>
+        <p id="loading-message">Connecting to database...</p>
     </div>
 
-    <!-- Balansealder Modal -->
+    <!-- Balance Age Modal -->
     <div id="age-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-lg w-full text-center shadow-2xl">
-            <h3 id="modal-title" class="text-2xl text-white font-semibold mb-4">Balansealder Beregnet</h3>
-            <p id="modal-message" class="text-lg text-gray-300 mb-2">Din estimerte balansealder er:</p>
+            <h3 id="modal-title" class="text-2xl text-white font-semibold mb-4">Balance Age Calculated</h3>
+            <p id="modal-message" class="text-lg text-gray-300 mb-2">Your estimated balance age is:</p>
             <p id="modal-balance-age" class="text-5xl font-bold text-emerald-400 mb-6"></p>
             
-            <!-- NY: Seksjon for fulle fitness-detaljer -->
+            <!-- NEW: Section for full fitness details -->
             <div id="modal-details">
-                <!-- Fylles av JS -->
+                <!-- Filled by JS -->
             </div>
 
-            <button id="close-modal-btn" class="filter-button active w-full !mt-6">Lukk</button>
+            <button id="close-modal-btn" class="filter-button active w-full !mt-6">Close</button>
         </div>
     </div>
 
-    <!-- Hovedinnhold -->
+    <!-- Main content -->
     <div class="max-w-7xl mx-auto p-6">
         <img src="https://storage.googleapis.com/files_webpage/narrow.png" class="h-8 w-auto mb-6">
-        <h1 class="text-3xl text-center text-white mb-8 font-light">Balanse Data Logger</h1>
+        <h1 class="text-3xl text-center text-white mb-8 font-light">Balance Data Logger</h1>
 
         <div class="flex flex-col lg:flex-row gap-8">
             
-            <!-- Venstre kolonne (Kontroller) -->
+            <!-- Left column (Controls) -->
             <div class="lg:w-1/3 flex flex-col gap-6">
 
-                <!-- Panel: Testleder -->
+                <!-- Panel: Test Supervisor -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Testleder</h3>
+                    <h3 class="text-lg text-white font-semibold mb-4">Test Supervisor</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg">
                         <div>
-                            <label for="testleder-input" class="block text-sm text-white font-medium mb-2">Ditt navn</label>
-                            <input type="text" id="testleder-input" class="name-input" placeholder="Skriv inn ditt navn...">
+                            <label for="testleder-input" class="block text-sm text-white font-medium mb-2">Your Name</label>
+                            <input type="text" id="testleder-input" class="name-input" placeholder="Enter your name...">
                         </div>
                     </div>
                 </div>
 
-                <!-- Panel: Legg til data -->
+                <!-- Panel: Add Data -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Legg til data</h3>
-                    <!-- Indre panel for selve skjemaet -->
+                    <h3 class="text-lg text-white font-semibold mb-4">Add Data</h3>
+                    <!-- Inner panel for the form itself -->
                     <div class="bg-gray-800/40 p-4 rounded-lg">
-                        <h4 class="text-md text-white font-medium mb-4">Testperson-data</h4>
+                        <h4 class="text-md text-white font-medium mb-4">Test Person Data</h4>
                         <form id="add-entry-form" class="space-y-4">
                             <div>
-                                <label for="alder" class="block text-sm text-white font-medium mb-2">Alder</label>
-                                <input type="number" id="alder" class="name-input" placeholder="F.eks. 25" required>
+                                <label for="alder" class="block text-sm text-white font-medium mb-2">Age</label>
+                                <input type="number" id="alder" class="name-input" placeholder="E.g. 25" required>
                             </div>
                             <div>
-                                <label for="kjonn" class="block text-sm text-white font-medium mb-2">Kjønn</label>
+                                <label for="kjonn" class="block text-sm text-white font-medium mb-2">Sex</label>
                                 <select id="kjonn" class="name-input">
-                                    <option value="Mann">Mann</option>
-                                    <option value="Kvinne">Kvinne</option>
-                                    <option value="Annet">Annet</option>
+                                    <option value="Mann">Male</option>
+                                    <option value="Kvinne">Female</option>
+                                    <option value="Annet">Other</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="areal" class="block text-sm text-white font-medium mb-2">Areal (cm²)</label>
-                                <input type="number" step="0.01" id="areal" class="name-input" placeholder="F.eks. 4.72" required>
+                                <label for="areal" class="block text-sm text-white font-medium mb-2">Area (cm²)</label>
+                                <input type="number" step="0.01" id="areal" class="name-input" placeholder="E.g. 4.72" required>
                             </div>
                             <div>
                                 <label for="diff" class="block text-sm text-white font-medium mb-2">Diff (cm)</label>
-                                <input type="number" step="0.01" id="diff" class="name-input" placeholder="F.eks. 1.20" required>
+                                <input type="number" step="0.01" id="diff" class="name-input" placeholder="E.g. 1.20" required>
                             </div>
 
-                            <!-- NY: Knapp for å vise fulle fitness-felt -->
+                            <!-- NEW: Button to show full fitness fields -->
                             <button type="button" id="toggle-fitness-btn" class="filter-button w-full !mt-6">
                                 Full Fitness Age Report
                             </button>
 
-                            <!-- NY: Skjulte felt for full fitness report -->
+                            <!-- NEW: Hidden fields for full fitness report -->
                             <div id="full-fitness-fields" class="hidden space-y-4 pt-4 border-t border-gray-700">
                                 <div>
-                                    <label for="hopphoyde" class="block text-sm text-white font-medium mb-2">Hopphøyde (cm)</label>
-                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="F.eks. 35.5">
+                                    <label for="hopphoyde" class="block text-sm text-white font-medium mb-2">Jump Height (cm)</label>
+                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="E.g. 35.5">
                                 </div>
                                 <div>
-                                    <label for="vekt" class="block text-sm text-white font-medium mb-2">Kroppsvekt (kg)</label>
-                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="F.eks. 80">
+                                    <label for="vekt" class="block text-sm text-white font-medium mb-2">Body Weight (kg)</label>
+                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="E.g. 80">
                                 </div>
                                 <div>
-                                    <label for="pullResultat" class="block text-sm text-white font-medium mb-2">Pull Resultat (kg)</label>
-                                    <input type="number" step="0.1" id="pullResultat" class="name-input" placeholder="F.eks. 120">
+                                    <label for="pullResultat" class="block text-sm text-white font-medium mb-2">Pull Result (kg)</label>
+                                    <input type="number" step="0.1" id="pullResultat" class="name-input" placeholder="E.g. 120">
                                 </div>
                             </div>
-                            <!-- Slutt på skjulte felt -->
+                            <!-- End of hidden fields -->
 
                             <button type="submit" id="submit-button" class="filter-button active w-full !mt-6">
-                                Legg til oppføring
+                                Add Entry
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- Panel: Instruksjoner -->
+                <!-- Panel: Instructions -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Instruksjoner</h3>
+                    <h3 class="text-lg text-white font-semibold mb-4">Instructions</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg text-sm space-y-2">
-                        <p>Instruksjoner til balansetest:</p>
+                        <p>Instructions for balance test:</p>
                         <ul class="list-disc list-inside pl-2">
-                            <li>Løft foten ca. 10 cm fra bakken.</li>
-                            <li>Hold armene ned langs siden av kroppen.</li>
-                            <li>Se rett frem og stå så stille som mulig.</li>
-                            <li>Stå i 30 sekunder på høyre fot og deretter 30 sekunder på venstre fot.</li>
-                            <li>Uten sko.</li>
+                            <li>Lift your foot approx. 10 cm from the ground.</li>
+                            <li>Hold your arms down by your sides.</li>
+                            <li>Look straight ahead and stand as still as possible.</li>
+                            <li>Stand for 30 seconds on the right foot and then 30 seconds on the left foot.</li>
+                            <li>Without shoes.</li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Panel: Statistikk -->
+                <!-- Panel: Statistics -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Statistikk</h3>
+                    <h3 class="text-lg text-white font-semibold mb-4">Statistics</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg space-y-3">
                         <div>
-                            <span class="font-medium text-white">Totalt antall:</span>
+                            <span class="font-medium text-white">Total count:</span>
                             <span id="total-count" class="font-bold text-xl text-emerald-400 ml-2">0</span>
                         </div>
                         
-                        <!-- Kjønnsfordeling -->
+                        <!-- Sex Distribution -->
                         <div class="border-t border-gray-600 pt-3">
-                            <h5 class="text-sm text-white font-medium mb-2">Kjønnsfordeling:</h5>
+                            <h5 class="text-sm text-white font-medium mb-2">Sex Distribution:</h5>
                             <div id="gender-stats" class="text-sm space-y-1">
-                                <p class="text-gray-400">Laster data...</p>
+                                <p class="text-gray-400">Loading data...</p>
                             </div>
                         </div>
 
-                        <!-- Aldersgrupper -->
+                        <!-- Age Groups -->
                         <div class="border-t border-gray-600 pt-3">
-                            <h5 class="text-sm text-white font-medium mb-2">Aldersgrupper:</h5>
+                            <h5 class="text-sm text-white font-medium mb-2">Age Groups:</h5>
                             <div id="age-group-stats" class="text-sm space-y-1">
-                                <p class="text-gray-400">Laster data...</p>
+                                <p class="text-gray-400">Loading data...</p>
                             </div>
                         </div>
 
@@ -231,42 +231,42 @@
 
             </div>
 
-            <!-- Høyre kolonne (Tabell) -->
+            <!-- Right column (Table) -->
             <div class="lg:w-2/3">
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Innsamlet Data</h3>
+                    <h3 class="text-lg text-white font-semibold mb-4">Collected Data</h3>
                     
-                    <!-- Filter og Last ned -->
+                    <!-- Filter and Download -->
                     <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                        <input type="text" id="filter-input" class="name-input flex-grow" placeholder="Filtrer på testleder...">
+                        <input type="text" id="filter-input" class="name-input flex-grow" placeholder="Filter by supervisor...">
                         <button id="download-csv-button" class="filter-button active !bg-blue-600 hover:!bg-blue-700 border-transparent whitespace-nowrap">
-                            Last ned CSV
+                            Download CSV
                         </button>
                     </div>
 
-                    <!-- Tabell-wrapper -->
+                    <!-- Table wrapper -->
                     <div class="max-h-[800px] overflow-y-auto overflow-x-auto rounded-lg border border-gray-700">
                         <table class="w-full min-w-max text-sm text-left text-gray-400">
                             <thead class="text-xs text-gray-300 uppercase bg-gray-800/40 sticky top-0">
                                 <tr>
-                                    <!-- NY: Kolonne for rapport-ikon -->
-                                    <th scope="col" class="py-3 px-4 text-center">Rapport</th>
-                                    <th scope="col" class="py-3 px-4">Testleder</th>
-                                    <th scope="col" class="py-3 px-4">Alder</th>
-                                    <th scope="col" class="py-3 px-4">Kjønn</th>
-                                    <th scope="col" class="py-3 px-4">Areal (cm²)</th>
+                                    <!-- NEW: Column for report icon -->
+                                    <th scope="col" class="py-3 px-4 text-center">Report</th>
+                                    <th scope="col" class="py-3 px-4">Supervisor</th>
+                                    <th scope="col" class="py-3 px-4">Age</th>
+                                    <th scope="col" class="py-3 px-4">Sex</th>
+                                    <th scope="col" class="py-3 px-4">Area (cm²)</th>
                                     <th scope="col" class="py-3 px-4">Diff (cm)</th>
-                                    <th scope="col" class="py-3 px-4">Balansealder</th>
-                                    <th scope="col" class="py-3 px-4">Tidsstempel</th>
-                                    <th scope="col" class="py-3 px-4 text-center">Handling</th>
+                                    <th scope="col" class="py-3 px-4">Balance Age</th>
+                                    <th scope="col" class="py-3 px-4">Timestamp</th>
+                                    <th scope="col" class="py-3 px-4 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="data-table-body" class="divide-y divide-gray-700">
-                                <!-- Fylles av JS -->
+                                <!-- Filled by JS -->
                                 <tr>
-                                    <!-- OPPDATERT: Colspan til 9 -->
+                                    <!-- UPDATED: Colspan to 9 -->
                                     <td colspan="9" class="py-4 px-6 text-center text-gray-500">
-                                        Laster data...
+                                        Loading data...
                                     </td>
                                 </tr>
                             </tbody>
@@ -279,7 +279,7 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        // Importer nødvendige Firebase-moduler
+        // Import necessary Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getFirestore, 
@@ -292,7 +292,7 @@
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Hardkodet Firebase-konfigurasjon for 'balanse-data'
+        // Hardcoded Firebase configuration for 'balanse-data'
         const firebaseConfig = {
             apiKey: "AIzaSyCIYqq1_2eKdBw3u_FYUIFvo6VnJcLVliA",
             authDomain: "balanse-data.firebaseapp.com",
@@ -303,13 +303,13 @@
             measurementId: "G-4RZ4FV30VF"
         };
         
-        // Globale variabler
+        // Global variables
         let db;
         let entriesCollection;
-        let allEntries = []; // Sørger for at den er en liste fra start
-        let unsubscribeEntries = null; // For å stoppe lytteren
+        let allEntries = []; // Ensure it's an array from the start
+        let unsubscribeEntries = null; // To stop the listener
 
-        // UI-elementer
+        // UI elements
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingMessage = document.getElementById('loading-message');
         const dataTableBody = document.getElementById('data-table-body');
@@ -317,23 +317,23 @@
         const addForm = document.getElementById('add-entry-form');
         const testlederInput = document.getElementById('testleder-input');
         const totalCountEl = document.getElementById('total-count');
-        const genderStatsEl = document.getElementById('gender-stats'); // Ny
+        const genderStatsEl = document.getElementById('gender-stats'); // New
         const ageGroupStatsEl = document.getElementById('age-group-stats');
         const downloadCsvButton = document.getElementById('download-csv-button');
-        // UI-elementer for Modal
+        // UI elements for Modal
         const ageModal = document.getElementById('age-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
         const modalBalanceAge = document.getElementById('modal-balance-age');
-        const modalDetails = document.getElementById('modal-details'); // NY
+        const modalDetails = document.getElementById('modal-details'); // NEW
         const closeModalBtn = document.getElementById('close-modal-btn');
         // UI for Full Fitness Report
         const toggleFitnessBtn = document.getElementById('toggle-fitness-btn');
         const fitnessFields = document.getElementById('full-fitness-fields');
 
-        // --- START: INNPORTET LOGIKK FOR FITNESS AGE ---
+        // --- START: IMPORTED LOGIC FOR FITNESS AGE ---
         const JUMP_DATA_MENN = [
-             // OPPDATERT: +5cm lagt til
+             // UPDATED: +5cm added
              { label:"8–9",   p5:24.0, p25:27.6, p50:30.8, p75:34.4, p95:39.5 },
              { label:"10–11", p5:25.8, p25:30.4, p50:34.2, p75:38.4, p95:42.9 },
              { label:"12–13", p5:27.8, p25:33.6, p50:37.7, p75:42.4, p95:50.6 },
@@ -351,7 +351,7 @@
              { label:"70–80", p5:10.0, p25:17.9, p50:19.7, p75:23.0, p95:27.6 }
         ];
         const JUMP_DATA_KVINNER = [
-             // DATA OPPDATERT BASERT PÅ BILDE (2025-10-28) - OG REDUSERT MED 3 CM
+             // DATA UPDATED BASED ON IMAGE (2025-10-28) - AND REDUCED BY 3 CM
              { label:"8–9",   p5:13.0, p25:16.8, p50:19.4, p75:22.3, p95:26.4 },
              { label:"10–11", p5:15.5, p25:19.2, p50:22.8, p75:25.9, p95:30.2 },
              { label:"12–13", p5:15.8, p25:20.4, p50:23.6, p75:27.0, p95:32.0 },
@@ -364,10 +364,10 @@
              { label:"35–39", p5:12.0, p25:15.4, p50:18.2, p75:21.2, p95:25.8 },
              { label:"40–44", p5:7.0,  p25:14.5, p50:17.0, p75:19.9, p95:24.6 },
              { label:"45–49", p5:6.5,  p25:13.8, p50:16.4, p75:18.9, p95:23.2 },
-             // GAMLE FALLBACK-DATA FOR ALDRE OVER 49 (IKKE I BILDET) - OG REDUSERT MED 3 CM
+             // OLD FALLBACK DATA FOR AGES OVER 49 (NOT IN IMAGE) - AND REDUCED BY 3 CM
              { label:"50–59", p5:6.0,  p25:9.0,  p50:12.5, p75:16.0, p95:20.0 },
              { label:"60–69", p5:5.0,  p25:7.5,  p50:10.0, p75:13.0, p95:17.0 },
-             { label:"70–80", p5:0.0,  p25:5.5,  p50:7.5,  p75:10.5, p95:14.0 } // p5 cappeet på 0
+             { label:"70–80", p5:0.0,  p25:5.5,  p50:7.5,  p75:10.5, p95:14.0 } // p5 capped at 0
         ];
 
         const STRENGTH_MODEL = {
@@ -425,28 +425,28 @@
              return Math.min(99.9, pts[pts.length-1].p + (jumpHeight - pts[pts.length-1].x) * m);
         }
         
-        // NY LOGIKK: P0 = Alder+5, P50 = Alder, P100 = 21
+        // NEW LOGIC: P0 = Age+5, P50 = Age, P100 = 21
         function calculateAgeFromPercentile(percentile, realAge, minAge = 21) {
             if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
             const p = Math.max(0, Math.min(100, percentile));
-            const maxAge = realAge + 5; // P0 = Alder + 5
+            const maxAge = realAge + 5; // P0 = Age + 5
             
             if (p === 50) {
                 return realAge;
             } else if (p > 50) {
-                // Mellom P50 (realAge) og P100 (minAge)
-                const factor = (p - 50) / 50; // 0 til 1
+                // Between P50 (realAge) and P100 (minAge)
+                const factor = (p - 50) / 50; // 0 to 1
                 return realAge - factor * (realAge - minAge);
             } else {
-                // Mellom P0 (maxAge) og P50 (realAge)
-                const factor = p / 50; // 0 til 1
+                // Between P0 (maxAge) and P50 (realAge)
+                const factor = p / 50; // 0 to 1
                 return maxAge - factor * (maxAge - realAge);
             }
         }
         
         function calculateJumpAge(realAge, sex, jumpHeight) {
             const percentile = calculateJumpPercentile(realAge, sex, jumpHeight);
-            return calculateAgeFromPercentile(percentile, realAge, 21); // Bruker 21 som min alder
+            return calculateAgeFromPercentile(percentile, realAge, 21); // Using 21 as min age
         }
 
         function getStrengthAgeGroup(age) {
@@ -483,7 +483,7 @@
                      return { score: NaN, percentile: NaN, error: "Calculation error (std dev zero)" };
                 }
                 const percentile = 50.0 * (1 + (zScore / Math.sqrt(2)) / Math.abs(zScore / Math.sqrt(2)) * Math.sqrt(1 - Math.exp(-2 * zScore * zScore / Math.PI)));
-                const clampedPercentile = Math.max(0, Math.min(100, percentile)); // Rettet typo her
+                const clampedPercentile = Math.max(0, Math.min(100, percentile)); // Fixed typo here
                 let finalScore = 50 + (zScore * 15);
                 finalScore = Math.max(0, Math.min(100, finalScore));
                 return { score: finalScore, percentile: clampedPercentile };
@@ -493,32 +493,32 @@
         }
         
         function calculateStrengthAgeFromPercentile(percentile, realAge) {
-             return calculateAgeFromPercentile(percentile, realAge, 21); // Bruker 21 som min alder
+             return calculateAgeFromPercentile(percentile, realAge, 21); // Using 21 as min age
         }
-        // --- SLUTT: INNPORTET LOGIKK ---
+        // --- END: IMPORTED LOGIC ---
 
 
         /**
-         * Viser en popup-modal med tilpasset innhold.
-         * @param {string} title - Tittelen på modalen
-         * @param {string} message - Hovedmeldingen
-         * @param {string} value - Verdien som skal vises (f.eks. alder)
+         * Displays a popup modal with custom content.
+         * @param {string} title - The title of the modal
+         * @param {string} message - The main message
+         * @param {string} value - The value to display (e.g., age)
          * @param {string} type - 'success', 'error', 'warning', 'info'
-         * @param {string} detailsHtml - (Valgfri) HTML for de nye detalj-boksene
+         * @param {string} detailsHtml - (Optional) HTML for the new detail boxes
          */
         function showModal(title, message, value, type = 'success', detailsHtml = "") {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             modalBalanceAge.textContent = value;
             
-            // Fyll inn eller tøm detalj-seksjonen
+            // Fill or empty the details section
             modalDetails.innerHTML = detailsHtml;
             
-            // Tilpass synlighet basert på om detaljer finnes
+            // Adjust visibility based on details
             modalDetails.style.display = detailsHtml ? "grid" : "none";
             modalBalanceAge.style.marginBottom = detailsHtml ? "0" : "1.5rem"; // 24px
             
-            // Tilbakestill farger
+            // Reset colors
             modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400');
 
             if (type === 'success') {
@@ -535,53 +535,53 @@
         }
 
         /**
-         * Hovedfunksjon som kjører når dokumentet er lastet
+         * Main function that runs when the document is loaded
          */
         async function main() {
             try {
-                console.log("App initialiserer...");
+                console.log("App initializing...");
                 
-                // 1. Initialiser Firebase App
+                // 1. Initialize Firebase App
                 const app = initializeApp(firebaseConfig);
                 
-                // 2. Initialiser Firestore DB
+                // 2. Initialize Firestore DB
                 db = getFirestore(app);
                 
-                // 3. Definer database-stien
+                // 3. Define database path
                 const dbPath = 'balanse-data-entries';
                 entriesCollection = collection(db, dbPath);
 
-                console.log(`Koblet til. Lytter til database-sti: ${dbPath}`);
+                console.log(`Connected. Listening to database path: ${dbPath}`);
 
-                // 4. Sett opp sanntids-lytter
+                // 4. Set up snapshot listener
                 setupSnapshots();
                 
-                // 5. Sett opp hendelseslyttere for UI
+                // 5. Set up UI event listeners
                 setupEventListeners();
 
             } catch (error) {
-                console.error("Feil under initialisering:", error);
-                loadingMessage.textContent = `Feil ved oppstart: ${error.message}`;
+                console.error("Initialization error:", error);
+                loadingMessage.textContent = `Startup error: ${error.message}`;
             }
         }
         
         /**
-         * Setter opp lyttere for UI-elementer
+         * Sets up UI event listeners
          */
         function setupEventListeners() {
-            // Lytter på "Full Fitness Report"-knappen
+            // Listen for "Full Fitness Report" button
             toggleFitnessBtn.addEventListener('click', () => {
                 fitnessFields.classList.toggle('hidden');
                 if (fitnessFields.classList.contains('hidden')) {
                     toggleFitnessBtn.textContent = "Full Fitness Age Report";
                     toggleFitnessBtn.classList.remove('active');
                 } else {
-                    toggleFitnessBtn.textContent = "Skjul full rapport";
+                    toggleFitnessBtn.textContent = "Hide full report";
                     toggleFitnessBtn.classList.add('active');
                 }
             });
 
-            // Lytter på 'Legg til'-skjemaet
+            // Listen for 'Add' form submit
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const testleder = testlederInput.value.trim();
@@ -590,7 +590,7 @@
                 const areal = parseFloat(document.getElementById('areal').value);
                 const diff = parseFloat(document.getElementById('diff').value);
                 
-                // NY: Hent fitness-data
+                // NEW: Get fitness data
                 const hopphoyde = parseFloat(document.getElementById('hopphoyde').value);
                 const vekt = parseFloat(document.getElementById('vekt').value);
                 const pullResultat = parseFloat(document.getElementById('pullResultat').value);
@@ -598,8 +598,8 @@
 
                 if (!testleder) {
                     showModal(
-                        "Mangler Testleder", 
-                        "Vennligst fyll inn 'Testleder'-navnet ditt.", 
+                        "Missing Supervisor", 
+                        "Please enter your 'Supervisor' name.", 
                         "⚠️", 
                         "warning"
                     );
@@ -609,15 +609,15 @@
                 
                 if (isNaN(alder) || isNaN(areal) || isNaN(diff)) {
                     showModal(
-                        "Ugyldig Data", 
-                        "Alder, Areal og Diff må være gyldige tall.", 
+                        "Invalid Data", 
+                        "Age, Area, and Diff must be valid numbers.", 
                         "⚠️", 
                         "warning"
                     );
                     return;
                 }
 
-                // --- Beregn balansealder (ALLTID) ---
+                // --- Calculate balance age (ALWAYS) ---
                 const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
                 
                 let dataToSave = {
@@ -626,17 +626,17 @@
                     kjonn: kjonn,
                     areal: areal,
                     diff: diff,
-                    balanceAlder: balanseAlder, // Lagre balansealder
+                    balanceAlder: balanseAlder, // Save balance age
                     createdAt: serverTimestamp(),
-                    // NY: Lagre fitness-data som null hvis de ikke er fylt ut
+                    // NEW: Save fitness data as null if not filled
                     hopphoyde: (!isNaN(hopphoyde) && showFullReport) ? hopphoyde : null,
                     vekt: (!isNaN(vekt) && showFullReport) ? vekt : null,
                     pullResultat: (!isNaN(pullResultat) && showFullReport) ? pullResultat : null
                 };
 
-                // Sjekk om vi skal vise full rapport
+                // Check if we should show full report
                 if (showFullReport && !isNaN(hopphoyde) && !isNaN(vekt) && !isNaN(pullResultat)) {
-                    // Vis full rapport
+                    // Show full report
                     const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
                     const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pullResultat);
                     const styrkeAlder = calculateStrengthAgeFromPercentile(strengthResult.percentile, alder);
@@ -649,102 +649,102 @@
 
                     const detailsHtml = `
                         <div class="age-card">
-                            <span class="age-card-title">Balansealder</span>
+                            <span class="age-card-title">Balance Age</span>
                             <span class="age-card-value text-balance">${balanseAlder.toFixed(1)}</span>
                         </div>
                         <div class="age-card">
-                            <span class="age-card-title">Funksjonsalder</span>
+                            <span class="age-card-title">Function Age</span>
                             <span class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</span>
                         </div>
                         <div class="age-card">
-                            <span class="age-card-title">Styrkealder</span>
+                            <span class="age-card-title">Strength Age</span>
                             <span class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</span>
                         </div>
                     `;
                     
                     showModal(
-                        "Full Fitness Rapport", 
-                        "Din samlede fitnessalder er:", 
+                        "Full Fitness Report", 
+                        "Your combined fitness age is:", 
                         samletAlder.toFixed(1), 
                         "success",
                         detailsHtml
                     );
 
                 } else {
-                    // Vis kun balansealder
+                    // Show only balance age
                     showModal(
-                        "Balansealder Beregnet", 
-                        "Din estimerte balansealder er:", 
+                        "Balance Age Calculated", 
+                        "Your estimated balance age is:", 
                         balanseAlder.toFixed(1), 
                         "success"
                     );
                 }
 
                 try {
-                    // Lagre data til databasen
+                    // Save data to database
                     await addDoc(entriesCollection, dataToSave);
                     addForm.reset();
-                    // Skjul fitness-feltene igjen
+                    // Hide fitness fields again
                     fitnessFields.classList.add('hidden');
                     toggleFitnessBtn.textContent = "Full Fitness Age Report";
                     toggleFitnessBtn.classList.remove('active');
                 } catch (error) {
-                    console.error("Feil ved lagring av data:", error);
+                    console.error("Error saving data:", error);
                     showModal(
-                        "Lagringsfeil", 
-                        `Kunne ikke lagre data: ${error.message}`, 
+                        "Save Error", 
+                        `Could not save data: ${error.message}`, 
                         "❌", 
                         "error"
                     );
                 }
             });
 
-            // Lytter på filter-input
+            // Listen for filter input
             filterInput.addEventListener('input', (e) => {
                 renderTableAndStats(e.target.value);
             });
             
-            // Lytter på CSV-nedlastingsknapp
+            // Listen for CSV download button
             downloadCsvButton.addEventListener('click', downloadCSV);
 
-            // Lytter: Lukk modal-knapp
+            // Listen: Close modal button
             closeModalBtn.addEventListener('click', () => {
                 ageModal.classList.add('hidden');
             });
         }
         
         /**
-         * Beregner balansealder basert på kjønn og CoP-areal.
-         * OPPDATERT: Kapper alderen til maks +5 år over reell alder.
-         * @param {number} realAge - Testpersonens faktiske alder
-         * @param {string} sex - "Mann" eller "Kvinne"
-         * @param {number} copArea - CoP Areal i cm²
-         * @returns {number} - Estimert balansealder
+         * Calculates balance age based on sex and CoP area.
+         * UPDATED: Caps the age at max +5 years over real age.
+         * @param {number} realAge - The test person's actual age
+         * @param {string} sex - "Male" or "Female"
+         * @param {number} copArea - CoP Area in cm²
+         * @returns {number} - Estimated balance age
          */
         function calculateBalanceAge(realAge, sex, copArea) {
             const area = parseFloat(copArea);
             if (!isFinite(area)) return NaN;
             
-            const maxAllowedAge = realAge + 5; // Ny grense
+            const maxAllowedAge = realAge + 5; // New limit
 
             if (realAge <= 35) {
-                // METODE 1 (Alder <= 35): 3.13 areal gir 21 år
+                // METHOD 1 (Age <= 35): 3.13 area gives 21 years
                 const minArea = 3.13;
                 const clippedArea = Math.max(minArea, area);
-                const kvinneBaseAlder = 21 - (2.36 * minArea); // ca. 13.61
-                const mannBaseAlder = 21 - (2.41 * minArea);   // ca. 13.46
+                const kvinneBaseAlder = 21 - (2.36 * minArea); // approx. 13.61
+                const mannBaseAlder = 21 - (2.41 * minArea);   // approx. 13.46
 
-                if (sex.toLowerCase() === "kvinne") {
+                if (sex.toLowerCase() === "kvinne" || sex.toLowerCase() === "female") {
                     return Math.min(kvinneBaseAlder + 2.36 * clippedArea, maxAllowedAge);
                 }
                 return Math.min(mannBaseAlder + 2.41 * clippedArea, maxAllowedAge);
 
             } else {
-                // METODE 2 (Alder > 35): Den "originale" formelen (3.0 areal gir ~33 år)
+                // METHOD 2 (Age > 35): The "original" formula (3.0 area gives ~33 years)
                 const minArea = 3.0;
                 const clippedArea = Math.max(minArea, area);
 
-                if (sex.toLowerCase() === "kvinne") {
+                if (sex.toLowerCase() === "kvinne" || sex.toLowerCase() === "female") {
                     return Math.min(26.11 + 2.36 * clippedArea, maxAllowedAge);
                 }
                 return Math.min(25.47 + 2.41 * clippedArea, maxAllowedAge);
@@ -752,12 +752,12 @@
         }
         
         /**
-         * Setter opp sanntids-lytteren til Firestore
+         * Sets up the realtime listener to Firestore
          */
         function setupSnapshots() {
-            if (unsubscribeEntries) unsubscribeEntries(); // Avslutt gammel lytter
+            if (unsubscribeEntries) unsubscribeEntries(); // Stop old listener
 
-            loadingMessage.textContent = 'Henter data...';
+            loadingMessage.textContent = 'Fetching data...';
 
             unsubscribeEntries = onSnapshot(entriesCollection, (snapshot) => {
                 allEntries = snapshot.docs.map(doc => ({
@@ -765,7 +765,7 @@
                     ...doc.data()
                 }));
                 
-                // Sorter data, nyeste først
+                // Sort data, newest first
                 allEntries.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 
                 renderTableAndStats(filterInput.value);
@@ -774,27 +774,27 @@
                     loadingOverlay.style.display = 'none';
                 }
             }, (error) => {
-                console.error("Feil ved henting av data:", error);
-                loadingMessage.textContent = `Feil ved henting av data: ${error.message}`;
-                dataTableBody.innerHTML = `<tr><td colspan="9" class="py-4 px-6 text-center text-red-500">Feil: ${error.message}</td></tr>`;
+                console.error("Error fetching data:", error);
+                loadingMessage.textContent = `Error fetching data: ${error.message}`;
+                dataTableBody.innerHTML = `<tr><td colspan="9" class="py-4 px-6 text-center text-red-500">Error: ${error.message}</td></tr>`;
                 
                 if (loadingOverlay.style.display !== 'none') {
-                    loadingMessage.textContent = "Feil: Klarte ikke hente data. Sjekk Firestore-reglene.";
+                    loadingMessage.textContent = "Error: Could not fetch data. Check Firestore rules.";
                 }
             });
         }
         
         /**
-         * Oppdaterer tabellen og statistikken basert på filter
+         * Updates the table and stats based on the filter
          */
         function renderTableAndStats(filterText = '') {
             if (!allEntries) {
-                console.warn("renderTableAndStats kalt før allEntries er definert.");
+                console.warn("renderTableAndStats called before allEntries is defined.");
                 allEntries = [];
             }
             const normalizedFilter = filterText.toLowerCase().trim();
             const filteredEntries = allEntries.filter(entry => 
-                entry.testleder?.toLowerCase().includes(normalizedFilter)
+                (entry.testleder?.toLowerCase() || '').includes(normalizedFilter)
             );
 
             renderTable(filteredEntries);
@@ -802,13 +802,13 @@
         }
 
         /**
-         * Tegner selve tabellen
+         * Renders the table itself
          */
         function renderTable(entries) {
-            dataTableBody.innerHTML = ''; // Tøm tabellen
+            dataTableBody.innerHTML = ''; // Clear the table
 
             if (entries.length === 0) {
-                dataTableBody.innerHTML = `<tr><td colspan="9" class="py-4 px-6 text-center text-gray-500">Ingen data funnet.</td></tr>`;
+                dataTableBody.innerHTML = `<tr><td colspan="9" class="py-4 px-6 text-center text-gray-500">No data found.</td></tr>`;
                 return;
             }
 
@@ -817,10 +817,10 @@
                 tr.className = `bg-[#1a1c1f] hover:bg-gray-800/40 border-b border-gray-700`;
                 tr.dataset.id = entry.id;
 
-                // Formater tidsstempel
-                const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('no-NO') : 'N/A';
+                // Format timestamp
+                const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('en-GB') : 'N/A';
                 
-                // Formater balansealder
+                // Format balance age
                 const balanceAlder = entry.balanceAlder;
                 let balanceAlderHtml = 'N/A';
                 let balanceColor = 'text-gray-400';
@@ -829,13 +829,20 @@
                     if (balanceAlder < entry.alder) balanceColor = 'text-emerald-400';
                     else if (balanceAlder > entry.alder + 2) balanceColor = 'text-yellow-400';
                 }
+
+                // Translate Sex
+                let sexDisplay = entry.kjonn;
+                if (sexDisplay === 'Mann') sexDisplay = 'Male';
+                if (sexDisplay === 'Kvinne') sexDisplay = 'Female';
+                if (sexDisplay === 'Annet') sexDisplay = 'Other';
+
                 
-                // NY: Sjekk for full rapport-data og lag ikon
+                // NEW: Check for full report data and create icon
                 const hasFullReport = entry.hopphoyde && entry.vekt && entry.pullResultat;
                 let reportIconHtml = '';
                 if (hasFullReport) {
                     reportIconHtml = `
-                        <button class="icon-button" data-action="view-report" title="Se full rapport">
+                        <button class="icon-button" data-action="view-report" title="View full report">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 1a1 1 0 000 2h8a1 1 0 100-2H6zM6 9a1 1 0 000 2h8a1 1 0 100-2H6zm0 4a1 1 0 100 2h5a1 1 0 100-2H6z" clip-rule="evenodd" />
                             </svg>
@@ -847,22 +854,22 @@
                     <td class="py-3 px-4 text-center">${reportIconHtml}</td>
                     <td class="py-3 px-4" data-field="testleder" data-editable="true">${entry.testleder || ''}</td>
                     <td class="py-3 px-4" data-field="alder" data-editable="true">${entry.alder}</td>
-                    <td class="py-3 px-4" data-field="kjonn" data-editable="true">${entry.kjonn}</td>
+                    <td class="py-3 px-4" data-field="kjonn" data-editable="true" data-original-value="${entry.kjonn}">${sexDisplay}</td>
                     <td class="py-3 px-4" data-field="areal" data-editable="true">${entry.areal}</td>
                     <td class="py-3 px-4" data-field="diff" data-editable="true">${entry.diff}</td>
                     <td class="py-3 px-4 ${balanceColor}" data-field="balanceAlder" data-editable="false">${balanceAlderHtml}</td>
                     <td class="py-3 px-4" data-field="timestamp" data-editable="false">${timestamp}</td>
                     <td class="py-3 px-4 text-center space-x-2">
-                        <button class="icon-button" data-action="edit" title="Rediger">
+                        <button class="icon-button" data-action="edit" title="Edit">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                         </button>
-                        <button class="icon-button icon-button-delete" data-action="delete" title="Slett">
+                        <button class="icon-button icon-button-delete" data-action="delete" title="Delete">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                         </button>
                     </td>
                 `;
                 
-                // Legg til hendelseslyttere for knappene
+                // Add event listeners for buttons
                 if (hasFullReport) {
                     tr.querySelector('[data-action="view-report"]').addEventListener('click', () => showReportFromEntry(entry));
                 }
@@ -874,48 +881,48 @@
         }
 
         /**
-         * NY: Viser full rapport fra en tabellrad
+         * NEW: Shows full report from a table row entry
          */
         function showReportFromEntry(entry) {
             const { alder, kjonn, areal, hopphoyde, vekt, pullResultat } = entry;
             
-            // 1. Beregn balansealder
+            // 1. Calculate balance age
             const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
             
-            // 2. Beregn funksjonsalder (hopp)
+            // 2. Calculate function age (jump)
             const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
             
-            // 3. Beregn styrkealder
+            // 3. Calculate strength age
             const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pullResultat);
             const styrkeAlder = calculateStrengthAgeFromPercentile(strengthResult.percentile, alder);
 
-            // 4. Beregn samlet alder
+            // 4. Calculate combined age
             const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(isFinite);
             let samletAlder = NaN;
             if (validAges.length > 0) {
                 samletAlder = validAges.reduce((sum, age) => sum + age, 0) / validAges.length;
             }
 
-            // 5. Bygg HTML for "sexy" bokser
+            // 5. Build HTML for "sexy" boxes
             const detailsHtml = `
                 <div class="age-card">
-                    <span class="age-card-title">Balansealder</span>
+                    <span class="age-card-title">Balance Age</span>
                     <span class="age-card-value text-balance">${balanseAlder.toFixed(1)}</span>
                 </div>
                 <div class="age-card">
-                    <span class="age-card-title">Funksjonsalder</span>
+                    <span class="age-card-title">Function Age</span>
                     <span class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</span>
                 </div>
                 <div class="age-card">
-                    <span class="age-card-title">Styrkealder</span>
+                    <span class="age-card-title">Strength Age</span>
                     <span class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</span>
                 </div>
             `;
             
-            // 6. Vis modalen
+            // 6. Show the modal
             showModal(
-                "Full Fitness Rapport", 
-                `Samlet Fitnessalder for ${entry.testleder}:`, 
+                "Full Fitness Report", 
+                `Combined Fitness Age for ${entry.testleder}:`, 
                 samletAlder.toFixed(1), 
                 "success",
                 detailsHtml
@@ -923,15 +930,15 @@
         }
         
         /**
-         * Oppdaterer statistikk-panelet
+         * Updates the statistics panel
          */
         function renderStats(entries) {
             totalCountEl.textContent = entries.length;
 
-            // Kjønnsstatistikk
+            // Sex statistics
             const genderCounts = { 'Mann': 0, 'Kvinne': 0, 'Annet': 0 };
             
-            // Aldersgrupper (nå med kjønn)
+            // Age groups (now with sex)
             const ageGroups = {};
             const ageBrackets = ['0-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70+'];
             ageBrackets.forEach(group => {
@@ -939,12 +946,12 @@
             });
 
             entries.forEach(entry => {
-                // Kjønn
+                // Sex
                 if (genderCounts.hasOwnProperty(entry.kjonn)) {
                     genderCounts[entry.kjonn]++;
                 }
 
-                // Alder
+                // Age
                 const alder = entry.alder;
                 let group = '70+';
                 if (alder <= 19) group = '0-19';
@@ -960,29 +967,31 @@
                 }
             });
 
-            // Vis kjønnsstatistikk
+            // Show sex statistics
             genderStatsEl.innerHTML = '';
+            // Translate for display
+            const displayGenders = { 'Mann': 'Male', 'Kvinne': 'Female', 'Annet': 'Other' };
             for (const [kjonn, count] of Object.entries(genderCounts)) {
                 if (count > 0) {
                     const p = document.createElement('p');
-                    p.innerHTML = `<span class="text-gray-400">${kjonn}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
+                    p.innerHTML = `<span class="text-gray-400">${displayGenders[kjonn]}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
                     genderStatsEl.appendChild(p);
                 }
             }
             if (entries.length === 0) {
-                genderStatsEl.innerHTML = '<p class="text-gray-400">Ingen data valgt.</p>';
+                genderStatsEl.innerHTML = '<p class="text-gray-400">No data selected.</p>';
             }
 
-            // Vis aldersgruppestatistikk (med tabell)
+            // Show age group statistics (with table)
             ageGroupStatsEl.innerHTML = `
                 <table class="w-full text-left text-xs">
                     <thead class="text-gray-400">
                         <tr>
-                            <th class="pb-1 font-medium">Gruppe</th>
-                            <th class="pb-1 font-medium text-center">Totalt</th>
+                            <th class="pb-1 font-medium">Group</th>
+                            <th class="pb-1 font-medium text-center">Total</th>
                             <th class="pb-1 font-medium text-center">M</th>
-                            <th class="pb-1 font-medium text-center">K</th>
-                            <th class="pb-1 font-medium text-center">A</th>
+                            <th class="pb-1 font-medium text-center">F</th>
+                            <th class="pb-1 font-medium text-center">O</th>
                         </tr>
                     </thead>
                     <tbody class="text-white divide-y divide-gray-700">
@@ -1005,31 +1014,31 @@
                 }
             }
             if (entries.length === 0 && ageTableBody) {
-                ageTableBody.innerHTML = '<tr><td colspan="5" class="py-1 text-gray-400">Ingen data valgt.</td></tr>';
+                ageTableBody.innerHTML = '<tr><td colspan="5" class="py-1 text-gray-400">No data selected.</td></tr>';
             }
         }
 
         /**
-         * Sletter en oppføring
+         * Deletes an entry
          */
         async function deleteEntry(id) {
-            // Bruker en tilpasset modal i stedet for window.confirm
-            // Siden jeg ikke har en "confirm-modal" klar, gjeninnfører jeg window.confirm
-            // MERK: window.confirm() fungerer kanskje ikke i alle iframe-miljøer.
-            const isConfirmed = true; // window.confirm("Er du sikker på at du vil slette denne oppføringen?");
+            // Using a custom modal instead of window.confirm
+            // Since I don't have a "confirm-modal" ready, re-introducing window.confirm
+            // NOTE: window.confirm() might not work in all iframe environments.
+            const isConfirmed = true; // window.confirm("Are you sure you want to delete this entry?");
             if (!isConfirmed) return;
             
             try {
                 const docRef = doc(db, entriesCollection.path, id);
                 await deleteDoc(docRef);
             } catch (error) {
-                console.error("Feil ved sletting:", error);
-                showModal("Slettefeil", `Kunne ikke slette: ${error.message}`, "❌", "error");
+                console.error("Error deleting:", error);
+                showModal("Delete Error", `Could not delete: ${error.message}`, "❌", "error");
             }
         }
 
         /**
-         * Bytter redigeringsmodus for en rad
+         * Toggles edit mode for a row
          */
         function toggleEditEntry(id) {
             const tr = dataTableBody.querySelector(`tr[data-id="${id}"]`);
@@ -1039,36 +1048,37 @@
             const editButton = tr.querySelector('[data-action="edit"]');
 
             if (isEditing) {
-                // Bytt til redigeringsmodus
+                // Switch to edit mode
                 editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
-                editButton.title = "Lagre";
+                editButton.title = "Save";
                 
                 tr.querySelectorAll('td[data-field][data-editable="true"]').forEach(td => {
                     const field = td.dataset.field;
-                    const value = td.textContent;
                     
                     if (field === 'kjonn') {
+                        const originalValue = td.dataset.originalValue; // Get the raw 'Mann'/'Kvinne' value
                         td.innerHTML = `
-                            <select class="table-input" data-original-value="${value}">
-                                <option value="Mann" ${value === 'Mann' ? 'selected' : ''}>Mann</option>
-                                <option value="Kvinne" ${value === 'Kvinne' ? 'selected' : ''}>Kvinne</option>
-                                <option value="Annet" ${value === 'Annet' ? 'selected' : ''}>Annet</option>
+                            <select class="table-input" data-original-value="${originalValue}">
+                                <option value="Mann" ${originalValue === 'Mann' ? 'selected' : ''}>Male</option>
+                                <option value="Kvinne" ${originalValue === 'Kvinne' ? 'selected' : ''}>Female</option>
+                                <option value="Annet" ${originalValue === 'Annet' ? 'selected' : ''}>Other</option>
                             </select>
                         `;
                     } else {
+                        const value = td.textContent;
                         const inputType = (field === 'alder' || field === 'areal' || field === 'diff') ? 'number' : 'text';
                         const step = (field === 'areal' || field === 'diff') ? '0.01' : '1';
                         td.innerHTML = `<input type="${inputType}" step="${step}" class="table-input" value="${value}" data-original-value="${value}">`;
                     }
                 });
             } else {
-                // Bytt tilbake (Lagre endringer)
+                // Switch back (Save changes)
                 saveEntryChanges(id);
             }
         }
 
         /**
-         * Lagrer endringene fra redigeringsmodus
+         * Saves the changes from edit mode
          */
         async function saveEntryChanges(id) {
             const tr = dataTableBody.querySelector(`tr[data-id="${id}"]`);
@@ -1079,12 +1089,12 @@
 
             const editButton = tr.querySelector('[data-action="edit"]');
             editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
-            editButton.title = "Rediger";
+            editButton.title = "Edit";
             
             const updates = {};
             let hasChanges = false;
             
-            const newValues = { ...originalEntry }; // Kopier for å beregne
+            const newValues = { ...originalEntry }; // Copy to calculate
             
             tr.querySelectorAll('td[data-field][data-editable="true"]').forEach(td => {
                 const input = td.querySelector('input, select');
@@ -1092,70 +1102,86 @@
 
                 const field = td.dataset.field;
                 const newValue = input.value;
-                const originalValue = input.dataset.originalValue;
+                const originalValue = (field === 'kjonn') ? input.dataset.originalValue : input.dataset.originalValue;
 
                 if (newValue !== originalValue) {
                     hasChanges = true;
                     if (field === 'alder') updates.alder = parseInt(newValue, 10);
                     else if (field === 'areal') updates.areal = parseFloat(newValue);
                     else if (field === 'diff') updates.diff = parseFloat(newValue);
-                    else updates[field] = newValue;
+                    else updates[field] = newValue; // This will be 'Mann', 'Kvinne', or 'Annet'
                     
-                    newValues[field] = updates[field]; // Oppdater kopien
+                    newValues[field] = updates[field]; // Update the copy
                 }
                 
-                // Sett tilbake til vanlig tekst
-                td.textContent = newValue;
+                // Set back to plain text
+                if(field === 'kjonn') {
+                    let sexDisplay = newValue;
+                    if (sexDisplay === 'Mann') sexDisplay = 'Male';
+                    if (sexDisplay === 'Kvinne') sexDisplay = 'Female';
+                    if (sexDisplay === 'Annet') sexDisplay = 'Other';
+                    td.textContent = sexDisplay;
+                    td.dataset.originalValue = newValue; // Update the original value dataset
+                } else {
+                    td.textContent = newValue;
+                }
             });
             
-            // NY: Oppdater balansealder hvis relevante felt ble endret
+            // NEW: Update balance age if relevant fields were changed
             if (updates.alder || updates.kjonn || updates.areal) {
                 const newBalanceAlder = calculateBalanceAge(newValues.alder, newValues.kjonn, newValues.areal);
                 updates.balanceAlder = newBalanceAlder;
                 hasChanges = true;
                 
-                // Oppdater cellen i tabellen umiddelbart
+                // Update the cell in the table immediately
                 const balanceCell = tr.querySelector('td[data-field="balanceAlder"]');
                 if (balanceCell) {
                     balanceCell.textContent = newBalanceAlder.toFixed(1);
-                    // (Farge-logikk vil kjøres ved neste render, eller vi kan legge det til her)
+                    // (Color logic will be applied on next full render)
                 }
             }
 
-            // Hvis det er endringer, oppdater databasen
+            // If there are changes, update the database
             if (hasChanges) {
                 try {
                     const docRef = doc(db, entriesCollection.path, id);
                     await updateDoc(docRef, updates);
                 } catch (error) {
-                    console.error("Feil ved oppdatering:", error);
-                    showModal("Oppdateringsfeil", `Kunne ikke oppdatere: ${error.message}`, "❌", "error");
+                    console.error("Error updating:", error);
+                    showModal("Update Error", `Could not update: ${error.message}`, "❌", "error");
                 }
             }
         }
         
         /**
-         * Laster ned filtrerte data som CSV
+         * Downloads filtered data as CSV
          */
         function downloadCSV() {
             const normalizedFilter = filterInput.value.toLowerCase().trim();
             const filteredEntries = allEntries.filter(entry => 
-                entry.testleder?.toLowerCase().includes(normalizedFilter)
+                (entry.testleder?.toLowerCase() || '').includes(normalizedFilter)
             );
             
             if (filteredEntries.length === 0) {
-                showModal("Tomt Filter", "Ingen data å laste ned for det valgte filteret.", "ℹ️", "info");
+                showModal("Empty Filter", "No data to download for the selected filter.", "ℹ️", "info");
                 return;
             }
 
-            // OPPDATERT: Lagt til nye kolonner
-            const headers = ["Testleder", "Alder", "Kjønn", "Areal (cm²)", "Diff (cm)", "Balansealder", "Hopphøyde (cm)", "Vekt (kg)", "Pull Resultat (kg)", "Tidsstempel"];
+            // UPDATED: Added new columns and translated headers
+            const headers = ["Supervisor", "Age", "Sex", "Area (cm²)", "Diff (cm)", "Balance Age", "Jump Height (cm)", "Weight (kg)", "Pull Result (kg)", "Timestamp"];
             const rows = filteredEntries.map(entry => {
-                const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('no-NO') : 'N/A';
+                const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('en-GB') : 'N/A';
+                
+                // Translate sex for CSV
+                let sexDisplay = entry.kjonn;
+                if (sexDisplay === 'Mann') sexDisplay = 'Male';
+                if (sexDisplay === 'Kvinne') sexDisplay = 'Female';
+                if (sexDisplay === 'Annet') sexDisplay = 'Other';
+
                 return [
                     `"${entry.testleder || ''}"`,
                     entry.alder,
-                    entry.kjonn,
+                    sexDisplay,
                     entry.areal,
                     entry.diff,
                     entry.balanceAlder?.toFixed(1) || 'N/A',
@@ -1173,13 +1199,13 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "balanse_data.csv");
-            document.body.appendChild(link); // Nødvendig for Firefox
+            link.setAttribute("download", "balance_data.csv");
+            document.body.appendChild(link); // Required for Firefox
             link.click();
             document.body.removeChild(link);
         }
 
-        // Kjør hovedfunksjonen når siden er klar
+        // Run main function when page is ready
         document.addEventListener('DOMContentLoaded', main);
     </script>
 
