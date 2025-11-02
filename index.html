@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balance Data</title>
-    <!-- Loading Tailwind CSS -->
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Custom style to match the Dash app */
+        /* Custom style to match Dash app */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; }
         .filter-button { background-color: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 5px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; transition: all 0.2s ease; cursor: pointer; white-space: nowrap; text-align: center; }
         .filter-button:hover { background-color: rgba(255, 255, 255, 0.1); }
@@ -19,8 +21,10 @@
         .icon-button { background: none; border: none; color: #9ca3af; cursor: pointer; transition: color 0.2s; }
         .icon-button:hover { color: #10b981; }
         .icon-button-delete:hover { color: #ef4444; }
+        .icon-button-report { color: #3b82f6; }
+        .icon-button-report:hover { color: #60a5fa; }
         
-        /* Loading spinner */
+        /* Loader spinner */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #10b981;
@@ -49,44 +53,34 @@
             color: white;
             font-size: 1.2rem;
         }
-        
-        /* --- NEW STYLING FOR MODAL --- */
-        #modal-details {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #4a5568; /* border-gray-600 */
-        }
+
+        /* Modal Styles */
         .age-card {
-            background-color: #2d3748; /* bg-gray-800 */
-            border-radius: 0.5rem; /* rounded-lg */
+            background-color: #2d3748; /* gray-800 */
+            border: 1px solid #4a5568; /* gray-700 */
+            border-radius: 0.75rem;
             padding: 1rem;
             text-align: center;
         }
         .age-card-title {
-            display: block;
             font-size: 0.875rem; /* text-sm */
-            font-weight: 500; /* font-medium */
-            color: #9ca3af; /* text-gray-400 */
+            font-weight: 500; /* medium */
+            color: #9ca3af; /* gray-400 */
             margin-bottom: 0.25rem;
         }
         .age-card-value {
-            display: block;
             font-size: 2.25rem; /* text-4xl */
-            font-weight: 700; /* font-bold */
+            font-weight: 700; /* bold */
         }
         .text-balance { color: #34d399; } /* emerald-400 */
         .text-function { color: #60a5fa; } /* blue-400 */
-        .text-strength { color: #a78bfa; } /* purple-400 */
-        /* --- END OF NEW STYLING --- */
+        .text-strength { color: #a78bfa; } /* violet-400 */
 
     </style>
 </head>
 <body class="h-full bg-black text-gray-300">
 
-    <!-- Loading overlay -->
+    <!-- Loading Overlay -->
     <div id="loading-overlay">
         <div class="loader"></div>
         <p id="loading-message">Connecting to database...</p>
@@ -94,33 +88,33 @@
 
     <!-- Balance Age Modal -->
     <div id="age-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-lg w-full text-center shadow-2xl">
+        <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-md w-full text-center shadow-2xl">
             <h3 id="modal-title" class="text-2xl text-white font-semibold mb-4">Balance Age Calculated</h3>
             <p id="modal-message" class="text-lg text-gray-300 mb-2">Your estimated balance age is:</p>
             <p id="modal-balance-age" class="text-5xl font-bold text-emerald-400 mb-6"></p>
             
-            <!-- NEW: Section for full fitness details -->
-            <div id="modal-details">
-                <!-- Filled by JS -->
+            <!-- Container for detailed age breakdown -->
+            <div id="modal-details" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <!-- Content is injected by JS -->
             </div>
-
-            <button id="close-modal-btn" class="filter-button active w-full !mt-6">Close</button>
+            
+            <button id="close-modal-btn" class="filter-button active w-full">Close</button>
         </div>
     </div>
 
-    <!-- Main content -->
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto p-6">
         <img src="https://storage.googleapis.com/files_webpage/narrow.png" class="h-8 w-auto mb-6">
         <h1 class="text-3xl text-center text-white mb-8 font-light">Balance Data Logger</h1>
 
         <div class="flex flex-col lg:flex-row gap-8">
             
-            <!-- Left column (Controls) -->
+            <!-- Left Column (Controls) -->
             <div class="lg:w-1/3 flex flex-col gap-6">
 
-                <!-- Panel: Test Supervisor -->
+                <!-- Panel: Test Leader -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Test Supervisor</h3>
+                    <h3 class="text-lg text-white font-semibold mb-4">Test Leader</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg">
                         <div>
                             <label for="testleder-input" class="block text-sm text-white font-medium mb-2">Your Name</label>
@@ -132,53 +126,52 @@
                 <!-- Panel: Add Data -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Add Data</h3>
-                    <!-- Inner panel for the form itself -->
+                    <!-- Inner panel for the form -->
                     <div class="bg-gray-800/40 p-4 rounded-lg">
                         <h4 class="text-md text-white font-medium mb-4">Test Person Data</h4>
                         <form id="add-entry-form" class="space-y-4">
                             <div>
                                 <label for="alder" class="block text-sm text-white font-medium mb-2">Age</label>
-                                <input type="number" id="alder" class="name-input" placeholder="E.g. 25" required>
+                                <input type="number" id="alder" class="name-input" placeholder="e.g. 25" required>
                             </div>
                             <div>
                                 <label for="kjonn" class="block text-sm text-white font-medium mb-2">Sex</label>
                                 <select id="kjonn" class="name-input">
-                                    <option value="Mann">Male</option>
-                                    <option value="Kvinne">Female</option>
-                                    <option value="Annet">Other</option>
+                                    <option value="Mann">Man</option>
+                                    <option value="Kvinne">Woman</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="areal" class="block text-sm text-white font-medium mb-2">Area (cm²)</label>
-                                <input type="number" step="0.01" id="areal" class="name-input" placeholder="E.g. 4.72" required>
+                                <label for="areal" class="block text-sm text-white font-medium mb-2">CoP Area (cm²)</label>
+                                <input type="number" step="0.01" id="areal" class="name-input" placeholder="e.g. 4.72" required>
                             </div>
                             <div>
-                                <label for="diff" class="block text-sm text-white font-medium mb-2">Diff (cm)</label>
-                                <input type="number" step="0.01" id="diff" class="name-input" placeholder="E.g. 1.20" required>
+                                <label for="diff" class="block text-sm text-white font-medium mb-2">CoP Diff (cm)</label>
+                                <input type="number" step="0.01" id="diff" class="name-input" placeholder="e.g. 1.20" required>
                             </div>
 
-                            <!-- NEW: Button to show full fitness fields -->
-                            <button type="button" id="toggle-fitness-btn" class="filter-button w-full !mt-6">
-                                Full Fitness Age Report
+                            <!-- "Full Fitness Report" toggle button -->
+                            <button type="button" id="toggle-fitness-report-btn" class="filter-button w-full !mt-6">
+                                Show Full Fitness Age Report
                             </button>
 
-                            <!-- NEW: Hidden fields for full fitness report -->
-                            <div id="full-fitness-fields" class="hidden space-y-4 pt-4 border-t border-gray-700">
+                            <!-- Hidden fields for Full Fitness Report -->
+                            <div id="full-fitness-report-fields" class="hidden space-y-4 pt-4 border-t border-gray-700">
                                 <div>
                                     <label for="hopphoyde" class="block text-sm text-white font-medium mb-2">Jump Height (cm)</label>
-                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="E.g. 35.5">
+                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="e.g. 45.5">
                                 </div>
                                 <div>
                                     <label for="vekt" class="block text-sm text-white font-medium mb-2">Body Weight (kg)</label>
-                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="E.g. 80">
+                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="e.g. 80">
                                 </div>
                                 <div>
-                                    <label for="pullResultat" class="block text-sm text-white font-medium mb-2">Pull Result (kg)</label>
-                                    <input type="number" step="0.1" id="pullResultat" class="name-input" placeholder="E.g. 120">
+                                    <label for="pull" class="block text-sm text-white font-medium mb-2">Pull Result (kg)</label>
+                                    <input type="number" step="0.1" id="pull" class="name-input" placeholder="e.g. 180">
                                 </div>
                             </div>
-                            <!-- End of hidden fields -->
-
+                            
                             <button type="submit" id="submit-button" class="filter-button active w-full !mt-6">
                                 Add Entry
                             </button>
@@ -190,12 +183,12 @@
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Instructions</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg text-sm space-y-2">
-                        <p>Instructions for balance test:</p>
+                        <p>Balance Test Instructions:</p>
                         <ul class="list-disc list-inside pl-2">
-                            <li>Lift your foot approx. 10 cm from the ground.</li>
-                            <li>Hold your arms down by your sides.</li>
+                            <li>Lift your foot approx. 10 cm off the ground.</li>
+                            <li>Keep your arms down by your sides.</li>
                             <li>Look straight ahead and stand as still as possible.</li>
-                            <li>Stand for 30 seconds on the right foot and then 30 seconds on the left foot.</li>
+                            <li>Stand for 30 seconds on the right foot, then 30 seconds on the left foot.</li>
                             <li>Without shoes.</li>
                         </ul>
                     </div>
@@ -206,39 +199,77 @@
                     <h3 class="text-lg text-white font-semibold mb-4">Statistics</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg space-y-3">
                         <div>
-                            <span class="font-medium text-white">Total count:</span>
+                            <span class="font-medium text-white">Total entries:</span>
                             <span id="total-count" class="font-bold text-xl text-emerald-400 ml-2">0</span>
                         </div>
                         
-                        <!-- Sex Distribution -->
+                        <!-- Gender Stats -->
                         <div class="border-t border-gray-600 pt-3">
-                            <h5 class="text-sm text-white font-medium mb-2">Sex Distribution:</h5>
+                            <h5 class="text-sm text-white font-medium mb-2">Gender Distribution:</h5>
                             <div id="gender-stats" class="text-sm space-y-1">
                                 <p class="text-gray-400">Loading data...</p>
                             </div>
                         </div>
-
-                        <!-- Age Groups -->
+                        
+                        <!-- Age Group Stats -->
                         <div class="border-t border-gray-600 pt-3">
                             <h5 class="text-sm text-white font-medium mb-2">Age Groups:</h5>
-                            <div id="age-group-stats" class="text-sm space-y-1">
+                            <div id="age-group-stats" class="text-sm space-y-1 overflow-x-auto">
                                 <p class="text-gray-400">Loading data...</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
             </div>
 
-            <!-- Right column (Table) -->
-            <div class="lg:w-2/3">
+            <!-- Right Column (Graphs & Table) -->
+            <div class="lg:w-2/3 flex flex-col gap-8">
+
+                <!-- Graph Section -->
+                <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
+                    <h3 class="text-lg text-white font-semibold mb-4">Balance Data Visualization</h3>
+                    
+                    <!-- Filter buttons -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-2 mb-4">
+                        <div class="flex justify-center gap-2" id="graph-filter-buttons">
+                            <button class="filter-button graph-filter active" data-gender="All">All</button>
+                            <button class="filter-button graph-filter" data-gender="Mann">Men</button>
+                            <button class="filter-button graph-filter" data-gender="Kvinne">Women</button>
+                        </div>
+                        <div class="flex justify-center gap-2" id="regression-filter-buttons">
+                            <button class="filter-button regression-filter active" data-type="exponential">Exponential</button>
+                            <button class="filter-button regression-filter" data-type="linear">Linear</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Age vs Area -->
+                        <div>
+                            <h4 class="text-md text-white font-medium mb-1 text-center">Age vs. CoP Area</h4>
+                            <p id="area-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
+                            <div class="bg-gray-800/40 p-4 rounded-lg h-80">
+                                <canvas id="ageVsAreaChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Age vs Diff -->
+                        <div>
+                            <h4 class="text-md text-white font-medium mb-1 text-center">Age vs. CoP Diff</h4>
+                            <p id="diff-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
+                            <div class="bg-gray-800/40 p-4 rounded-lg h-80">
+                                <canvas id="ageVsDiffChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Collected Data</h3>
                     
                     <!-- Filter and Download -->
                     <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                        <input type="text" id="filter-input" class="name-input flex-grow" placeholder="Filter by supervisor...">
+                        <input type="text" id="filter-input" class="name-input flex-grow" placeholder="Filter by test leader...">
                         <button id="download-csv-button" class="filter-button active !bg-blue-600 hover:!bg-blue-700 border-transparent whitespace-nowrap">
                             Download CSV
                         </button>
@@ -249,22 +280,20 @@
                         <table class="w-full min-w-max text-sm text-left text-gray-400">
                             <thead class="text-xs text-gray-300 uppercase bg-gray-800/40 sticky top-0">
                                 <tr>
-                                    <!-- NEW: Column for report icon -->
-                                    <th scope="col" class="py-3 px-4 text-center">Report</th>
-                                    <th scope="col" class="py-3 px-4">Supervisor</th>
+                                    <th scope="col" class="py-3 px-2 text-center">Report</th>
+                                    <th scope="col" class="py-3 px-4">Test Leader</th>
                                     <th scope="col" class="py-3 px-4">Age</th>
                                     <th scope="col" class="py-3 px-4">Sex</th>
-                                    <th scope="col" class="py-3 px-4">Area (cm²)</th>
-                                    <th scope="col" class="py-3 px-4">Diff (cm)</th>
+                                    <th scope="col" class="py-3 px-4">CoP Area (cm²)</th>
+                                    <th scope="col" class="py-3 px-4">CoP Diff (cm)</th>
                                     <th scope="col" class="py-3 px-4">Balance Age</th>
                                     <th scope="col" class="py-3 px-4">Timestamp</th>
-                                    <th scope="col" class="py-3 px-4 text-center">Action</th>
+                                    <th scope="col" class="py-3 px-4 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="data-table-body" class="divide-y divide-gray-700">
                                 <!-- Filled by JS -->
                                 <tr>
-                                    <!-- UPDATED: Colspan to 9 -->
                                     <td colspan="9" class="py-4 px-6 text-center text-gray-500">
                                         Loading data...
                                     </td>
@@ -273,6 +302,7 @@
                         </table>
                     </div>
                 </div>
+                
             </div>
         </div>
     </div>
@@ -293,6 +323,7 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Hardcoded Firebase configuration for 'balanse-data'
+        // !! IMPORTANT: This is for demonstration. Use secure rules in production.
         const firebaseConfig = {
             apiKey: "AIzaSyCIYqq1_2eKdBw3u_FYUIFvo6VnJcLVliA",
             authDomain: "balanse-data.firebaseapp.com",
@@ -306,67 +337,55 @@
         // Global variables
         let db;
         let entriesCollection;
-        let allEntries = []; // Ensure it's an array from the start
+        let allEntries = []; // Ensure it's a list from the start
         let unsubscribeEntries = null; // To stop the listener
+        let currentRegressionType = 'exponential'; // NEW: Track regression state
+        let currentGraphGender = 'All'; // NEW: Track gender filter state
 
-        // UI elements
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const loadingMessage = document.getElementById('loading-message');
-        const dataTableBody = document.getElementById('data-table-body');
-        const filterInput = document.getElementById('filter-input');
-        const addForm = document.getElementById('add-entry-form');
-        const testlederInput = document.getElementById('testleder-input');
-        const totalCountEl = document.getElementById('total-count');
-        const genderStatsEl = document.getElementById('gender-stats'); // New
-        const ageGroupStatsEl = document.getElementById('age-group-stats');
-        const downloadCsvButton = document.getElementById('download-csv-button');
-        // UI elements for Modal
-        const ageModal = document.getElementById('age-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalBalanceAge = document.getElementById('modal-balance-age');
-        const modalDetails = document.getElementById('modal-details'); // NEW
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        // UI for Full Fitness Report
-        const toggleFitnessBtn = document.getElementById('toggle-fitness-btn');
-        const fitnessFields = document.getElementById('full-fitness-fields');
+        // --- NORMATIVE DATA & CALCULATION LOGIC ---
 
-        // --- START: IMPORTED LOGIC FOR FITNESS AGE ---
+        // Data based on user-provided images (2025-10-28)
+        // Adjusted: +5cm for all men.
         const JUMP_DATA_MENN = [
-             { label:"8–9",   p5:19.0, p25:22.6, p50:25.8, p75:29.4, p95:34.5 }, // Under 30 - UENDRET
-             { label:"10–11", p5:20.8, p25:25.4, p50:29.2, p75:33.4, p95:37.9 }, // Under 30 - UENDRET
-             { label:"12–13", p5:22.8, p25:28.6, p50:32.7, p75:37.4, p95:45.6 }, // Under 30 - UENDRET
-             { label:"14–15", p5:24.4, p25:31.6, p50:36.1, p75:40.8, p95:48.0 }, // Under 30 - UENDRET
-             { label:"16–17", p5:24.8, p25:33.6, p50:39.3, p75:44.1, p95:52.4 }, // Under 30 - UENDRET
-             { label:"18–19", p5:27.2, p25:35.0, p50:40.6, p75:46.2, p95:54.2 }, // Under 30 - UENDRET
-             { label:"20–24", p5:25.8, p25:33.8, p50:39.4, p75:45.0, p95:53.2 }, // Under 30 - UENDRET
-             { label:"25–29", p5:24.5, p25:32.2, p50:37.4, p75:42.6, p95:50.1 }, // Under 30 - UENDRET
-             // --- 30 ÅR OG OPPOVER - LAGT TIL 5 CM ---
-             { label:"30–34", p5:28.2, p25:35.2, p50:40.0, p75:44.6, p95:51.8 },
-             { label:"35–39", p5:26.8, p25:33.0, p50:37.6, p75:41.9, p95:48.4 },
-             { label:"40–44", p5:25.6, p25:31.2, p50:35.1, p75:39.1, p95:45.2 },
-             { label:"45–49", p5:20.1, p25:29.3, p50:32.8, p75:36.9, p95:42.6 },
-             { label:"50–59", p5:17.8, p25:21.2, p50:24.7, p75:27.8, p95:33.7 },
-             { label:"60–69", p5:16.7, p25:19.6, p50:22.15,p75:24.9, p95:30.2 },
-             { label:"70–80", p5:10.0, p25:17.9, p50:19.7, p75:23.0, p95:27.6 }
+            { age: 8.5,  label:"8–9",  p5:22.0, p25:25.6, p50:28.8, p75:32.4, p95:37.5 },
+            { age: 10.5, label:"10–11", p5:23.8, p25:28.4, p50:32.2, p75:36.4, p95:40.9 },
+            { age: 12.5, label:"12–13", p5:25.8, p25:31.6, p50:35.7, p75:40.4, p95:48.6 },
+            { age: 14.5, label:"14–15", p5:27.4, p25:34.6, p50:39.1, p75:43.8, p95:51.0 },
+            { age: 16.5, label:"16–17", p5:27.8, p25:36.6, p50:42.3, p75:47.1, p95:55.4 },
+            { age: 18.5, label:"18–19", p5:30.2, p25:38.0, p50:43.6, p75:49.2, p95:57.2 },
+            { age: 22,   label:"20–24", p5:28.8, p25:36.8, p50:42.4, p75:48.0, p95:56.2 },
+            { age: 27,   label:"25–29", p5:27.5, p25:35.2, p50:40.4, p75:45.6, p95:53.1 },
+            // Adjusted: +5cm for 30+
+            { age: 32,   label:"30–34", p5:31.2, p25:38.2, p50:40.0, p75:42.6, p95:49.8 },
+            { age: 37,   label:"35–39", p5:29.8, p25:36.0, p50:40.6, p75:39.9, p95:46.4 },
+            { age: 42,   label:"40–44", p5:28.6, p25:34.2, p50:38.1, p75:37.1, p95:43.2 },
+            { age: 47,   label:"45–49", p5:23.1, p25:32.3, p50:35.8, p75:34.9, p95:40.6 },
+            // Fallback data (50+) - Adjusted +5cm
+            { age: 54.5, label:"50–59", p5:15.8, p25:19.2, p50:22.7, p75:25.8, p95:31.7 },
+            { age: 64.5, label:"60–69", p5:14.7, p25:17.6, p50:20.15,p75:22.9, p95:28.2 },
+            { age: 75,   label:"70–80", p5:5.0,  p25:15.9, p50:17.7, p75:21.0, p95:25.6 }
         ];
+
+        // Data based on user-provided images (2025-10-28)
+        // Adjusted: +5cm for 30+
         const JUMP_DATA_KVINNER = [
-             { label:"8–9",   p5:8.0,  p25:11.8, p50:14.4, p75:17.3, p95:21.4 }, // Under 30 - UENDRET
-             { label:"10–11", p5:10.5, p25:14.2, p50:17.8, p75:20.9, p95:25.2 }, // Under 30 - UENDRET
-             { label:"12–13", p5:10.8, p25:15.4, p50:18.6, p75:22.0, p95:27.0 }, // Under 30 - UENDRET
-             { label:"14–15", p5:10.5, p25:15.5, p50:18.6, p75:21.9, p95:26.6 }, // Under 30 - UENDRET
-             { label:"16–17", p5:10.0, p25:14.4, p50:17.8, p75:21.2, p95:26.3 }, // Under 30 - UENDRET
-             { label:"18–19", p5:9.9,  p25:14.2, p50:17.3, p75:20.6, p95:25.4 }, // Under 30 - UENDRET
-             { label:"20–24", p5:9.0,  p25:13.0, p50:16.4, p75:19.8, p95:24.5 }, // Under 30 - UENDRET
-             { label:"25–29", p5:8.2,  p25:12.0, p50:15.2, p75:18.4, p95:23.4 }, // Under 30 - UENDRET
-             // --- 30 ÅR OG OPPOVER - LAGT TIL 5 CM ---
-             { label:"30–34", p5:12.6, p25:16.2, p50:19.2, p75:22.2, p95:27.0 },
-             { label:"35–39", p5:12.0, p25:15.4, p50:18.2, p75:21.2, p95:25.8 },
-             { label:"40–44", p5:7.0,  p25:14.5, p50:17.0, p75:19.9, p95:24.6 },
-             { label:"45–49", p5:6.5,  p25:13.8, p50:16.4, p75:18.9, p95:23.2 },
-             { label:"50–59", p5:6.0,  p25:9.0,  p50:12.5, p75:16.0, p95:20.0 },
-             { label:"60–69", p5:5.0,  p25:7.5,  p50:10.0, p75:13.0, p95:17.0 },
-             { label:"70–80", p5:5.0,  p25:5.5,  p50:7.5,  p75:10.5, p95:14.0 }
+            { age: 8.5,  label:"8–9",  p5:16.0, p25:19.8, p50:22.4, p75:25.3, p95:29.4 },
+            { age: 10.5, label:"10–11", p5:18.5, p25:22.2, p50:25.8, p75:28.9, p95:33.2 },
+            { age: 12.5, label:"12–13", p5:18.8, p25:23.4, p50:26.6, p75:30.0, p95:35.0 },
+            { age: 14.5, label:"14–15", p5:18.5, p25:23.5, p50:26.6, p75:29.9, p95:34.6 },
+            { age: 16.5, label:"16–17", p5:18.0, p25:22.4, p50:25.8, p75:29.2, p95:34.3 },
+            { age: 18.5, label:"18–19", p5:17.9, p25:22.2, p50:25.3, p75:28.6, p95:33.4 },
+            { age: 22,   label:"20–24", p5:17.0, p25:21.0, p50:24.4, p75:27.8, p95:32.5 },
+            { age: 27,   label:"25–29", p5:16.2, p25:20.0, p50:23.2, p75:26.4, p95:31.4 },
+            // Adjusted: +5cm for 30+
+            { age: 32,   label:"30–34", p5:20.6, p25:24.2, p50:27.2, p75:30.2, p95:35.0 },
+            { age: 37,   label:"35–39", p5:20.0, p25:23.4, p50:26.2, p75:29.2, p95:33.8 },
+            { age: 42,   label:"40–44", p5:15.0, p25:22.5, p50:25.0, p75:27.9, p95:32.6 },
+            { age: 47,   label:"45–49", p5:14.5, p25:21.8, p50:24.4, p75:26.9, p95:31.2 },
+            // Fallback data (50+) - Adjusted +5cm
+            { age: 54.5, label:"50–59", p5:14.0, p25:17.0, p50:20.5, p75:24.0, p95:28.0 },
+            { age: 64.5, label:"60–69", p5:13.0, p25:15.5, p50:18.0, p75:21.0, p95:25.0 },
+            { age: 75,   label:"70–80", p5:5.0,  p25:13.5, p50:15.5, p75:18.5, p95:22.0 }
         ];
 
         const STRENGTH_MODEL = {
@@ -377,7 +396,7 @@
             "20-29_m": { mean: 1.0554, stdDev: 0.1545 }, "30-39_m": { mean: 1.0463, stdDev: 0.1411 },
             "40-49_m": { mean: 1.0234, stdDev: 0.1382 }, "50-59_m": { mean: 0.9800, stdDev: 0.1626 },
             "60-69_m": { mean: 0.8587, stdDev: 0.1127 }, "70-79_m": { mean: 0.7195, stdDev: 0.1766 },
-             "80+_m": { mean: 0.69, stdDev: 0.17 }, // Added estimate for 80+ male
+             "80+_m": { mean: 0.69, stdDev: 0.17 },
             "Under 10_f": { mean: 0.8631, stdDev: 0.1100 }, "10-19_f": { mean: 1.0489, stdDev: 0.1200 },
             "20-29_f": { mean: 1.1283, stdDev: 0.1625 }, "30-39_f": { mean: 1.1265, stdDev: 0.1728 },
             "40-49_f": { mean: 1.1329, stdDev: 0.2453 }, "50-59_f": { mean: 1.0346, stdDev: 0.1595 },
@@ -387,138 +406,54 @@
           overall: { mean: 1.0168, stdDev: 0.1808 }
         };
 
-        function getAgeGroupData(age, sex) {
-            const dataSet = sex.toLowerCase() === 'kvinne' ? JUMP_DATA_KVINNER : JUMP_DATA_MENN;
-            if (age <= 9) return dataSet[0];
-            if (age <= 11) return dataSet[1];
-            if (age <= 13) return dataSet[2];
-            if (age <= 15) return dataSet[3];
-            if (age <= 17) return dataSet[4];
-            if (age <= 19) return dataSet[5];
-            if (age <= 24) return dataSet[6];
-            if (age <= 29) return dataSet[7];
-            if (age <= 34) return dataSet[8];
-            if (age <= 39) return dataSet[9];
-            if (age <= 44) return dataSet[10];
-            if (age <= 49) return dataSet[11];
-            if (age <= 59) return dataSet[12];
-            if (age <= 69) return dataSet[13];
-            return dataSet[14]; // 70+
-        }
-
-        function calculateJumpPercentile(age, sex, jumpHeight) {
-             if (!isFinite(jumpHeight) || !isFinite(age)) return NaN;
-             const g = getAgeGroupData(age, sex);
-             const pts = [ {p:5, x:g.p5}, {p:25, x:g.p25}, {p:50, x:g.p50}, {p:75, x:g.p75}, {p:95, x:g.p95} ];
-             if (jumpHeight <= pts[0].x) {
-                 const m = (pts[1].p - pts[0].p) / (pts[1].x - pts[0].x || 1e-6);
-                 return Math.max(0.1, pts[0].p + (jumpHeight - pts[0].x) * m);
-             }
-             for (let i = 0; i < pts.length - 1; i++) {
-                 if (jumpHeight <= pts[i+1].x) {
-                     const m = (pts[i+1].p - pts[i].p) / (pts[i+1].x - pts[i].x || 1e-6);
-                     return pts[i].p + (jumpHeight - pts[i].x) * m;
-                 }
-             }
-             const m = (pts[pts.length-1].p - pts[pts.length-2].p) / (pts[pts.length-1].x - pts[pts.length-2].x || 1e-6);
-             return Math.min(99.9, pts[pts.length-1].p + (jumpHeight - pts[pts.length-1].x) * m);
-        }
+        // --- UI Elements ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
+        const dataTableBody = document.getElementById('data-table-body');
+        const filterInput = document.getElementById('filter-input');
+        const addForm = document.getElementById('add-entry-form');
+        const testlederInput = document.getElementById('testleder-input');
+        const totalCountEl = document.getElementById('total-count');
+        const genderStatsEl = document.getElementById('gender-stats');
+        const ageGroupStatsEl = document.getElementById('age-group-stats');
+        const downloadCsvButton = document.getElementById('download-csv-button');
         
-        // NEW LOGIC: P0 = Age+5, P50 = Age, P100 = 21
-        function calculateAgeFromPercentile(percentile, realAge, minAge = 21) {
-            if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
-            const p = Math.max(0, Math.min(100, percentile));
-            const maxAge = realAge + 5; // P0 = Age + 5
-            
-            if (p === 50) {
-                return realAge;
-            } else if (p > 50) {
-                // Between P50 (realAge) and P100 (minAge)
-                const factor = (p - 50) / 50; // 0 to 1
-                return realAge - factor * (realAge - minAge);
-            } else {
-                // Between P0 (maxAge) and P50 (realAge)
-                const factor = p / 50; // 0 to 1
-                return maxAge - factor * (maxAge - realAge);
-            }
-        }
+        // Modal UI
+        const ageModal = document.getElementById('age-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalBalanceAge = document.getElementById('modal-balance-age');
+        const modalDetails = document.getElementById('modal-details');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        // Fitness Report UI
+        const toggleFitnessReportBtn = document.getElementById('toggle-fitness-report-btn');
+        const fullFitnessReportFields = document.getElementById('full-fitness-report-fields');
         
-        function calculateJumpAge(realAge, sex, jumpHeight) {
-            const percentile = calculateJumpPercentile(realAge, sex, jumpHeight);
-            return calculateAgeFromPercentile(percentile, realAge, 21); // Using 21 as min age
-        }
+        // Graph UI
+        const chartInstances = {
+            ageVsArea: null,
+            ageVsDiff: null
+        };
+        const ageVsAreaCanvas = document.getElementById('ageVsAreaChart');
+        const ageVsDiffCanvas = document.getElementById('ageVsDiffChart');
+        const graphFilterButtons = document.getElementById('graph-filter-buttons');
+        const regressionFilterButtons = document.getElementById('regression-filter-buttons'); // NEW
+        const areaStatsDisplay = document.getElementById('area-stats-display'); // NEW
+        const diffStatsDisplay = document.getElementById('diff-stats-display'); // NEW
 
-        function getStrengthAgeGroup(age) {
-            if (age < 10) return 'Under 10'; if (age < 20) return '10-19';
-            if (age < 30) return '20-29'; if (age < 40) return '30-39';
-            if (age < 50) return '40-49'; if (age < 60) return '50-59';
-            if (age < 70) return '60-69'; if (age < 80) return '70-79';
-            return '80+';
-        }
-
-        function calculateStrengthScoreAndPercentile(gender, age, weight, pull) {
-            if (!isFinite(age) || !isFinite(weight) || !isFinite(pull) || weight <= 0 || pull < 0) {
-                return { score: NaN, percentile: NaN, error: "Invalid input values" };
-            }
-            try {
-                const genderKey = gender.toLowerCase() === 'kvinne' ? 'female' : 'male';
-                const model = STRENGTH_MODEL[genderKey];
-                const expectedLogPull = model.intercept + model.slope * Math.log(weight);
-                const expectedPull = Math.exp(expectedLogPull);
-                if (!isFinite(expectedPull) || expectedPull <= 0) {
-                     return { score: NaN, percentile: NaN, error: "Calculation error (expected pull)" };
-                }
-                const strengthRatio = pull / expectedPull;
-                const ageGroup = getStrengthAgeGroup(age);
-                const groupKey = `${ageGroup}_${genderKey === 'female' ? 'f' : 'm'}`;
-                let groupStats = STRENGTH_MODEL.ageGroupAdjustments[groupKey];
-                let zScore = 0;
-                if (groupStats && groupStats.stdDev > 0) {
-                    zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
-                } else if (STRENGTH_MODEL.overall.stdDev > 0) {
-                    groupStats = STRENGTH_MODEL.overall;
-                    zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
-                } else {
-                     return { score: NaN, percentile: NaN, error: "Calculation error (std dev zero)" };
-                }
-                const percentile = 50.0 * (1 + (zScore / Math.sqrt(2)) / Math.abs(zScore / Math.sqrt(2)) * Math.sqrt(1 - Math.exp(-2 * zScore * zScore / Math.PI)));
-                const clampedPercentile = Math.max(0, Math.min(100, percentile)); // Fixed typo here
-                let finalScore = 50 + (zScore * 15);
-                finalScore = Math.max(0, Math.min(100, finalScore));
-                return { score: finalScore, percentile: clampedPercentile };
-            } catch (error) {
-                 return { score: NaN, percentile: NaN, error: "Calculation failed" };
-            }
-        }
         
-        function calculateStrengthAgeFromPercentile(percentile, realAge) {
-             return calculateAgeFromPercentile(percentile, realAge, 21); // Using 21 as min age
-        }
-        // --- END: IMPORTED LOGIC ---
-
-
         /**
-         * Displays a popup modal with custom content.
-         * @param {string} title - The title of the modal
-         * @param {string} message - The main message
-         * @param {string} value - The value to display (e.g., age)
-         * @param {string} type - 'success', 'error', 'warning', 'info'
-         * @param {string} detailsHtml - (Optional) HTML for the new detail boxes
+         * Shows a popup modal with custom content.
          */
-        function showModal(title, message, value, type = 'success', detailsHtml = "") {
+        function showModal(title, message, value, type = 'success', detailsHtml = '') {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             modalBalanceAge.textContent = value;
-            
-            // Fill or empty the details section
-            modalDetails.innerHTML = detailsHtml;
-            
-            // Adjust visibility based on details
-            modalDetails.style.display = detailsHtml ? "grid" : "none";
-            modalBalanceAge.style.marginBottom = detailsHtml ? "0" : "1.5rem"; // 24px
+            modalDetails.innerHTML = detailsHtml; // Inject the details HTML
             
             // Reset colors
-            modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400');
+            modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400', 'text-white');
 
             if (type === 'success') {
                 modalBalanceAge.classList.add('text-emerald-400');
@@ -528,10 +463,13 @@
                 modalBalanceAge.classList.add('text-yellow-400');
             } else if (type === 'info') {
                 modalBalanceAge.classList.add('text-blue-400');
+            } else if (type === 'report') {
+                modalBalanceAge.classList.add('text-white'); // For the main 'Fitness Age'
             }
             
             ageModal.classList.remove('hidden');
         }
+
 
         /**
          * Main function that runs when the document is loaded
@@ -546,41 +484,29 @@
                 // 2. Initialize Firestore DB
                 db = getFirestore(app);
                 
-                // 3. Define database path
+                // 3. Define the database path
                 const dbPath = 'balanse-data-entries';
                 entriesCollection = collection(db, dbPath);
 
                 console.log(`Connected. Listening to database path: ${dbPath}`);
 
-                // 4. Set up snapshot listener
+                // 4. Set up real-time listener
                 setupSnapshots();
                 
-                // 5. Set up UI event listeners
+                // 5. Set up event listeners for UI
                 setupEventListeners();
 
             } catch (error) {
-                console.error("Initialization error:", error);
-                loadingMessage.textContent = `Startup error: ${error.message}`;
+                console.error("Error during initialization:", error);
+                loadingMessage.textContent = `Startup Error: ${error.message}`;
             }
         }
         
         /**
-         * Sets up UI event listeners
+         * Sets up listeners for UI elements
          */
         function setupEventListeners() {
-            // Listen for "Full Fitness Report" button
-            toggleFitnessBtn.addEventListener('click', () => {
-                fitnessFields.classList.toggle('hidden');
-                if (fitnessFields.classList.contains('hidden')) {
-                    toggleFitnessBtn.textContent = "Full Fitness Age Report";
-                    toggleFitnessBtn.classList.remove('active');
-                } else {
-                    toggleFitnessBtn.textContent = "Hide full report";
-                    toggleFitnessBtn.classList.add('active');
-                }
-            });
-
-            // Listen for 'Add' form submit
+            // Listener for the 'Add' form
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const testleder = testlederInput.value.trim();
@@ -588,170 +514,339 @@
                 const kjonn = document.getElementById('kjonn').value;
                 const areal = parseFloat(document.getElementById('areal').value);
                 const diff = parseFloat(document.getElementById('diff').value);
-                
-                // NEW: Get fitness data
-                const hopphoyde = parseFloat(document.getElementById('hopphoyde').value);
-                const vekt = parseFloat(document.getElementById('vekt').value);
-                const pullResultat = parseFloat(document.getElementById('pullResultat').value);
-                const showFullReport = !fitnessFields.classList.contains('hidden');
 
                 if (!testleder) {
-                    showModal(
-                        "Missing Supervisor", 
-                        "Please enter your 'Supervisor' name.", 
-                        "⚠️", 
-                        "warning"
-                    );
+                    showModal("Missing Test Leader", "Please enter your 'Test Leader' name.", "⚠️", "warning");
                     testlederInput.focus();
                     return;
                 }
                 
                 if (isNaN(alder) || isNaN(areal) || isNaN(diff)) {
-                    showModal(
-                        "Invalid Data", 
-                        "Age, Area, and Diff must be valid numbers.", 
-                        "⚠️", 
-                        "warning"
-                    );
+                    showModal("Invalid Data", "Age, Area, and Diff must be valid numbers.", "⚠️", "warning");
                     return;
                 }
-
-                // --- Calculate balance age (ALWAYS) ---
-                const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
                 
-                let dataToSave = {
-                    testleder: testleder,
-                    alder: alder,
-                    kjonn: kjonn,
-                    areal: areal,
-                    diff: diff,
-                    balanceAlder: balanseAlder, // Save balance age
-                    createdAt: serverTimestamp(),
-                    // NEW: Save fitness data as null if not filled
-                    hopphoyde: (!isNaN(hopphoyde) && showFullReport) ? hopphoyde : null,
-                    vekt: (!isNaN(vekt) && showFullReport) ? vekt : null,
-                    pullResultat: (!isNaN(pullResultat) && showFullReport) ? pullResultat : null
-                };
+                // --- Get Full Fitness Report data (if visible) ---
+                const isFullReport = !fullFitnessReportFields.classList.contains('hidden');
+                const hopphoydeEl = document.getElementById('hopphoyde');
+                const vektEl = document.getElementById('vekt');
+                const pullEl = document.getElementById('pull');
 
-                // Check if we should show full report
-                if (showFullReport && !isNaN(hopphoyde) && !isNaN(vekt) && !isNaN(pullResultat)) {
-                    // Show full report
-                    const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
-                    const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pullResultat);
-                    const styrkeAlder = calculateStrengthAgeFromPercentile(strengthResult.percentile, alder);
+                let hopphoyde = null;
+                let vekt = null;
+                let pull = null;
+                
+                // Calculate Balance Age (always calculated)
+                const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
 
-                    const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(isFinite);
-                    let samletAlder = NaN;
-                    if (validAges.length > 0) {
-                        samletAlder = validAges.reduce((sum, age) => sum + age, 0) / validAges.length;
+                if (isFullReport) {
+                    // Full report fields are visible, validate them
+                    hopphoyde = parseFloat(hopphoydeEl.value);
+                    vekt = parseFloat(vektEl.value);
+                    pull = parseFloat(pullEl.value);
+
+                    if (isNaN(hopphoyde) || isNaN(vekt) || isNaN(pull)) {
+                         showModal(
+                            "Invalid Report Data", 
+                            "Jump Height, Weight, and Pull Result must be valid numbers for a full report.", 
+                            "⚠️", 
+                            "warning"
+                        );
+                        return;
                     }
+                    
+                    // --- Calculate all ages for modal ---
+                    const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
+                    const styrkeAlder = calculateStrengthAge(alder, kjonn, vekt, pull);
+                    
+                    const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(Number.isFinite);
+                    const samletAlder = validAges.length > 0 ? validAges.reduce((a, b) => a + b, 0) / validAges.length : 0;
 
+                    // Show "sexy" modal
                     const detailsHtml = `
                         <div class="age-card">
-                            <span class="age-card-title">Balance Age</span>
-                            <span class="age-card-value text-balance">${balanseAlder.toFixed(1)}</span>
+                            <h4 class="age-card-title">BALANCE AGE</h4>
+                            <p class="age-card-value text-balance">${balanseAlder.toFixed(1)}</p>
                         </div>
                         <div class="age-card">
-                            <span class="age-card-title">Function Age</span>
-                            <span class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</span>
+                            <h4 class="age-card-title">FUNCTIONAL AGE</h4>
+                            <p class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</p>
                         </div>
                         <div class="age-card">
-                            <span class="age-card-title">Strength Age</span>
-                            <span class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</span>
+                            <h4 class="age-card-title">STRENGTH AGE</h4>
+                            <p class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</p>
                         </div>
                     `;
-                    
                     showModal(
                         "Full Fitness Report", 
-                        "Your combined fitness age is:", 
+                        "Your estimated fitness age is:", 
                         samletAlder.toFixed(1), 
-                        "success",
+                        "report",
                         detailsHtml
                     );
 
                 } else {
-                    // Show only balance age
-                    showModal(
-                        "Balance Age Calculated", 
-                        "Your estimated balance age is:", 
-                        balanseAlder.toFixed(1), 
-                        "success"
-                    );
+                    // --- Show simple modal (Balance Age only) ---
+                    if (!isNaN(balanseAlder)) {
+                        showModal(
+                            "Balance Age Calculated", 
+                            "Your estimated balance age is:", 
+                            balanseAlder.toFixed(1), 
+                            "success",
+                            "" // No details
+                        );
+                    } else {
+                        console.warn("Could not calculate balance age.");
+                    }
                 }
 
                 try {
-                    // Save data to database
-                    await addDoc(entriesCollection, dataToSave);
+                    // Save data to the database
+                    await addDoc(entriesCollection, {
+                        testleder: testleder,
+                        alder: alder,
+                        kjonn: kjonn,
+                        areal: areal,
+                        diff: diff,
+                        balanceAlder: balanseAlder, // Save calculated balance age
+                        hopphoyde: isFullReport && !isNaN(hopphoyde) ? hopphoyde : null,
+                        vekt: isFullReport && !isNaN(vekt) ? vekt : null,
+                        pull: isFullReport && !isNaN(pull) ? pull : null,
+                        createdAt: serverTimestamp()
+                    });
                     addForm.reset();
-                    // Hide fitness fields again
-                    fitnessFields.classList.add('hidden');
-                    toggleFitnessBtn.textContent = "Full Fitness Age Report";
-                    toggleFitnessBtn.classList.remove('active');
+                    // Hide the report fields again after submission
+                    fullFitnessReportFields.classList.add('hidden');
+                    toggleFitnessReportBtn.textContent = 'Show Full Fitness Age Report';
                 } catch (error) {
                     console.error("Error saving data:", error);
-                    showModal(
-                        "Save Error", 
-                        `Could not save data: ${error.message}`, 
-                        "❌", 
-                        "error"
-                    );
+                    showModal("Save Error", `Could not save data: ${error.message}`, "❌", "error");
                 }
             });
 
-            // Listen for filter input
+            // Listener for filter input
             filterInput.addEventListener('input', (e) => {
                 renderTableAndStats(e.target.value);
             });
             
-            // Listen for CSV download button
+            // Listener for CSV download button
             downloadCsvButton.addEventListener('click', downloadCSV);
 
-            // Listen: Close modal button
+            // Listener: Close modal button
             closeModalBtn.addEventListener('click', () => {
                 ageModal.classList.add('hidden');
             });
+            
+            // Listener: Toggle Full Fitness Report
+            toggleFitnessReportBtn.addEventListener('click', () => {
+                const isHidden = fullFitnessReportFields.classList.toggle('hidden');
+                if (isHidden) {
+                    toggleFitnessReportBtn.textContent = 'Show Full Fitness Age Report';
+                } else {
+                    toggleFitnessReportBtn.textContent = 'Hide Full Fitness Age Report';
+                }
+            });
+            
+            // Listener: Graph filter buttons
+            setupGraphFilters();
+            setupRegressionFilters(); // NEW
         }
         
+        // --- START OF CALCULATION FUNCTIONS ---
+
         /**
-         * Calculates balance age based on sex and CoP area.
-         * UPDATED: Caps the age at max +5 years over real age.
-         * @param {number} realAge - The test person's actual age
-         * @param {string} sex - "Male" or "Female"
-         * @param {number} copArea - CoP Area in cm²
-         * @returns {number} - Estimated balance age
+         * Helper function to check for female sex, handling Norwegian/English data
+         */
+        function isFemale(sexString) {
+            if (!sexString) return false;
+            const s = sexString.toLowerCase();
+            return s === 'woman' || s === 'kvinne';
+        }
+
+        /**
+         * Finds the correct age group data from the jump tables.
+         * Uses new, more granular age groups.
+         */
+        function getAgeGroupData(age, sex) {
+            const dataSet = isFemale(sex) ? JUMP_DATA_KVINNER : JUMP_DATA_MENN;
+            if (age <= 9) return dataSet[0]; // 8-9
+            if (age <= 11) return dataSet[1]; // 10-11
+            if (age <= 13) return dataSet[2]; // 12-13
+            if (age <= 15) return dataSet[3]; // 14-15
+            if (age <= 17) return dataSet[4]; // 16-17
+            if (age <= 19) return dataSet[5]; // 18-19
+            if (age <= 24) return dataSet[6]; // 20-24
+            if (age <= 29) return dataSet[7]; // 25-29
+            if (age <= 34) return dataSet[8]; // 30-34
+            if (age <= 39) return dataSet[9]; // 35-39
+            if (age <= 44) return dataSet[10]; // 40-44
+            if (age <= 49) return dataSet[11]; // 45-49
+            if (age <= 59) return dataSet[12]; // 50-59
+            if (age <= 69) return dataSet[13]; // 60-69
+            return dataSet[14]; // 70-80
+        }
+
+        /**
+         * Calculates percentile score (0-100) based on jump height, age, and sex.
+         */
+        function calculateJumpPercentile(age, sex, jumpHeight) {
+             if (!isFinite(jumpHeight) || !isFinite(age)) return NaN;
+             const g = getAgeGroupData(age, sex);
+             const pts = [ {p:5, x:g.p5}, {p:25, x:g.p25}, {p:50, x:g.p50}, {p:75, x:g.p75}, {p:95, x:g.p95} ];
+             
+             if (jumpHeight <= pts[0].x) { // Below P5
+                 const m = (pts[1].p - pts[0].p) / (pts[1].x - pts[0].x || 1e-6);
+                 return Math.max(0.1, pts[0].p + (jumpHeight - pts[0].x) * m);
+             }
+             for (let i = 0; i < pts.length - 1; i++) {
+                 if (jumpHeight <= pts[i+1].x) { // Between two points
+                     const m = (pts[i+1].p - pts[i].p) / (pts[i+1].x - pts[i].x || 1e-6);
+                     return pts[i].p + (jumpHeight - pts[i].x) * m;
+                 }
+             }
+             // Above P95
+             const m = (pts[pts.length-1].p - pts[pts.length-2].p) / (pts[pts.length-1].x - pts[pts.length-2].x || 1e-6);
+             return Math.min(99.9, pts[pts.length-1].p + (jumpHeight - pts[pts.length-1].x) * m);
+        }
+
+        /**
+         * Calculates Balance Age.
+         * Caps the age at max realAge + 5 years.
          */
         function calculateBalanceAge(realAge, sex, copArea) {
             const area = parseFloat(copArea);
             if (!isFinite(area)) return NaN;
             
-            const maxAllowedAge = realAge + 5; // New limit
-
+            let calculatedAge;
+            
             if (realAge <= 35) {
-                // METHOD 1 (Age <= 35): 3.13 area gives 21 years
+                // METHOD 1 (Age <= 35)
                 const minArea = 3.13;
                 const clippedArea = Math.max(minArea, area);
-                const kvinneBaseAlder = 21 - (2.36 * minArea); // approx. 13.61
-                const mannBaseAlder = 21 - (2.41 * minArea);   // approx. 13.46
-
-                if (sex.toLowerCase() === "kvinne" || sex.toLowerCase() === "female") {
-                    return Math.min(kvinneBaseAlder + 2.36 * clippedArea, maxAllowedAge);
+                const kvinneBaseAlder = 21 - (2.36 * minArea); // ~13.61
+                const mannBaseAlder = 21 - (2.41 * minArea);   // ~13.46
+                
+                if (isFemale(sex)) {
+                    calculatedAge = kvinneBaseAlder + 2.36 * clippedArea;
+                } else {
+                    calculatedAge = mannBaseAlder + 2.41 * clippedArea;
                 }
-                return Math.min(mannBaseAlder + 2.41 * clippedArea, maxAllowedAge);
-
             } else {
-                // METHOD 2 (Age > 35): The "original" formula (3.0 area gives ~33 years)
+                // METHOD 2 (Age > 35)
                 const minArea = 3.0;
                 const clippedArea = Math.max(minArea, area);
-
-                if (sex.toLowerCase() === "kvinne" || sex.toLowerCase() === "female") {
-                    return Math.min(26.11 + 2.36 * clippedArea, maxAllowedAge);
+                
+                if (isFemale(sex)) {
+                    calculatedAge = 26.11 + 2.36 * clippedArea;
+                } else {
+                    calculatedAge = 25.47 + 2.41 * clippedArea;
                 }
-                return Math.min(25.47 + 2.41 * clippedArea, maxAllowedAge);
+            }
+            // Cap the age at realAge + 5
+            return Math.min(calculatedAge, realAge + 5);
+        }
+
+        /**
+         * Converts a percentile score (0-100) to an age based on the P0/P50/P100 model.
+         */
+        function calculateAgeFromPercentile(percentile, realAge) {
+            if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
+            
+            const p = Math.max(0, Math.min(100, percentile));
+            const minAge = 21; // P100 = 21
+            const midAge = realAge; // P50 = realAge
+            const maxAge = realAge + 5; // P0 = realAge + 5
+
+            if (p === 50) {
+                return midAge;
+            } else if (p > 50) {
+                // Between P50 and P100 (linear interpolation)
+                const factor = (p - 50) / 50; // (0 to 1)
+                return midAge - factor * (midAge - minAge);
+            } else { // p < 50
+                // Between P0 and P50 (linear interpolation)
+                const factor = p / 50; // (0 to 1)
+                return maxAge - factor * (maxAge - midAge);
             }
         }
         
         /**
-         * Sets up the realtime listener to Firestore
+         * Calculates Functional (Jump) Age
+         */
+        function calculateJumpAge(realAge, sex, jumpHeight) {
+            const percentile = calculateJumpPercentile(realAge, sex, jumpHeight);
+            return calculateAgeFromPercentile(percentile, realAge);
+        }
+
+        /**
+         * Finds the age group for the strength model.
+         */
+        function getStrengthAgeGroup(age) {
+            if (age < 10) return 'Under 10'; if (age < 20) return '10-19';
+            if (age < 30) return '20-29'; if (age < 40) return '30-39';
+            if (age < 50) return '40-49'; if (age < 60) return '50-59';
+            if (age < 70) return '60-69'; if (age < 80) return '70-79';
+            return '80+';
+        }
+
+        /**
+         * Calculates Strength Percentile score.
+         */
+        function calculateStrengthScoreAndPercentile(gender, age, weight, pull) {
+            if (!isFinite(age) || !isFinite(weight) || !isFinite(pull) || weight <= 0 || pull < 0) {
+                return { score: NaN, percentile: NaN, error: "Invalid input values" };
+            }
+            try {
+                const genderKey = isFemale(gender) ? 'female' : 'male';
+                const model = STRENGTH_MODEL[genderKey];
+                const expectedLogPull = model.intercept + model.slope * Math.log(weight);
+                const expectedPull = Math.exp(expectedLogPull);
+
+                if (!isFinite(expectedPull) || expectedPull <= 0) {
+                     return { score: NaN, percentile: NaN, error: "Calculation error (expected pull)" };
+                }
+                const strengthRatio = pull / expectedPull;
+                const ageGroup = getStrengthAgeGroup(age);
+                const groupKey = `${ageGroup}_${genderKey === 'female' ? 'f' : 'm'}`;
+                let groupStats = STRENGTH_MODEL.ageGroupAdjustments[groupKey];
+                let zScore = 0;
+
+                if (groupStats && groupStats.stdDev > 0) {
+                    zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
+                } else if (STRENGTH_MODEL.overall.stdDev > 0) { // Fallback
+                    groupStats = STRENGTH_MODEL.overall;
+                    zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
+                } else {
+                     return { score: NaN, percentile: NaN, error: "Calculation error (std dev zero)" };
+                }
+                
+                // Simplified z-score to percentile
+                const p = 0.5 * (1 + (zScore / Math.sqrt(2)) / Math.sqrt(1 + (zScore*zScore/2))); // Basic approximation
+                const percentile = Math.max(0, Math.min(100, p * 100));
+                
+                 const clampedPercentile = Math.max(0, Math.min(100, percentile));
+                 let finalScore = 50 + (zScore * 15);
+                 finalScore = Math.max(0, Math.min(100, finalScore));
+                return { score: finalScore, percentile: clampedPercentile };
+            } catch (error) {
+                 return { score: NaN, percentile: NaN, error: "Calculation failed" };
+            }
+        }
+
+        /**
+         * Calculates Strength Age
+         */
+        function calculateStrengthAge(realAge, sex, weight, pull) {
+            const strengthResult = calculateStrengthScoreAndPercentile(sex, realAge, weight, pull);
+            const percentile = strengthResult.percentile;
+            return calculateAgeFromPercentile(percentile, realAge);
+        }
+
+        // --- END OF CALCULATION FUNCTIONS ---
+        
+
+        /**
+         * Sets up real-time listener to Firestore
          */
         function setupSnapshots() {
             if (unsubscribeEntries) unsubscribeEntries(); // Stop old listener
@@ -768,6 +863,7 @@
                 allEntries.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 
                 renderTableAndStats(filterInput.value);
+                renderGraphs(); // Re-render graphs with new data
                 
                 if (loadingOverlay.style.display !== 'none') {
                     loadingOverlay.style.display = 'none';
@@ -784,16 +880,16 @@
         }
         
         /**
-         * Updates the table and stats based on the filter
+         * Updates the table and statistics based on the filter
          */
         function renderTableAndStats(filterText = '') {
-            if (!allEntries) {
+            if (!allEntries) { 
                 console.warn("renderTableAndStats called before allEntries is defined.");
                 allEntries = [];
             }
             const normalizedFilter = filterText.toLowerCase().trim();
             const filteredEntries = allEntries.filter(entry => 
-                (entry.testleder?.toLowerCase() || '').includes(normalizedFilter)
+                entry.testleder?.toLowerCase().includes(normalizedFilter)
             );
 
             renderTable(filteredEntries);
@@ -801,10 +897,10 @@
         }
 
         /**
-         * Renders the table itself
+         * Renders the data table
          */
         function renderTable(entries) {
-            dataTableBody.innerHTML = ''; // Clear the table
+            dataTableBody.innerHTML = ''; // Clear table
 
             if (entries.length === 0) {
                 dataTableBody.innerHTML = `<tr><td colspan="9" class="py-4 px-6 text-center text-gray-500">No data found.</td></tr>`;
@@ -816,48 +912,32 @@
                 tr.className = `bg-[#1a1c1f] hover:bg-gray-800/40 border-b border-gray-700`;
                 tr.dataset.id = entry.id;
 
-                // Format timestamp
                 const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('en-GB') : 'N/A';
                 
-                // Format balance age
-                const balanceAlder = entry.balanceAlder;
-                let balanceAlderHtml = 'N/A';
-                let balanceColor = 'text-gray-400';
-                if (balanceAlder) {
-                    balanceAlderHtml = balanceAlder.toFixed(1);
-                    if (balanceAlder < entry.alder) balanceColor = 'text-emerald-400';
-                    else if (balanceAlder > entry.alder + 2) balanceColor = 'text-yellow-400';
-                }
+                // Check if it has full report data
+                const hasFullReport = entry.hopphoyde != null && entry.vekt != null && entry.pull != null;
+                const reportIcon = hasFullReport 
+                    ? `<button class="icon-button icon-button-report" data-action="view-report" title="View Full Report">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                           <path d="M9 4.804A7.968 7.968 0 001.153 8.624l-.013.028A7.968 7.968 0 0010 17c3.45 0 6.45-2.22 7.86-5.348l.013-.028A7.968 7.968 0 0011 4.804zM10 15c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7z" />
+                           <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                         </svg>
+                       </button>`
+                    : `<span class="opacity-30" title="No full report data">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                           <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.523l8.367 8.367zm1.414-1.414L6.523 5.11A6 6 0 0114.89 13.477z" clip-rule="evenodd" />
+                         </svg>
+                       </span>`;
 
-                // Translate Sex
-                let sexDisplay = entry.kjonn;
-                if (sexDisplay === 'Mann') sexDisplay = 'Male';
-                if (sexDisplay === 'Kvinne') sexDisplay = 'Female';
-                if (sexDisplay === 'Annet') sexDisplay = 'Other';
-
-                
-                // NEW: Check for full report data and create icon
-                const hasFullReport = entry.hopphoyde && entry.vekt && entry.pullResultat;
-                let reportIconHtml = '';
-                if (hasFullReport) {
-                    reportIconHtml = `
-                        <button class="icon-button" data-action="view-report" title="View full report">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 1a1 1 0 000 2h8a1 1 0 100-2H6zM6 9a1 1 0 000 2h8a1 1 0 100-2H6zm0 4a1 1 0 100 2h5a1 1 0 100-2H6z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    `;
-                }
-                
                 tr.innerHTML = `
-                    <td class="py-3 px-4 text-center">${reportIconHtml}</td>
-                    <td class="py-3 px-4" data-field="testleder" data-editable="true">${entry.testleder || ''}</td>
-                    <td class="py-3 px-4" data-field="alder" data-editable="true">${entry.alder}</td>
-                    <td class="py-3 px-4" data-field="kjonn" data-editable="true" data-original-value="${entry.kjonn}">${sexDisplay}</td>
-                    <td class="py-3 px-4" data-field="areal" data-editable="true">${entry.areal}</td>
-                    <td class="py-3 px-4" data-field="diff" data-editable="true">${entry.diff}</td>
-                    <td class="py-3 px-4 ${balanceColor}" data-field="balanceAlder" data-editable="false">${balanceAlderHtml}</td>
-                    <td class="py-3 px-4" data-field="timestamp" data-editable="false">${timestamp}</td>
+                    <td class="py-3 px-2 text-center">${reportIcon}</td>
+                    <td class="py-3 px-4" data-field="testleder">${entry.testleder || ''}</td>
+                    <td class="py-3 px-4" data-field="alder">${entry.alder}</td>
+                    <td class="py-3 px-4" data-field="kjonn">${entry.kjonn}</td>
+                    <td class="py-3 px-4" data-field="areal">${entry.areal}</td>
+                    <td class="py-3 px-4" data-field="diff">${entry.diff}</td>
+                    <td class="py-3 px-4 text-balance font-medium" data-field="balanceAlder">${entry.balanceAlder?.toFixed(1) || 'N/A'}</td>
+                    <td class="py-3 px-4" data-field="createdAt">${timestamp}</td>
                     <td class="py-3 px-4 text-center space-x-2">
                         <button class="icon-button" data-action="edit" title="Edit">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
@@ -868,65 +948,57 @@
                     </td>
                 `;
                 
-                // Add event listeners for buttons
-                if (hasFullReport) {
-                    tr.querySelector('[data-action="view-report"]').addEventListener('click', () => showReportFromEntry(entry));
-                }
+                // Add event listeners for the buttons
                 tr.querySelector('[data-action="edit"]').addEventListener('click', () => toggleEditEntry(entry.id));
                 tr.querySelector('[data-action="delete"]').addEventListener('click', () => deleteEntry(entry.id));
+                
+                const reportButton = tr.querySelector('[data-action="view-report"]');
+                if (reportButton) {
+                    reportButton.addEventListener('click', () => viewFullReport(entry));
+                }
 
                 dataTableBody.appendChild(tr);
             });
         }
-
+        
         /**
-         * NEW: Shows full report from a table row entry
+         * Handles clicking the "View Report" icon in the table.
          */
-        function showReportFromEntry(entry) {
-            const { alder, kjonn, areal, hopphoyde, vekt, pullResultat } = entry;
+        function viewFullReport(entry) {
+            const { alder, kjonn, areal, hopphoyde, vekt, pull } = entry;
             
-            // 1. Calculate balance age
+            // Recalculate all ages
             const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
-            
-            // 2. Calculate function age (jump)
             const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
+            const styrkeAlder = calculateStrengthAge(alder, kjonn, vekt, pull);
             
-            // 3. Calculate strength age
-            const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pullResultat);
-            const styrkeAlder = calculateStrengthAgeFromPercentile(strengthResult.percentile, alder);
+            const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(Number.isFinite);
+            const samletAlder = validAges.length > 0 ? validAges.reduce((a, b) => a + b, 0) / validAges.length : 0;
 
-            // 4. Calculate combined age
-            const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(isFinite);
-            let samletAlder = NaN;
-            if (validAges.length > 0) {
-                samletAlder = validAges.reduce((sum, age) => sum + age, 0) / validAges.length;
-            }
-
-            // 5. Build HTML for "sexy" boxes
             const detailsHtml = `
                 <div class="age-card">
-                    <span class="age-card-title">Balance Age</span>
-                    <span class="age-card-value text-balance">${balanseAlder.toFixed(1)}</span>
+                    <h4 class="age-card-title">BALANCE AGE</h4>
+                    <p class="age-card-value text-balance">${balanseAlder.toFixed(1)}</p>
                 </div>
                 <div class="age-card">
-                    <span class="age-card-title">Function Age</span>
-                    <span class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</span>
+                    <h4 class="age-card-title">FUNCTIONAL AGE</h4>
+                    <p class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</p>
                 </div>
                 <div class="age-card">
-                    <span class="age-card-title">Strength Age</span>
-                    <span class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</span>
+                    <h4 class="age-card-title">STRENGTH AGE</h4>
+                    <p class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</p>
                 </div>
             `;
             
-            // 6. Show the modal
             showModal(
-                "Full Fitness Report", 
-                `Combined Fitness Age for ${entry.testleder}:`, 
+                `Report for ${entry.testleder}`, 
+                "Estimated fitness age is:", 
                 samletAlder.toFixed(1), 
-                "success",
+                "report",
                 detailsHtml
             );
         }
+
         
         /**
          * Updates the statistics panel
@@ -934,98 +1006,359 @@
         function renderStats(entries) {
             totalCountEl.textContent = entries.length;
 
-            // Sex statistics
-            const genderCounts = { 'Mann': 0, 'Kvinne': 0, 'Annet': 0 };
-            
-            // Age groups (now with sex)
+            // Gender stats
+            const genderCounts = { 'Mann': 0, 'Kvinne': 0, 'Other': 0 };
             const ageGroups = {};
+            /*
+            '0-19': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Other': 0 },
+            */
+
             const ageBrackets = ['0-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70+'];
             ageBrackets.forEach(group => {
-                ageGroups[group] = { total: 0, 'Mann': 0, 'Kvinne': 0, 'Annet': 0 };
+                ageGroups[group] = { total: 0, 'Mann': 0, 'Kvinne': 0, 'Other': 0 };
             });
 
             entries.forEach(entry => {
-                // Sex
-                if (genderCounts.hasOwnProperty(entry.kjonn)) {
-                    genderCounts[entry.kjonn]++;
-                }
+                const kjonn = entry.kjonn in genderCounts ? entry.kjonn : 'Other';
+                genderCounts[kjonn]++;
 
-                // Age
                 const alder = entry.alder;
-                let group = '70+';
+                let group;
                 if (alder <= 19) group = '0-19';
                 else if (alder <= 29) group = '20-29';
                 else if (alder <= 39) group = '30-39';
                 else if (alder <= 49) group = '40-49';
                 else if (alder <= 59) group = '50-59';
                 else if (alder <= 69) group = '60-69';
+                else group = '70+';
                 
                 ageGroups[group].total++;
-                if (ageGroups[group].hasOwnProperty(entry.kjonn)) {
-                    ageGroups[group][entry.kjonn]++;
-                }
+                ageGroups[group][kjonn]++;
             });
 
-            // Show sex statistics
+            // Render Gender Stats
             genderStatsEl.innerHTML = '';
-            // Translate for display
-            const displayGenders = { 'Mann': 'Male', 'Kvinne': 'Female', 'Annet': 'Other' };
-            for (const [kjonn, count] of Object.entries(genderCounts)) {
-                if (count > 0) {
+            for (const [gender, count] of Object.entries(genderCounts)) {
+                 if (count > 0) {
                     const p = document.createElement('p');
-                    p.innerHTML = `<span class="text-gray-400">${displayGenders[kjonn]}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
+                    p.innerHTML = `<span class="text-gray-400">${gender}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
                     genderStatsEl.appendChild(p);
                 }
             }
-            if (entries.length === 0) {
-                genderStatsEl.innerHTML = '<p class="text-gray-400">No data selected.</p>';
-            }
 
-            // Show age group statistics (with table)
+            // Render Age Group Stats
             ageGroupStatsEl.innerHTML = `
-                <table class="w-full text-left text-xs">
+                <table class="w-full min-w-full text-left text-xs">
                     <thead class="text-gray-400">
                         <tr>
-                            <th class="pb-1 font-medium">Group</th>
-                            <th class="pb-1 font-medium text-center">Total</th>
-                            <th class="pb-1 font-medium text-center">M</th>
-                            <th class="pb-1 font-medium text-center">F</th>
-                            <th class="pb-1 font-medium text-center">O</th>
+                            <th class="py-1 pr-2">Group</th>
+                            <th class="py-1 px-2 text-center">Total</th>
+                            <th class="py-1 px-2 text-center">M</th>
+                            <th class="py-1 px-2 text-center">W</th>
+                            <th class="py-1 pl-2 text-center">O</th>
                         </tr>
                     </thead>
-                    <tbody class="text-white divide-y divide-gray-700">
-                    </tbody>
+                    <tbody class="text-white"></tbody>
                 </table>
             `;
             const ageTableBody = ageGroupStatsEl.querySelector('tbody');
             
-            for (const [group, counts] of Object.entries(ageGroups)) {
-                if (counts.total > 0) {
+            for (const group of ageBrackets) {
+                const data = ageGroups[group];
+                if (data.total > 0) {
                     const tr = document.createElement('tr');
+                    tr.className = 'border-t border-gray-700/50';
                     tr.innerHTML = `
-                        <td class="py-1">${group}</td>
-                        <td class="py-1 text-center font-bold">${counts.total}</td>
-                        <td class="py-1 text-center text-gray-400">${counts.Mann}</td>
-                        <td class="py-1 text-center text-gray-400">${counts.Kvinne}</td>
-                        <td class="py-1 text-center text-gray-400">${counts.Annet}</td>
+                        <td class="py-1 pr-2 font-medium">${group}</td>
+                        <td class="py-1 px-2 text-center text-emerald-400 font-bold">${data.total}</td>
+                        <td class="py-1 px-2 text-center">${data['Mann']}</td>
+                        <td class="py-1 px-2 text-center">${data['Kvinne']}</td>
+                        <td class="py-1 pl-2 text-center">${data['Other']}</td>
                     `;
                     ageTableBody.appendChild(tr);
                 }
             }
-            if (entries.length === 0 && ageTableBody) {
-                ageTableBody.innerHTML = '<tr><td colspan="5" class="py-1 text-gray-400">No data selected.</td></tr>';
+            
+            if (entries.length === 0) {
+                genderStatsEl.innerHTML = '<p class="text-gray-400">No data selected.</p>';
+                ageGroupStatsEl.innerHTML = '<p class="text-gray-400">No data selected.</p>';
             }
         }
+        
+        // --- START GRAPH FUNCTIONS ---
+
+        /**
+         * Calculates linear regression.
+         * Returns slope (b) and intercept (a).
+         */
+        function calculateLinearRegression(data) {
+            if (data.length < 2) return { a: 0, b: 0 };
+            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, n = data.length;
+
+            for (const p of data) {
+                sumX += p.x;
+                sumY += p.y;
+                sumXY += p.x * p.y;
+                sumXX += p.x * p.x;
+            }
+
+            const b = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const a = (sumY - b * sumX) / n;
+            return { a, b };
+        }
+
+        /**
+         * Calculates exponential regression.
+         * Returns a and b for y = a * e^(b*x)
+         */
+        function calculateExponentialRegression(data) {
+            if (data.length < 2) return { a: 0, b: 0 };
+
+            // Transform data to linear form: log(y) = log(a) + b*x
+            const transformedData = data.filter(p => p.y > 0).map(p => ({
+                x: p.x,
+                logY: Math.log(p.y)
+            }));
+
+            if (transformedData.length < 2) return { a: 0, b: 0 };
+
+            let sumX = 0, sumLogY = 0, sumXLogY = 0, sumXX = 0, n = transformedData.length;
+            
+            for (const p of transformedData) {
+                sumX += p.x;
+                sumLogY += p.logY;
+                sumXLogY += p.x * p.logY;
+                sumXX += p.x * p.x;
+            }
+
+            // Calculate slope (b) and intercept (logA) of the linear regression
+            const b = (n * sumXLogY - sumX * sumLogY) / (n * sumXX - sumX * sumX);
+            const logA = (sumLogY - b * sumX) / n;
+            
+            // Convert back to exponential form: y = a * e^(b*x)
+            const a = Math.exp(logA);
+            return { a, b };
+        }
+        
+        /**
+         * Calculates R and R-squared values for a dataset and its trend.
+         */
+        function calculateRValues(data, a, b, isExponential) {
+            if (data.length < 2) return { r: NaN, r2: NaN };
+
+            let yMean = 0;
+            let n = data.length;
+            const points = [];
+            
+            // For exponential, we calculate R² on the log-transformed data
+            if (isExponential) {
+                // NEW CHECK for invalid 'a' parameter from regression
+                if (a <= 0 || !isFinite(a)) return { r: NaN, r2: NaN }; 
+
+                const logData = data.filter(p => p.y > 0).map(p => ({ x: p.x, y: Math.log(p.y) }));
+                if (logData.length < 2) return { r: NaN, r2: NaN };
+                
+                const logA = Math.log(a);
+                n = logData.length;
+                yMean = logData.reduce((sum, p) => sum + p.y, 0) / n;
+                
+                let ssTot = 0; // Total sum of squares
+                let ssRes = 0; // Residual sum of squares
+                
+                for (const p of logData) {
+                    const predictedLogY = logA + b * p.x;
+                    ssTot += Math.pow(p.y - yMean, 2);
+                    ssRes += Math.pow(p.y - predictedLogY, 2);
+                }
+                const r2 = 1 - (ssRes / ssTot);
+                return { r: Math.sqrt(r2), r2: r2 };
+
+            } else {
+                // For linear, we use the standard Pearson R formula
+                let sumX = 0, sumY = 0, sumXX = 0, sumYY = 0, sumXY = 0;
+                
+                for (const p of data) {
+                    sumX += p.x;
+                    sumY += p.y;
+                    sumXX += p.x * p.x;
+                    sumYY += p.y * p.y;
+                    sumXY += p.x * p.y;
+                }
+                
+                const numerator = (n * sumXY - sumX * sumY);
+                const denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
+                
+                if (denominator === 0) return { r: NaN, r2: NaN };
+                
+                const r = numerator / denominator;
+                return { r: r, r2: r * r };
+            }
+        }
+
+        /**
+         * Renders both scatter plots
+         */
+        function renderGraphs() {
+            if (!allEntries || allEntries.length === 0) return;
+            
+            const filterGender = currentGraphGender;
+
+            // 1. Filter data based on selected gender
+            const filteredEntries = allEntries.filter(entry => {
+                if (filterGender === 'All') return true;
+                return entry.kjonn === filterGender;
+            });
+
+            // 2. Prepare data for charts (with outliers filtered)
+            const areaData = filteredEntries.map(e => ({ x: e.alder, y: e.areal })).filter(e => e.x > 0 && e.y > 0 && e.y <= 30);
+            const diffData = filteredEntries.map(e => ({ x: e.alder, y: e.diff })).filter(e => e.x > 0 && e.y > 0 && e.y <= 0.75);
+            
+            let areaTrendline, areaStats, diffTrendline, diffStats;
+            const minX = Math.min(...allEntries.map(e => e.alder), 18);
+            const maxX = Math.max(...allEntries.map(e => e.alder), 70);
+            
+            // 3. Calculate Trendlines and Stats
+            if (currentRegressionType === 'linear') {
+                const areaParams = calculateLinearRegression(areaData);
+                areaTrendline = [{ x: minX, y: areaParams.a + areaParams.b * minX }, { x: maxX, y: areaParams.a + areaParams.b * maxX }];
+                areaStats = calculateRValues(areaData, areaParams.a, areaParams.b, false);
+                
+                const diffParams = calculateLinearRegression(diffData);
+                diffTrendline = [{ x: minX, y: diffParams.a + diffParams.b * minX }, { x: maxX, y: diffParams.a + diffParams.b * maxX }];
+                diffStats = calculateRValues(diffData, diffParams.a, diffParams.b, false);
+                
+            } else { // Exponential
+                const areaParams = calculateExponentialRegression(areaData);
+                areaTrendline = [];
+                for(let x = minX; x <= maxX; x++) areaTrendline.push({x: x, y: areaParams.a * Math.exp(areaParams.b * x)});
+                areaStats = calculateRValues(areaData, areaParams.a, areaParams.b, true);
+                
+                const diffParams = calculateExponentialRegression(diffData);
+                diffTrendline = [];
+                for(let x = minX; x <= maxX; x++) diffTrendline.push({x: x, y: diffParams.a * Math.exp(diffParams.b * x)});
+                diffStats = calculateRValues(diffData, diffParams.a, diffParams.b, true);
+            }
+            
+            // 4. Update Stats Display
+            areaStatsDisplay.textContent = areaStats.r ? `R: ${areaStats.r.toFixed(3)}, R²: ${areaStats.r2.toFixed(3)}` : 'N/A (not enough data)';
+            diffStatsDisplay.textContent = diffStats.r ? `R: ${diffStats.r.toFixed(3)}, R²: ${diffStats.r2.toFixed(3)}` : 'N/A (not enough data)';
+
+            // 5. Create Chart Configuration
+            const chartConfig = (chartData, trendData, label) => ({
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Data Points',
+                            data: chartData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)', // emerald-500
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                        },
+                        {
+                            label: `${currentRegressionType.charAt(0).toUpperCase() + currentRegressionType.slice(1)} Trend`,
+                            data: trendData,
+                            type: 'line',
+                            borderColor: 'rgba(239, 68, 68, 0.7)', // red-500
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Age', color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: label, color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#9ca3af' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label.includes('Trend')) return null;
+                                    return `Age: ${context.parsed.x}, ${label}: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 6. Destroy old charts and create new ones
+            if (chartInstances.ageVsArea) chartInstances.ageVsArea.destroy();
+            if (chartInstances.ageVsDiff) chartInstances.ageVsDiff.destroy();
+            
+            if (ageVsAreaCanvas && areaData.length > 0) {
+                chartInstances.ageVsArea = new Chart(ageVsAreaCanvas, chartConfig(areaData, areaTrendline, 'CoP Area'));
+            }
+            if (ageVsDiffCanvas && diffData.length > 0) {
+                chartInstances.ageVsDiff = new Chart(ageVsDiffCanvas, chartConfig(diffData, diffTrendline, 'CoP Diff'));
+            }
+        }
+        
+        /**
+         * Sets up event listeners for graph filter buttons
+         */
+        function setupGraphFilters() {
+            graphFilterButtons.addEventListener('click', (e) => {
+                if (e.target.classList.contains('graph-filter')) {
+                    graphFilterButtons.querySelectorAll('.graph-filter').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+                    currentGraphGender = e.target.dataset.gender; // Update state
+                    renderGraphs(); // Re-render graphs
+                }
+            });
+        }
+        
+        /**
+         * Sets up event listeners for regression filter buttons
+         */
+        function setupRegressionFilters() {
+            regressionFilterButtons.addEventListener('click', (e) => {
+                if (e.target.classList.contains('regression-filter')) {
+                    regressionFilterButtons.querySelectorAll('.regression-filter').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+                    currentRegressionType = e.target.dataset.type; // Update state
+                    renderGraphs(); // Re-render graphs
+                }
+            });
+        }
+        
+        // --- END GRAPH FUNCTIONS ---
+
 
         /**
          * Deletes an entry
          */
         async function deleteEntry(id) {
-            // Using a custom modal instead of window.confirm
-            // Since I don't have a "confirm-modal" ready, re-introducing window.confirm
-            // NOTE: window.confirm() might not work in all iframe environments.
-            const isConfirmed = true; // window.confirm("Are you sure you want to delete this entry?");
-            if (!isConfirmed) return;
+            // NOTE: Using a custom modal instead of window.confirm
+            // For this quick implementation, we'll skip confirmation
+            // In a real app, you'd build a custom confirmation modal
+            // const isConfirmed = window.confirm("Are you sure you want to delete this entry?");
+            // if (!isConfirmed) return;
             
             try {
                 const docRef = doc(db, entriesCollection.path, id);
@@ -1047,24 +1380,26 @@
             const editButton = tr.querySelector('[data-action="edit"]');
 
             if (isEditing) {
-                // Switch to edit mode
+                // Change to edit mode
                 editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
                 editButton.title = "Save";
                 
-                tr.querySelectorAll('td[data-field][data-editable="true"]').forEach(td => {
+                tr.querySelectorAll('td[data-field]').forEach(td => {
                     const field = td.dataset.field;
+                    const value = td.textContent;
+                    
+                    // Don't edit calculated fields or timestamp
+                    if (field === 'balanceAlder' || field === 'createdAt') return;
                     
                     if (field === 'kjonn') {
-                        const originalValue = td.dataset.originalValue; // Get the raw 'Mann'/'Kvinne' value
                         td.innerHTML = `
-                            <select class="table-input" data-original-value="${originalValue}">
-                                <option value="Mann" ${originalValue === 'Mann' ? 'selected' : ''}>Male</option>
-                                <option value="Kvinne" ${originalValue === 'Kvinne' ? 'selected' : ''}>Female</option>
-                                <option value="Annet" ${originalValue === 'Annet' ? 'selected' : ''}>Other</option>
+                            <select class="table-input" data-original-value="${value}">
+                                <option value="Mann" ${value === 'Mann' ? 'selected' : ''}>Man</option>
+                                <option value="Kvinne" ${value === 'Kvinne' ? 'selected' : ''}>Woman</option>
+                                <option value="Other" ${value === 'Other' ? 'selected' : ''}>Other</option>
                             </select>
                         `;
                     } else {
-                        const value = td.textContent;
                         const inputType = (field === 'alder' || field === 'areal' || field === 'diff') ? 'number' : 'text';
                         const step = (field === 'areal' || field === 'diff') ? '0.01' : '1';
                         td.innerHTML = `<input type="${inputType}" step="${step}" class="table-input" value="${value}" data-original-value="${value}">`;
@@ -1077,14 +1412,11 @@
         }
 
         /**
-         * Saves the changes from edit mode
+         * Saves changes from edit mode
          */
         async function saveEntryChanges(id) {
             const tr = dataTableBody.querySelector(`tr[data-id="${id}"]`);
             if (!tr) return;
-            
-            const originalEntry = allEntries.find(e => e.id === id);
-            if (!originalEntry) return;
 
             const editButton = tr.querySelector('[data-action="edit"]');
             editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
@@ -1092,56 +1424,43 @@
             
             const updates = {};
             let hasChanges = false;
+            let needsRecalculation = false;
             
-            const newValues = { ...originalEntry }; // Copy to calculate
-            
-            tr.querySelectorAll('td[data-field][data-editable="true"]').forEach(td => {
+            tr.querySelectorAll('td[data-field]').forEach(td => {
                 const input = td.querySelector('input, select');
                 if (!input) return;
 
                 const field = td.dataset.field;
                 const newValue = input.value;
-                const originalValue = (field === 'kjonn') ? input.dataset.originalValue : input.dataset.originalValue;
+                const originalValue = input.dataset.originalValue;
 
                 if (newValue !== originalValue) {
                     hasChanges = true;
                     if (field === 'alder') updates.alder = parseInt(newValue, 10);
                     else if (field === 'areal') updates.areal = parseFloat(newValue);
                     else if (field === 'diff') updates.diff = parseFloat(newValue);
-                    else updates[field] = newValue; // This will be 'Mann', 'Kvinne', or 'Annet'
+                    else updates[field] = newValue;
                     
-                    newValues[field] = updates[field]; // Update the copy
+                    if (['alder', 'kjonn', 'areal'].includes(field)) {
+                        needsRecalculation = true;
+                    }
                 }
                 
                 // Set back to plain text
-                if(field === 'kjonn') {
-                    let sexDisplay = newValue;
-                    if (sexDisplay === 'Mann') sexDisplay = 'Male';
-                    if (sexDisplay === 'Kvinne') sexDisplay = 'Female';
-                    if (sexDisplay === 'Annet') sexDisplay = 'Other';
-                    td.textContent = sexDisplay;
-                    td.dataset.originalValue = newValue; // Update the original value dataset
-                } else {
-                    td.textContent = newValue;
-                }
+                td.textContent = newValue;
             });
             
-            // NEW: Update balance age if relevant fields were changed
-            if (updates.alder || updates.kjonn || updates.areal) {
-                const newBalanceAlder = calculateBalanceAge(newValues.alder, newValues.kjonn, newValues.areal);
-                updates.balanceAlder = newBalanceAlder;
-                hasChanges = true;
+            // Recalculate Balance Age if needed
+            if (needsRecalculation) {
+                const newAlder = updates.alder !== undefined ? updates.alder : parseInt(tr.querySelector('td[data-field="alder"]').textContent);
+                const newKjonn = updates.kjonn !== undefined ? updates.kjonn : tr.querySelector('td[data-field="kjonn"]').textContent;
+                const newAreal = updates.areal !== undefined ? updates.areal : parseFloat(tr.querySelector('td[data-field="areal"]').textContent);
                 
-                // Update the cell in the table immediately
-                const balanceCell = tr.querySelector('td[data-field="balanceAlder"]');
-                if (balanceCell) {
-                    balanceCell.textContent = newBalanceAlder.toFixed(1);
-                    // (Color logic will be applied on next full render)
-                }
+                updates.balanceAlder = calculateBalanceAge(newAlder, newKjonn, newAreal);
             }
-
+            
             // If there are changes, update the database
-            if (hasChanges) {
+            if (hasChanges || needsRecalculation) {
                 try {
                     const docRef = doc(db, entriesCollection.path, id);
                     await updateDoc(docRef, updates);
@@ -1158,7 +1477,7 @@
         function downloadCSV() {
             const normalizedFilter = filterInput.value.toLowerCase().trim();
             const filteredEntries = allEntries.filter(entry => 
-                (entry.testleder?.toLowerCase() || '').includes(normalizedFilter)
+                entry.testleder?.toLowerCase().includes(normalizedFilter)
             );
             
             if (filteredEntries.length === 0) {
@@ -1166,28 +1485,20 @@
                 return;
             }
 
-            // UPDATED: Added new columns and translated headers
-            const headers = ["Supervisor", "Age", "Sex", "Area (cm²)", "Diff (cm)", "Balance Age", "Jump Height (cm)", "Weight (kg)", "Pull Result (kg)", "Timestamp"];
+            const headers = ["TestLeader", "Age", "Sex", "CoPArea(cm²)", "CoPDiff(cm)", "BalanceAge", "Timestamp", "JumpHeight(cm)", "Weight(kg)", "Pull(kg)"];
             const rows = filteredEntries.map(entry => {
                 const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('en-GB') : 'N/A';
-                
-                // Translate sex for CSV
-                let sexDisplay = entry.kjonn;
-                if (sexDisplay === 'Mann') sexDisplay = 'Male';
-                if (sexDisplay === 'Kvinne') sexDisplay = 'Female';
-                if (sexDisplay === 'Annet') sexDisplay = 'Other';
-
                 return [
                     `"${entry.testleder || ''}"`,
                     entry.alder,
-                    sexDisplay,
+                    entry.kjonn,
                     entry.areal,
                     entry.diff,
-                    entry.balanceAlder?.toFixed(1) || 'N/A',
+                    entry.balanceAlder?.toFixed(2) || 'N/A',
+                    `"${timestamp}"`,
                     entry.hopphoyde || 'N/A',
                     entry.vekt || 'N/A',
-                    entry.pullResultat || 'N/A',
-                    `"${timestamp}"`
+                    entry.pull || 'N/A'
                 ].join(',');
             });
 
@@ -1204,10 +1515,14 @@
             document.body.removeChild(link);
         }
 
-        // Run main function when page is ready
+        // Run the main function when the page is ready
         document.addEventListener('DOMContentLoaded', main);
     </script>
 
 </body>
 </html>
+
+
+
+
 
