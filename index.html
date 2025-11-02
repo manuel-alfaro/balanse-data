@@ -1613,7 +1613,9 @@
                     
                     r2Value = regressionResult.r2;
                     // Calculate R (correlation coefficient)
-                    rValue = Math.sqrt(Math.max(0, r2Value)) * (regressionResult.equation[0] < 0 ? -1 : 1);
+                    // Use sign of first equation term (slope) to determine R sign
+                    const slopeSign = Math.sign(regressionResult.equation[regressionResult.equation.length - 2]);
+                    rValue = Math.sqrt(Math.max(0, r2Value)) * (slopeSign || 1);
 
 
                 } catch (error) {
@@ -1624,7 +1626,8 @@
                         regressionLabel = `Poly Failed. Fallback (Linear)`;
                         
                         r2Value = regressionResult.r2;
-                        rValue = Math.sqrt(Math.max(0, r2Value)) * (regressionResult.equation[0] < 0 ? -1 : 1);
+                        const slopeSign = Math.sign(regressionResult.equation[0]);
+                        rValue = Math.sqrt(Math.max(0, r2Value)) * (slopeSign || 1);
 
                     } catch (linearError) {
                         console.error(`Linear fallback failed: ${linearError.message}`);
@@ -1642,6 +1645,22 @@
             // 4. Update the visual stats card
             updateStatsCard(statsEl, rValue, r2Value, regressionLabel);
 
+            // 4.5. [NEW] Add 1:1 Agreement Line if conditions are met
+            let lineOfAgreementData = [];
+            const isAgeVsBalanceAge = (xLabel.includes('Age') && yLabel.includes('Balance Age')) || (xLabel.includes('Balance Age') && yLabel.includes('Age'));
+            
+            if (currentRegressionType === 'linear' && isAgeVsBalanceAge && trendDataForCalc.length > 0) {
+                // Find min and max of all data to draw the line
+                const allX = trendDataForCalc.map(p => p[0]);
+                const allY = trendDataForCalc.map(p => p[1]);
+                const minVal = Math.min(...allX, ...allY);
+                const maxVal = Math.max(...allX, ...allY);
+                
+                lineOfAgreementData = [
+                    { x: minVal, y: minVal },
+                    { x: maxVal, y: maxVal }
+                ];
+            }
 
             // 5. Define datasets
             const datasets = [];
@@ -1697,6 +1716,22 @@
                 tension: 0.1
             });
 
+            // [NEW] Add the agreement line dataset if it was generated
+            if (lineOfAgreementData.length > 0) {
+                datasets.push({
+                    label: '1:1 Agreement Line',
+                    data: lineOfAgreementData,
+                    type: 'line',
+                    borderColor: 'rgba(255, 255, 255, 0.6)', // White dashed line
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // This makes it dashed ("striplet")
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0
+                });
+            }
+
             // 6. Create chart config
             const chartConfig = {
                 type: 'scatter',
@@ -1725,7 +1760,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    if (context.dataset.label.includes('Trend')) return null;
+                                    if (context.dataset.label.includes('Trend') || context.dataset.label.includes('Agreement')) return null;
                                     return `${context.dataset.label}: (${context.parsed.x}, ${context.parsed.y})`;
                                 }
                             }
