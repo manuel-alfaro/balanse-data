@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- NEW: Load regression-js for advanced trendlines (REMOVED - now loaded as module) -->
     <style>
         /* Custom style to match Dash app */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; }
@@ -80,6 +79,48 @@
         .highlight-row {
             background-color: rgba(239, 68, 68, 0.1); /* red-500 with 10% opacity */
         }
+
+        /* NEW: Stats card styling */
+        .stats-card {
+            background-color: #2d3748; /* gray-800 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* medium */
+            color: #9ca3af; /* gray-400 */
+            margin-bottom: 0.25rem;
+        }
+        .stat-value {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* bold */
+        }
+        .stat-desc {
+            font-size: 0.75rem; /* text-xs */
+            color: #d1d5db; /* gray-300 */
+            margin-top: 0.25rem;
+        }
+        .stat-class {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* semibold */
+            margin-top: 0.25rem;
+        }
+
+        /* R-value color classes */
+        .r-strong { color: #22c55e; } /* green-500 */
+        .r-good { color: #3b82f6; } /* blue-500 */
+        .r-moderate { color: #eab308; } /* yellow-500 */
+        .r-low { color: #f97316; } /* orange-500 */
+        .r-vlow { color: #ef4444; } /* red-500 */
+        .r-fail { color: #6b7280; } /* gray-500 */
 
     </style>
 </head>
@@ -244,16 +285,18 @@
                             <button class="filter-button graph-filter" data-gender="Mann">Men</button>
                             <button class="filter-button graph-filter" data-gender="Kvinne">Women</button>
                         </div>
-                        <div class="flex flex-col items-center gap-2">
+                        
+                        <!-- MODIFIED: Changed to flex-row for smoother layout -->
+                        <div class="flex flex-row items-center justify-center gap-2">
                              <div class="flex justify-center gap-2" id="regression-filter-buttons">
                                 <button class="filter-button regression-filter active" data-type="exponential">Exponential</button>
                                 <button class="filter-button regression-filter" data-type="linear">Linear</button>
                                 <button class="filter-button regression-filter" data-type="polynomial">Polynomial</button>
                             </div>
-                             <!-- NEW: Polynomial Order Input -->
-                            <div id="poly-order-container" class="hidden w-40">
-                                <label for="poly-order" class="block text-sm text-white font-medium mb-1 text-center">Order:</label>
-                                <input type="number" id="poly-order" class="name-input !py-1 text-center" value="2" min="2" max="5">
+                             <!-- MODIFIED: Polynomial Order Input -->
+                            <div id="poly-order-container" class="hidden flex flex-row items-center gap-2">
+                                <label for="poly-order" class="text-sm text-white font-medium">Order:</label>
+                                <input type="number" id="poly-order" class="name-input !py-1 text-center w-20" value="2" min="2" max="5">
                             </div>
                         </div>
                     </div>
@@ -267,7 +310,7 @@
                                 <select id="x-axis-select-1" class="name-input">
                                     <option value="alder" selected>Age</option>
                                     <option value="areal">CoP Area</option>
-                                    <option value="diff">CoP Diff</option>
+                                    <option value="diff">CoP Diff (cm) x100</option>
                                     <option value="balanceAlder">Balance Age</option>
                                 </select>
                             </div>
@@ -276,14 +319,18 @@
                                 <select id="y-axis-select-1" class="name-input">
                                     <option value="alder">Age</option>
                                     <option value="areal" selected>CoP Area</option>
-                                    <option value="diff">CoP Diff</option>
+                                    <option value="diff">CoP Diff (cm) x100</option>
                                     <option value="balanceAlder">Balance Age</option>
                                 </select>
                             </div>
                         </div>
-                        <p id="area-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
+                        <!-- REMOVED OLD P TAG -->
                         <div class="bg-gray-800/40 p-4 rounded-lg h-[400px]">
                             <canvas id="areaChart"></canvas>
+                        </div>
+                        <!-- NEW: Visual Stats Card -->
+                        <div id="area-stats-display" class="stats-card">
+                             <!-- Content injected by JS -->
                         </div>
                     </div>
 
@@ -296,7 +343,7 @@
                                 <select id="x-axis-select-2" class="name-input">
                                     <option value="alder" selected>Age</option>
                                     <option value="areal">CoP Area</option>
-                                    <option value="diff">CoP Diff</option>
+                                    <option value="diff">CoP Diff (cm) x100</option>
                                     <option value="balanceAlder">Balance Age</option>
                                 </select>
                             </div>
@@ -305,14 +352,18 @@
                                 <select id="y-axis-select-2" class="name-input">
                                     <option value="alder">Age</option>
                                     <option value="areal">CoP Area</option>
-                                    <option value="diff" selected>CoP Diff</option>
+                                    <option value="diff" selected>CoP Diff (cm) x100</option>
                                     <option value="balanceAlder">Balance Age</option>
                                 </select>
                             </div>
                         </div>
-                        <p id="diff-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
+                        <!-- REMOVED OLD P TAG -->
                         <div class="bg-gray-800/40 p-4 rounded-lg h-[400px]">
                             <canvas id="diffChart"></canvas>
+                        </div>
+                        <!-- NEW: Visual Stats Card -->
+                        <div id="diff-stats-display" class="stats-card">
+                            <!-- Content injected by JS -->
                         </div>
                     </div>
                 </div>
@@ -905,7 +956,7 @@
                  let finalScore = 50 + (zScore * 15);
                  finalScore = Math.max(0, Math.min(100, finalScore));
 
-                return { score: finalScore, percentile: clampedPercentile };
+                return { score: score, percentile: clampedPercentile };
             } catch (error) {
                 console.error("Error in calculateStrengthScoreAndPercentile:", error);
                  return { score: NaN, percentile: NaN, error: "Calculation failed" };
@@ -1525,8 +1576,9 @@
         function updateChart(instances, canvas, chartId, dataObject, statsEl, xLabel, yLabel) {
             let regressionResult = null;
             let trendData = [];
-            let statsText = 'N/A (not enough data)';
             let regressionLabel = `${currentRegressionType.charAt(0).toUpperCase() + currentRegressionType.slice(1)} Trend`;
+            
+            let rValue = NaN, r2Value = NaN, statsText = 'N/A (not enough data)';
             
             // 1. Get the correct data subset based on the filter
             let data;
@@ -1558,13 +1610,22 @@
                     if (!regressionResult || !isFinite(regressionResult.r2)) {
                         throw new Error("Regression failed (NaN or invalid result)");
                     }
+                    
+                    r2Value = regressionResult.r2;
+                    // Calculate R (correlation coefficient)
+                    rValue = Math.sqrt(Math.max(0, r2Value)) * (regressionResult.equation[0] < 0 ? -1 : 1);
+
 
                 } catch (error) {
                     // --- FALLBACK LOGIC ---
                     console.warn(`Primary regression (${currentRegressionType}) failed: ${error.message}. Falling back to linear.`);
                     try {
                         regressionResult = regression.linear(trendDataForCalc, { precision: 3 });
-                        regressionLabel = `Fallback (Linear)`;
+                        regressionLabel = `Poly Failed. Fallback (Linear)`;
+                        
+                        r2Value = regressionResult.r2;
+                        rValue = Math.sqrt(Math.max(0, r2Value)) * (regressionResult.equation[0] < 0 ? -1 : 1);
+
                     } catch (linearError) {
                         console.error(`Linear fallback failed: ${linearError.message}`);
                         regressionResult = null; // Ensure it's null
@@ -1575,19 +1636,14 @@
                 if (regressionResult) {
                     trendData = regressionResult.points.map(p => ({ x: p[0], y: p[1] }));
                     trendData.sort((a, b) => a.x - b.x); // Ensure line draws correctly
-                    
-                    // Calculate R (correlation coefficient)
-                    const r = Math.sqrt(Math.max(0, regressionResult.r2)) * (regressionResult.equation[0] < 0 ? -1 : 1);
-                    statsText = `R: ${r.toFixed(3)} | R²: ${regressionResult.r2.toFixed(3)} | ${regressionResult.string}`;
-                } else {
-                     statsText = 'N/A (calculation error)';
-                     trendData = [];
                 }
             }
             
-            statsEl.textContent = statsText;
+            // 4. Update the visual stats card
+            updateStatsCard(statsEl, rValue, r2Value, regressionLabel);
 
-            // 4. Define datasets
+
+            // 5. Define datasets
             const datasets = [];
             
             // Colors
@@ -1641,7 +1697,7 @@
                 tension: 0.1
             });
 
-            // 5. Create chart config
+            // 6. Create chart config
             const chartConfig = {
                 type: 'scatter',
                 data: { datasets: datasets },
@@ -1678,7 +1734,7 @@
                 }
             };
 
-            // 6. Destroy old chart and create new one
+            // 7. Destroy old chart and create new one
             if (instances[chartId]) {
                 instances[chartId].destroy();
             }
@@ -1686,6 +1742,55 @@
             if (canvas) {
                 instances[chartId] = new Chart(canvas, chartConfig);
             }
+        }
+
+        /**
+         * NEW: Updates the visual stats card with colors and descriptions
+         */
+        function updateStatsCard(statsEl, r, r2, label) {
+            if (!isFinite(r) || !isFinite(r2)) {
+                statsEl.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-label">R (Correlation)</div>
+                        <div class="stat-value r-fail">N/A</div>
+                        <div class="stat-class r-fail">Calculation Failed</div>
+                        <div class="stat-desc">Not enough data to calculate trend.</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">R² (Model Fit)</div>
+                        <div class="stat-value r-fail">N/A</div>
+                        <div class="stat-class r-fail">${label}</div>
+                        <div class="stat-desc">Trendline could not be drawn.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let rClass = 'r-vlow';
+            let rText = 'Veldig Lav';
+            const rAbs = Math.abs(r);
+
+            if (rAbs >= 0.8) { rClass = 'r-strong'; rText = 'Sterk'; }
+            else if (rAbs >= 0.6) { rClass = 'r-good'; rText = 'God'; }
+            else if (rAbs >= 0.4) { rClass = 'r-moderate'; rText = 'Moderat'; }
+            else if (rAbs >= 0.2) { rClass = 'r-low'; rText = 'Lav'; }
+            
+            const r2Percent = (r2 * 100).toFixed(1);
+
+            statsEl.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">R (Correlation)</div>
+                    <div class="stat-value ${rClass}">${r.toFixed(3)}</div>
+                    <div class="stat-class ${rClass}">${rText}</div>
+                    <div class="stat-desc">Viser styrken på sammenhengen (1 er perfekt).</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">R² (Model Fit)</div>
+                    <div class="stat-value">${r2.toFixed(3)}</div>
+                    <div class="stat-class">${label}</div>
+                    <div class="stat-desc">${r2Percent}% av variasjonen forklares av trendlinjen.</div>
+                </div>
+            `;
         }
         
         
