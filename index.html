@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balance Data</title>
+    <title>Balance Data Logger (High Contrast)</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- NEW: regression-js is now imported as a module in the script below -->
+    <!-- NEW: Load regression-js for advanced trendlines (REMOVED - now loaded as module) -->
     <style>
         /* Custom style to match Dash app */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; }
@@ -75,6 +75,11 @@
         .text-balance { color: #34d399; } /* emerald-400 */
         .text-function { color: #60a5fa; } /* blue-400 */
         .text-strength { color: #c084fc; } /* purple-400 */
+
+        /* FIX: Highlighting for stats table */
+        .highlight-row {
+            background-color: rgba(239, 68, 68, 0.1); /* red-500 with 10% opacity */
+        }
 
     </style>
 </head>
@@ -228,8 +233,6 @@
             <!-- Right Column (Graphs & Table) -->
             <div class="lg:w-2/3 flex flex-col gap-8">
 
-                <!-- DEBUG PANEL REMOVED -->
-
                 <!-- ENHANCED: Graph Section (2 Dynamic Charts) -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Data Visualization</h3>
@@ -241,18 +244,24 @@
                             <button class="filter-button graph-filter" data-gender="Mann">Men</button>
                             <button class="filter-button graph-filter" data-gender="Kvinne">Women</button>
                         </div>
-                        <div class="flex justify-center gap-2" id="regression-filter-buttons">
-                            <button class="filter-button regression-filter active" data-type="exponential">Exponential</button>
-                            <button class="filter-button regression-filter" data-type="linear">Linear</button>
-                            <button class="filter-button regression-filter" data-type="polynomial">Polynomial (2nd)</button>
+                        <div class="flex flex-col items-center gap-2">
+                             <div class="flex justify-center gap-2" id="regression-filter-buttons">
+                                <button class="filter-button regression-filter active" data-type="exponential">Exponential</button>
+                                <button class="filter-button regression-filter" data-type="linear">Linear</button>
+                                <button class="filter-button regression-filter" data-type="polynomial">Polynomial</button>
+                            </div>
+                             <!-- NEW: Polynomial Order Input -->
+                            <div id="poly-order-container" class="hidden w-40">
+                                <label for="poly-order" class="block text-sm text-white font-medium mb-1 text-center">Order:</label>
+                                <input type="number" id="poly-order" class="name-input !py-1 text-center" value="2" min="2" max="5">
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Chart 1: Default Age vs Area -->
                     <div class="mb-8">
-                        <!-- NEW: Axis Selectors for Chart 1 -->
-                        <!-- FIX: Removed sm:grid-cols-2 to force vertical stacking -->
-                        <div class="grid grid-cols-1 gap-4 mb-4">
+                        <!-- NEW: Axis Selectors for Chart 1 - FORCED STACKING -->
+                        <div class="flex flex-col gap-4 mb-4">
                             <div>
                                 <label for="x-axis-select-1" class="block text-sm text-white font-medium mb-2">Graph 1: X-Axis</label>
                                 <select id="x-axis-select-1" class="name-input">
@@ -280,9 +289,8 @@
 
                     <!-- Chart 2: Default Age vs Diff -->
                     <div>
-                        <!-- NEW: Axis Selectors for Chart 2 -->
-                        <!-- FIX: Removed sm:grid-cols-2 to force vertical stacking -->
-                        <div class="grid grid-cols-1 gap-4 mb-4">
+                        <!-- NEW: Axis Selectors for Chart 2 - FORCED STACKING -->
+                        <div class="flex flex-col gap-4 mb-4">
                             <div>
                                 <label for="x-axis-select-2" class="block text-sm text-white font-medium mb-2">Graph 2: X-Axis</label>
                                 <select id="x-axis-select-2" class="name-input">
@@ -367,7 +375,7 @@
             updateDoc,
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // --- FIX V8: Import regression as an ES Module ---
+        // NEW: Import regression.js as an ES Module
         import regression from 'https://esm.run/regression@2.0.1';
 
         // Hardcoded Firebase configuration for 'balanse-data'
@@ -448,28 +456,58 @@
         };
         // --- END OF STRENGTH DATA ---
 
-        // UI elements - DECLARED here, INITIALIZED in initializeUIElements()
-        let loadingOverlay, loadingMessage, dataTableBody, filterInput, addForm, testlederInput;
-        let totalCountEl, ageGroupStatsEl, genderStatsEl, downloadCsvButton;
-        let ageModal, modalTitle, modalMessage, modalBalanceAge, modalDetails, closeModalBtn;
-        let toggleFitnessReportBtn, fullFitnessReportFields;
-        
-        // ENHANCED: Graph UI
-        const chartInstances = {
-            areaChart: null,
-            diffChart: null
-        };
-        
-        let areaStatsDisplay, diffStatsDisplay, graphFilterButtons, regressionFilterButtons;
-        let xAxisSelect1, yAxisSelect1, xAxisSelect2, yAxisSelect2;
-        // NEW: Add canvas elements here
-        let areaChartCanvas, diffChartCanvas;
-        // DEBUG PANEL VARS REMOVED
+        // UI elements
+        let loadingOverlay, loadingMessage, dataTableBody, filterInput, addForm, testlederInput,
+            totalCountEl, ageGroupStatsEl, genderStatsEl, downloadCsvButton, ageModal,
+            modalTitle, modalMessage, modalBalanceAge, modalDetails, closeModalBtn,
+            toggleFitnessReportBtn, fullFitnessReportFields, chartInstances, areaChartCanvas,
+            diffChartCanvas, areaStatsDisplay, diffStatsDisplay, graphFilterButtons,
+            regressionFilterButtons, xAxisSelect1, yAxisSelect1, xAxisSelect2, yAxisSelect2,
+            polyOrderContainer, polyOrderInput;
 
         // Global graph state
         let currentGraphGender = 'All';
         let currentRegressionType = 'exponential';
         
+        /**
+         * Finds and assigns all UI elements to global variables
+         */
+        function initializeUIElements() {
+            loadingOverlay = document.getElementById('loading-overlay');
+            loadingMessage = document.getElementById('loading-message');
+            dataTableBody = document.getElementById('data-table-body');
+            filterInput = document.getElementById('filter-input');
+            addForm = document.getElementById('add-entry-form');
+            testlederInput = document.getElementById('testleder-input');
+            totalCountEl = document.getElementById('total-count');
+            ageGroupStatsEl = document.getElementById('age-group-stats');
+            genderStatsEl = document.getElementById('gender-stats');
+            downloadCsvButton = document.getElementById('download-csv-button');
+            ageModal = document.getElementById('age-modal');
+            modalTitle = document.getElementById('modal-title');
+            modalMessage = document.getElementById('modal-message');
+            modalBalanceAge = document.getElementById('modal-balance-age');
+            modalDetails = document.getElementById('modal-details');
+            closeModalBtn = document.getElementById('close-modal-btn');
+            toggleFitnessReportBtn = document.getElementById('toggle-fitness-report-btn');
+            fullFitnessReportFields = document.getElementById('full-fitness-report-fields');
+            
+            // Graph UI
+            chartInstances = { areaChart: null, diffChart: null };
+            areaChartCanvas = document.getElementById('areaChart');
+            diffChartCanvas = document.getElementById('diffChart');
+            areaStatsDisplay = document.getElementById('area-stats-display');
+            diffStatsDisplay = document.getElementById('diff-stats-display');
+            graphFilterButtons = document.getElementById('graph-filter-buttons');
+            regressionFilterButtons = document.getElementById('regression-filter-buttons');
+            xAxisSelect1 = document.getElementById('x-axis-select-1');
+            yAxisSelect1 = document.getElementById('y-axis-select-1');
+            xAxisSelect2 = document.getElementById('x-axis-select-2');
+            yAxisSelect2 = document.getElementById('y-axis-select-2');
+            polyOrderContainer = document.getElementById('poly-order-container');
+            polyOrderInput = document.getElementById('poly-order');
+        }
+
         /**
          * Shows a popup modal with custom content.
          * @param {string} title - The title of the modal
@@ -492,7 +530,7 @@
 
 
             if (type === 'success') {
-                modalBalanceAge.classList.add('text-emerald-400');
+                modalBalanceAge.classList.add('emerald-400');
             } else if (type === 'error') {
                 modalBalanceAge.classList.add('text-red-500');
             } else if (type === 'warning') {
@@ -516,30 +554,25 @@
          */
         async function main() {
             try {
-                console.log("App initializing...");
-                
-                // NEW: Initialize all UI elements safely after DOM load
+                // 1. Get all UI elements
                 initializeUIElements();
 
-                // 1. Initialize Firebase App
+                // 2. Initialize Firebase App
                 const app = initializeApp(firebaseConfig);
                 
-                // 2. Initialize Firestore DB
+                // 3. Initialize Firestore DB
                 db = getFirestore(app);
                 
-                // 3. Define the database path (MUST match Firestore rules)
+                // 4. Define the database path (MUST match Firestore rules)
                 // This is hardcoded so everyone sees the same data.
                 const dbPath = 'balanse-data-entries';
                 entriesCollection = collection(db, dbPath);
 
-                console.log(`Connected. Listening to database path: ${dbPath}`);
-
-                // 4. Set up real-time listener
+                // 5. Set up real-time listener
                 setupSnapshots();
                 
-                // 5. Set up event listeners for UI
+                // 6. Set up event listeners for UI
                 setupEventListeners();
-                console.log("Event listeners set up. App is ready.");
 
             } catch (error) {
                 console.error("Initialization Error:", error);
@@ -547,48 +580,6 @@
             }
         }
         
-        /**
-         * NEW: Safely initializes all UI element variables after DOM load
-         */
-        function initializeUIElements() {
-            // DEBUG PANEL REMOVED
-            
-            // General UI
-            loadingOverlay = document.getElementById('loading-overlay');
-            loadingMessage = document.getElementById('loading-message');
-            dataTableBody = document.getElementById('data-table-body');
-            filterInput = document.getElementById('filter-input');
-            addForm = document.getElementById('add-entry-form');
-            testlederInput = document.getElementById('testleder-input');
-            totalCountEl = document.getElementById('total-count');
-            ageGroupStatsEl = document.getElementById('age-group-stats');
-            genderStatsEl = document.getElementById('gender-stats');
-            downloadCsvButton = document.getElementById('download-csv-button');
-            ageModal = document.getElementById('age-modal');
-            modalTitle = document.getElementById('modal-title');
-            modalMessage = document.getElementById('modal-message');
-            modalBalanceAge = document.getElementById('modal-balance-age');
-            modalDetails = document.getElementById('modal-details');
-            closeModalBtn = document.getElementById('close-modal-btn');
-            toggleFitnessReportBtn = document.getElementById('toggle-fitness-report-btn');
-            fullFitnessReportFields = document.getElementById('full-fitness-report-fields');
-            
-            // Graph-related elements
-            areaStatsDisplay = document.getElementById('area-stats-display');
-            diffStatsDisplay = document.getElementById('diff-stats-display');
-            graphFilterButtons = document.getElementById('graph-filter-buttons');
-            regressionFilterButtons = document.getElementById('regression-filter-buttons');
-            xAxisSelect1 = document.getElementById('x-axis-select-1');
-            yAxisSelect1 = document.getElementById('y-axis-select-1');
-            xAxisSelect2 = document.getElementById('x-axis-select-2');
-            yAxisSelect2 = document.getElementById('y-axis-select-2');
-
-            // --- CRITICAL FIX ---
-            // Get the canvas elements here
-            areaChartCanvas = document.getElementById('areaChart');
-            diffChartCanvas = document.getElementById('diffChart');
-        }
-
         /**
          * Sets up listeners for UI elements
          */
@@ -644,11 +635,11 @@
                     
                     if (isNaN(hopphoyde) || isNaN(vekt) || isNaN(pull)) {
                          showModal(
-                             "Incomplete Report", 
-                             "For a full report, Jump Height, Weight, and Pull Result must all be valid numbers.", 
-                             "⚠️", 
-                             "warning"
-                         );
+                            "Incomplete Report", 
+                            "For a full report, Jump Height, Weight, and Pull Result must all be valid numbers.", 
+                            "⚠️", 
+                            "warning"
+                        );
                         return;
                     }
                     
@@ -1116,8 +1107,21 @@
                 </div>
             `;
 
-            // Render Age Stats (Table)
+            // --- Render Age Stats (Table) ---
             ageGroupStatsEl.innerHTML = ''; // Clear
+            
+            // 1. Convert to array and filter out empty groups
+            const groupsArray = Object.entries(ageGroups)
+                .map(([group, counts]) => ({ group, ...counts }))
+                .filter(g => g.total > 0);
+
+            // 2. Sort by total count (ascending)
+            groupsArray.sort((a, b) => a.total - b.total);
+
+            // 3. Get the 3 lowest counts (or fewer if not enough data)
+            const lowestCounts = groupsArray.slice(0, 3).map(g => g.group);
+
+            // 4. Create table
             const table = document.createElement('table');
             table.className = 'w-full text-left text-xs';
             table.innerHTML = `
@@ -1134,20 +1138,32 @@
             `;
             const tbody = table.querySelector('tbody');
 
+            // 5. Re-sort by age group for display
+            groupsArray.sort((a, b) => {
+                const aMin = parseInt(a.group);
+                const bMin = parseInt(b.group);
+                return aMin - bMin;
+            });
+
+            // 6. Populate table rows
             let hasData = false;
-            for (const [group, counts] of Object.entries(ageGroups)) {
-                if (counts.total > 0) {
-                    hasData = true;
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="py-1">${group}</td>
-                        <td class="py-1 text-center font-medium text-white">${counts.total}</td>
-                        <td class="py-1 text-center text-gray-300">${counts.Mann}</td>
-                        <td class="py-1 text-center text-gray-300">${counts.Kvinne}</td>
-                        <td class="py-1 text-center text-gray-300">${counts.Annet}</td>
-                    `;
-                    tbody.appendChild(row);
+            for (const item of groupsArray) {
+                hasData = true;
+                const row = document.createElement('tr');
+                
+                // Check if this group is one of the 3 lowest
+                if (lowestCounts.includes(item.group)) {
+                    row.className = 'highlight-row';
                 }
+
+                row.innerHTML = `
+                    <td class="py-1">${item.group}</td>
+                    <td class="py-1 text-center font-medium text-white">${item.total}</td>
+                    <td class="py-1 text-center text-gray-300">${item.Mann}</td>
+                    <td class="py-1 text-center text-gray-300">${item.Kvinne}</td>
+                    <td class="py-1 text-center text-gray-300">${item.Annet}</td>
+                `;
+                tbody.appendChild(row);
             }
             
             if (!hasData) {
@@ -1199,7 +1215,7 @@
                     if (field === 'kjonn') {
                         td.innerHTML = `
                             <select class="table-input" data-original-value="${value}">
-                                <option value="Mann">Man</option>
+                                <option value="Mann" ${value === 'Mann' ? 'selected' : ''}>Man</option>
                                 <option value="Kvinne" ${value === 'Kvinne' ? 'selected' : ''}>Woman</option>
                                 <option value="Annet" ${value === 'Annet' ? 'selected' : ''}>Other</option>
                             </select>
@@ -1392,20 +1408,12 @@
          * Renders the two scatter plots (Area and Diff)
          */
         function renderGraphs() {
-            // --- FIX V8: Simplified check ---
-            if (!allEntries) { 
-                console.warn(`renderGraphs ABORTED: Data not ready (allEntries is null).`);
-                return;
-            }
-            if (typeof regression === 'undefined') {
-                // This check is now a fallback, it *shouldn'T* be hit if the import worked.
-                console.error(`renderGraphs FAILED: regression module is still undefined.`);
-                return;
+            if (!allEntries || !regression) {
+                return; // Not ready
             }
             
-            // Check if canvases were found during init
             if (!areaChartCanvas || !diffChartCanvas) {
-                console.error("renderGraphs ABORTED: Canvas elements were not found on init.");
+                console.error("Canvas elements not found! Aborting graph render.");
                 return;
             }
             
@@ -1413,97 +1421,55 @@
             const filterGender = currentGraphGender;
             const xAxisKey1 = xAxisSelect1.value;
             const yAxisKey1 = yAxisSelect1.value;
-            const xAxisLabel1 = xAxisSelect1.options[xAxisSelect1.selectedIndex].text;
-            const yAxisLabel1 = yAxisSelect1.options[yAxisSelect1.selectedIndex].text;
+            let xAxisLabel1 = xAxisSelect1.options[xAxisSelect1.selectedIndex].text;
+            let yAxisLabel1 = yAxisSelect1.options[yAxisSelect1.selectedIndex].text;
+            
             const xAxisKey2 = xAxisSelect2.value;
             const yAxisKey2 = yAxisSelect2.value;
-            const xAxisLabel2 = xAxisSelect2.options[xAxisSelect2.selectedIndex].text;
-            const yAxisLabel2 = yAxisSelect2.options[yAxisSelect2.selectedIndex].text;
+            let xAxisLabel2 = xAxisSelect2.options[xAxisSelect2.selectedIndex].text;
+            let yAxisLabel2 = yAxisSelect2.options[yAxisSelect2.selectedIndex].text;
+
+            // NEW: Adjust labels if 'diff' is selected
+            if (xAxisLabel1.includes('CoP Diff')) xAxisLabel1 = 'CoP Diff (cm) x100';
+            if (yAxisLabel1.includes('CoP Diff')) yAxisLabel1 = 'CoP Diff (cm) x100';
+            if (xAxisLabel2.includes('CoP Diff')) xAxisLabel2 = 'CoP Diff (cm) x100';
+            if (yAxisLabel2.includes('CoP Diff')) yAxisLabel2 = 'CoP Diff (cm) x100';
+
 
             // 2. Prepare data for charts (with outliers filtered)
-            // Sort all data into gender-specific buckets first
-            const dataForChart1_Men = [];
-            const dataForChart1_Women = [];
-            const dataForChart1_Other = [];
-            const dataForChart2_Men = [];
-            const dataForChart2_Women = [];
-            const dataForChart2_Other = [];
+            // regression-js needs data in [x, y] array format
+            const dataForChart1 = { Mann: [], Kvinne: [], Annet: [], All: [] };
+            const dataForChart2 = { Mann: [], Kvinne: [], Annet: [], All: [] };
 
             for (const entry of allEntries) {
                 // Get data for Chart 1
                 const x1 = entry[xAxisKey1];
                 const y1 = entry[yAxisKey1];
+                applyAndPushData(dataForChart1, x1, y1, xAxisKey1, yAxisKey1, entry.kjonn);
+                
                 // Get data for Chart 2
                 const x2 = entry[xAxisKey2];
                 const y2 = entry[yAxisKey2];
-                
-                if (entry.kjonn === 'Mann') {
-                    applyAndPushData(dataForChart1_Men, x1, y1, xAxisKey1, yAxisKey1);
-                    applyAndPushData(dataForChart2_Men, x2, y2, xAxisKey2, yAxisKey2);
-                } else if (entry.kjonn === 'Kvinne') {
-                    applyAndPushData(dataForChart1_Women, x1, y1, xAxisKey1, yAxisKey1);
-                    applyAndPushData(dataForChart2_Women, x2, y2, xAxisKey2, yAxisKey2);
-                } else {
-                    applyAndPushData(dataForChart1_Other, x1, y1, xAxisKey1, yAxisKey1);
-                    applyAndPushData(dataForChart2_Other, x2, y2, xAxisKey2, yAxisKey2);
-                }
+                applyAndPushData(dataForChart2, x2, y2, xAxisKey2, yAxisKey2, entry.kjonn);
             }
 
-            // 3. Create dataset objects based on filter
-            const datasets1 = [];
-            const datasets2 = [];
-            const allDataForTrend1 = [];
-            const allDataForTrend2 = [];
-            
-            const colorMen = 'rgba(96, 165, 250, 0.6)'; // blue-400
-            const colorWomen = 'rgba(239, 68, 68, 0.6)'; // red-500 (NEW CONTRAST)
-            const colorOther = 'rgba(156, 163, 175, 0.6)'; // gray-400
-
-            if (currentGraphGender === 'All') {
-                datasets1.push({ label: 'Men', data: dataForChart1_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
-                datasets1.push({ label: 'Women', data: dataForChart1_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
-                datasets1.push({ label: 'Other', data: dataForChart1_Other.map(p => ({ x: p[0], y: p[1] })), color: colorOther });
-                allDataForTrend1.push(...dataForChart1_Men, ...dataForChart1_Women, ...dataForChart1_Other);
-
-                datasets2.push({ label: 'Men', data: dataForChart2_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
-                datasets2.push({ label: 'Women', data: dataForChart2_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
-                datasets2.push({ label: 'Other', data: dataForChart2_Other.map(p => ({ x: p[0], y: p[1] })), color: colorOther });
-                allDataForTrend2.push(...dataForChart2_Men, ...dataForChart2_Women, ...dataForChart2_Other);
-
-            } else if (currentGraphGender === 'Mann') {
-                datasets1.push({ label: 'Men', data: dataForChart1_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
-                allDataForTrend1.push(...dataForChart1_Men);
-
-                datasets2.push({ label: 'Men', data: dataForChart2_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
-                allDataForTrend2.push(...dataForChart2_Men);
-
-            } else if (currentGraphGender === 'Kvinne') {
-                datasets1.push({ label: 'Women', data: dataForChart1_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
-                allDataForTrend1.push(...dataForChart1_Women);
-
-                datasets2.push({ label: 'Women', data: dataForChart2_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
-                allDataForTrend2.push(...dataForChart2_Women);
-            }
-            
-            // 4. Update Area Chart (Chart 1)
+            // 3. Update Area Chart (Chart 1)
             updateChart(
                 chartInstances,
                 areaChartCanvas,
                 'areaChart',
-                datasets1, // Pass the array of dataset objects
-                allDataForTrend1, // Pass the combined data for regression
+                dataForChart1,
                 areaStatsDisplay,
                 xAxisLabel1,
                 yAxisLabel1
             );
 
-            // 5. Update Diff Chart (Chart 2)
+            // 4. Update Diff Chart (Chart 2)
             updateChart(
                 chartInstances,
                 diffChartCanvas,
                 'diffChart',
-                datasets2, // Pass the array of dataset objects
-                allDataForTrend2, // Pass the combined data for regression
+                dataForChart2,
                 diffStatsDisplay,
                 xAxisLabel2,
                 yAxisLabel2
@@ -1513,7 +1479,11 @@
         /**
          * Helper function to apply filters and push valid data
          */
-        function applyAndPushData(dataArray, x, y, xKey, yKey) {
+        function applyAndPushData(dataObject, x, y, xKey, yKey, gender) {
+            // NEW: Scale 'diff' values by 100
+            if (xKey === 'diff') x = x * 100;
+            if (yKey === 'diff') y = y * 100;
+
             // Check for valid numbers
             if (x == null || y == null || !isFinite(x) || !isFinite(y) || x < 0 || y < 0) {
                 return;
@@ -1523,7 +1493,7 @@
             if (yKey === 'areal' && y > 30) {
                 return;
             }
-            if (yKey === 'diff' && y > 0.75) { // User requested filters back, using original 0.75
+            if (yKey === 'diff' && y > 75) { // NEW: Scaled filter (was 0.75)
                 return;
             }
 
@@ -1531,85 +1501,150 @@
             if (xKey === 'areal' && x > 30) {
                 return;
             }
-            if (xKey === 'diff' && x > 0.75) { // User requested filters back, using original 0.75
+            if (xKey === 'diff' && x > 75) { // NEW: Scaled filter (was 0.75)
                 return;
             }
             
             // All valid data points will now be added
-            dataArray.push([x, y]);
+            const dataPoint = [x, y];
+            dataObject.All.push(dataPoint);
+            
+            if (gender === 'Mann') {
+                dataObject.Mann.push(dataPoint);
+            } else if (gender === 'Kvinne') {
+                dataObject.Kvinne.push(dataPoint);
+            } else {
+                dataObject.Annet.push(dataPoint);
+            }
         }
 
 
         /**
          * Helper function to create/update a single chart instance
          */
-        function updateChart(instances, canvas, chartId, dataSetObjects, allDataForTrend, statsEl, xLabel, yLabel) {
+        function updateChart(instances, canvas, chartId, dataObject, statsEl, xLabel, yLabel) {
             let regressionResult = null;
             let trendData = [];
             let statsText = 'N/A (not enough data)';
+            let regressionLabel = `${currentRegressionType.charAt(0).toUpperCase() + currentRegressionType.slice(1)} Trend`;
+            
+            // 1. Get the correct data subset based on the filter
+            let data;
+            let trendDataForCalc;
+            
+            if (currentGraphGender === 'All') {
+                data = []; // Will be built from colored datasets
+                trendDataForCalc = dataObject.All;
+            } else {
+                data = dataObject[currentGraphGender].map(p => ({ x: p[0], y: p[1] }));
+                trendDataForCalc = dataObject[currentGraphGender];
+            }
 
-            // FIX: Only try regression if there are enough points
-            if (allDataForTrend.length >= 2) {
+            // 2. Try to calculate regression
+            if (trendDataForCalc.length >= 2) {
                 try {
-                    // --- FIX V8: Use imported 'regression' module directly ---
-                    if (currentRegressionType === 'linear') {
-                        regressionResult = regression.linear(allDataForTrend, { precision: 3 });
-                    } else if (currentRegressionType === 'polynomial') {
-                        regressionResult = regression.polynomial(allDataForTrend, { order: 2, precision: 3 });
-                    } else { // Default to exponential
-                        regressionResult = regression.exponential(allDataForTrend, { precision: 3 });
+                    // --- PRIMARY REGRESSION ATTEMPT ---
+                    let options = { precision: 3 };
+                    let primaryRegressionType = currentRegressionType;
+
+                    if (currentRegressionType === 'polynomial') {
+                        options.order = parseInt(polyOrderInput.value) || 2;
+                        regressionLabel = `Polynomial (${options.order}) Trend`;
                     }
                     
-                    if (regressionResult) {
-                        trendData = regressionResult.points.map(p => ({ x: p[0], y: p[1] }));
-                        trendData.sort((a, b) => a.x - b.x); // Ensure line draws correctly
-                        
-                        // NEW: Calculate both R and R-squared
-                        const r2 = regressionResult.r2;
-                        const r = Math.sqrt(r2);
-                        statsText = `R: ${r.toFixed(3)} | R²: ${r2.toFixed(3)} | ${regressionResult.string}`;
+                    regressionResult = regression[primaryRegressionType](trendDataForCalc, options);
+
+                    // Check for NaN or invalid results
+                    if (!regressionResult || !isFinite(regressionResult.r2)) {
+                        throw new Error("Regression failed (NaN or invalid result)");
                     }
+
                 } catch (error) {
-                    console.error(`Regression calculation failed for ${chartId}: ${error.message}`);
-                    statsText = 'N/A (calculation error)';
-                    trendData = [];
+                    // --- FALLBACK LOGIC ---
+                    console.warn(`Primary regression (${currentRegressionType}) failed: ${error.message}. Falling back to linear.`);
+                    try {
+                        regressionResult = regression.linear(trendDataForCalc, { precision: 3 });
+                        regressionLabel = `Fallback (Linear)`;
+                    } catch (linearError) {
+                        console.error(`Linear fallback failed: ${linearError.message}`);
+                        regressionResult = null; // Ensure it's null
+                    }
+                }
+
+                // 3. Format results if successful
+                if (regressionResult) {
+                    trendData = regressionResult.points.map(p => ({ x: p[0], y: p[1] }));
+                    trendData.sort((a, b) => a.x - b.x); // Ensure line draws correctly
+                    
+                    // Calculate R (correlation coefficient)
+                    const r = Math.sqrt(Math.max(0, regressionResult.r2)) * (regressionResult.equation[0] < 0 ? -1 : 1);
+                    statsText = `R: ${r.toFixed(3)} | R²: ${regressionResult.r2.toFixed(3)} | ${regressionResult.string}`;
+                } else {
+                     statsText = 'N/A (calculation error)';
+                     trendData = [];
                 }
             }
             
-            if (!statsEl) {
-                console.error(`statsEl for ${chartId} ('${statsEl}') is NULL. Cannot display stats.`);
+            statsEl.textContent = statsText;
+
+            // 4. Define datasets
+            const datasets = [];
+            
+            // Colors
+            const colorMan = 'rgba(59, 130, 246, 0.7)'; // blue-500
+            const colorWoman = 'rgba(239, 68, 68, 0.7)'; // red-500
+            const colorOther = 'rgba(107, 114, 128, 0.7)'; // gray-500
+            const colorTrend = 'rgba(250, 204, 21, 0.8)'; // yellow-400
+
+            if (currentGraphGender === 'All') {
+                datasets.push({
+                    label: 'Men',
+                    data: dataObject.Mann.map(p => ({ x: p[0], y: p[1] })),
+                    backgroundColor: colorMan,
+                    pointRadius: 4, pointHoverRadius: 6,
+                });
+                datasets.push({
+                    label: 'Women',
+                    data: dataObject.Kvinne.map(p => ({ x: p[0], y: p[1] })),
+                    backgroundColor: colorWoman,
+                    pointRadius: 4, pointHoverRadius: 6,
+                });
+                 datasets.push({
+                    label: 'Other',
+                    data: dataObject.Annet.map(p => ({ x: p[0], y: p[1] })),
+                    backgroundColor: colorOther,
+                    pointRadius: 4, pointHoverRadius: 6,
+                });
             } else {
-                statsEl.textContent = statsText;
+                let color = colorMan; // Default to Man
+                if (currentGraphGender === 'Kvinne') color = colorWoman;
+                if (currentGraphGender === 'Annet') color = colorOther;
+                
+                datasets.push({
+                    label: currentGraphGender,
+                    data: dataObject[currentGraphGender].map(p => ({ x: p[0], y: p[1] })),
+                    backgroundColor: color,
+                    pointRadius: 4, pointHoverRadius: 6,
+                });
             }
 
+            // Add the trendline dataset
+            datasets.push({
+                label: regressionLabel,
+                data: trendData,
+                type: 'line',
+                borderColor: colorTrend,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0.1
+            });
+
+            // 5. Create chart config
             const chartConfig = {
                 type: 'scatter',
-                data: {
-                    datasets: [
-                        // Map the data objects to Chart.js datasets
-                        ...dataSetObjects.map(ds => ({
-                            label: ds.label,
-                            data: ds.data,
-                            backgroundColor: ds.color,
-                            borderColor: ds.color.replace('0.6', '1'),
-                            borderWidth: 1,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                        })),
-                        // Add the trendline dataset
-                        {
-                            label: `${currentRegressionType.charAt(0).toUpperCase() + currentRegressionType.slice(1)} Trend`,
-                            data: trendData,
-                            type: 'line',
-                            borderColor: 'rgba(234, 179, 8, 0.7)', // yellow-500 (NEW TRENDLINE)
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0.1
-                        }
-                    ]
-                },
+                data: { datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -1634,12 +1669,8 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    if (context.dataset.label.toLowerCase().includes('trend')) {
-                                        return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
-                                    }
-                                    // It's a data point
-                                    const genderLabel = context.dataset.label; // "Men", "Women", or "Other"
-                                    return `${genderLabel} - ${xLabel}: ${context.parsed.x}, ${yLabel}: ${context.parsed.y}`;
+                                    if (context.dataset.label.includes('Trend')) return null;
+                                    return `${context.dataset.label}: (${context.parsed.x}, ${context.parsed.y})`;
                                 }
                             }
                         }
@@ -1647,15 +1678,13 @@
                 }
             };
 
-            // FIX: Always destroy and recreate the chart.
+            // 6. Destroy old chart and create new one
             if (instances[chartId]) {
                 instances[chartId].destroy();
             }
             
             if (canvas) {
                 instances[chartId] = new Chart(canvas, chartConfig);
-            } else {
-                console.error(`Cannot create chart for ${chartId}: CANVAS is NULL.`);
             }
         }
         
@@ -1682,27 +1711,40 @@
          */
         function setupRegressionFilters() {
              regressionFilterButtons.addEventListener('click', (e) => {
-                if (e.target.classList.contains('regression-filter')) {
+                 if (e.target.classList.contains('regression-filter')) {
                     // Update active state
                     regressionFilterButtons.querySelectorAll('.regression-filter').forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
                     // Update global state
                     currentRegressionType = e.target.dataset.type;
+                    
+                    // Show/hide poly order input
+                    if (currentRegressionType === 'polynomial') {
+                        polyOrderContainer.classList.remove('hidden');
+                    } else {
+                        polyOrderContainer.classList.add('hidden');
+                    }
+                    
                     // Re-render graphs
                     renderGraphs();
+                 }
+             });
+             
+             // Also add listener for the poly order input
+             polyOrderInput.addEventListener('change', () => {
+                if (currentRegressionType === 'polynomial') {
+                    renderGraphs();
                 }
-            });
+             });
         }
         
         // --- END GRAPH FUNCTIONS ---
 
 
-        // Run the main function when the page AND all scripts are fully loaded
-        window.addEventListener('load', main);
+        // Run the main function when the page is ready
+        document.addEventListener('DOMContentLoaded', main);
     </script>
 
 </body>
 </html>
-
-
 
