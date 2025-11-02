@@ -1563,7 +1563,11 @@
                     if (regressionResult) {
                         trendData = regressionResult.points.map(p => ({ x: p[0], y: p[1] }));
                         trendData.sort((a, b) => a.x - b.x); // Ensure line draws correctly
-                        statsText = `R²: ${regressionResult.r2.toFixed(3)} | ${regressionResult.string}`;
+                        
+                        // NEW: Calculate both R and R-squared
+                        const r2 = regressionResult.r2;
+                        const r = Math.sqrt(r2);
+                        statsText = `R: ${r.toFixed(3)} | R²: ${r2.toFixed(3)} | ${regressionResult.string}`;
                     }
                 } catch (error) {
                     console.error(`Regression calculation failed for ${chartId}: ${error.message}`);
@@ -1699,5 +1703,6 @@
 
 </body>
 </html>
+
 
 
