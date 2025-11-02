@@ -274,7 +274,7 @@
             <!-- Right Column (Graphs & Table) -->
             <div class="lg:w-2/3 flex flex-col gap-8">
 
-                <!-- ENHANCED: Graph Section (2 Dynamic Charts) -->
+                <!-- ENHANCED: Graph Section (REMOVED 2ND CHART) -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Data Visualization</h3>
 
@@ -306,8 +306,8 @@
                         <!-- NEW: Axis Selectors for Chart 1 - CHANGED TO GRID -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label for="x-axis-select-1" class="block text-sm text-white font-medium mb-2">Graph 1: X-Axis</label>
-                                <select id="x-axis-select-1" class="name-input">
+                                <label for="x-axis-select" class="block text-sm text-white font-medium mb-2">X-Axis</label>
+                                <select id="x-axis-select" class="name-input">
                                     <option value="alder" selected>Age</option>
                                     <option value="areal">CoP Area</option>
                                     <option value="diff">CoP Diff (cm) x100</option>
@@ -315,8 +315,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="y-axis-select-1" class="block text-sm text-white font-medium mb-2">Graph 1: Y-Axis</label>
-                                <select id="y-axis-select-1" class="name-input">
+                                <label for="y-axis-select" class="block text-sm text-white font-medium mb-2">Y-Axis</label>
+                                <select id="y-axis-select" class="name-input">
                                     <option value="alder">Age</option>
                                     <option value="areal" selected>CoP Area</option>
                                     <option value="diff">CoP Diff (cm) x100</option>
@@ -326,46 +326,16 @@
                         </div>
                         <!-- REMOVED OLD P TAG -->
                         <div class="bg-gray-800/40 p-4 rounded-lg h-[400px]">
-                            <canvas id="areaChart"></canvas>
+                            <canvas id="mainChart"></canvas>
                         </div>
                         <!-- NEW: Visual Stats Card -->
-                        <div id="area-stats-display" class="stats-card">
+                        <div id="stats-display" class="stats-card">
                              <!-- Content injected by JS -->
                         </div>
                     </div>
 
-                    <!-- Chart 2: Default Age vs Diff -->
-                    <div>
-                        <!-- NEW: Axis Selectors for Chart 2 - CHANGED TO GRID -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label for="x-axis-select-2" class="block text-sm text-white font-medium mb-2">Graph 2: X-Axis</label>
-                                <select id="x-axis-select-2" class="name-input">
-                                    <option value="alder" selected>Age</option>
-                                    <option value="areal">CoP Area</option>
-                                    <option value="diff">CoP Diff (cm) x100</option>
-                                    <option value="balanceAlder">Balance Age</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="y-axis-select-2" class="block text-sm text-white font-medium mb-2">Graph 2: Y-Axis</label>
-                                <select id="y-axis-select-2" class="name-input">
-                                    <option value="alder">Age</option>
-                                    <option value="areal">CoP Area</option>
-                                    <option value="diff" selected>CoP Diff (cm) x100</option>
-                                    <option value="balanceAlder">Balance Age</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- REMOVED OLD P TAG -->
-                        <div class="bg-gray-800/40 p-4 rounded-lg h-[400px]">
-                            <canvas id="diffChart"></canvas>
-                        </div>
-                        <!-- NEW: Visual Stats Card -->
-                        <div id="diff-stats-display" class="stats-card">
-                            <!-- Content injected by JS -->
-                        </div>
-                    </div>
+                    <!-- CHART 2 REMOVED -->
+
                 </div>
 
 
@@ -511,9 +481,9 @@
         let loadingOverlay, loadingMessage, dataTableBody, filterInput, addForm, testlederInput,
             totalCountEl, ageGroupStatsEl, genderStatsEl, downloadCsvButton, ageModal,
             modalTitle, modalMessage, modalBalanceAge, modalDetails, closeModalBtn,
-            toggleFitnessReportBtn, fullFitnessReportFields, chartInstances, areaChartCanvas,
-            diffChartCanvas, areaStatsDisplay, diffStatsDisplay, graphFilterButtons,
-            regressionFilterButtons, xAxisSelect1, yAxisSelect1, xAxisSelect2, yAxisSelect2,
+            toggleFitnessReportBtn, fullFitnessReportFields, chartInstances, chartCanvas,
+            statsDisplay, graphFilterButtons,
+            regressionFilterButtons, xAxisSelect, yAxisSelect,
             polyOrderContainer, polyOrderInput;
 
         // Global graph state
@@ -544,17 +514,13 @@
             fullFitnessReportFields = document.getElementById('full-fitness-report-fields');
             
             // Graph UI
-            chartInstances = { areaChart: null, diffChart: null };
-            areaChartCanvas = document.getElementById('areaChart');
-            diffChartCanvas = document.getElementById('diffChart');
-            areaStatsDisplay = document.getElementById('area-stats-display');
-            diffStatsDisplay = document.getElementById('diff-stats-display');
+            chartInstances = { mainChart: null };
+            chartCanvas = document.getElementById('mainChart');
+            statsDisplay = document.getElementById('stats-display');
             graphFilterButtons = document.getElementById('graph-filter-buttons');
             regressionFilterButtons = document.getElementById('regression-filter-buttons');
-            xAxisSelect1 = document.getElementById('x-axis-select-1');
-            yAxisSelect1 = document.getElementById('y-axis-select-1');
-            xAxisSelect2 = document.getElementById('x-axis-select-2');
-            yAxisSelect2 = document.getElementById('y-axis-select-2');
+            xAxisSelect = document.getElementById('x-axis-select');
+            yAxisSelect = document.getElementById('y-axis-select');
             polyOrderContainer = document.getElementById('poly-order-container');
             polyOrderInput = document.getElementById('poly-order');
         }
@@ -792,10 +758,8 @@
             setupRegressionFilters();
             
             // NEW: Listeners for axis selection
-            xAxisSelect1.addEventListener('change', renderGraphs);
-            yAxisSelect1.addEventListener('change', renderGraphs);
-            xAxisSelect2.addEventListener('change', renderGraphs);
-            yAxisSelect2.addEventListener('change', renderGraphs);
+            xAxisSelect.addEventListener('change', renderGraphs);
+            yAxisSelect.addEventListener('change', renderGraphs);
         }
         
         // --- START OF CALCULATION FUNCTIONS ---
@@ -1463,67 +1427,43 @@
                 return; // Not ready
             }
             
-            if (!areaChartCanvas || !diffChartCanvas) {
-                console.error("Canvas elements not found! Aborting graph render.");
+            if (!chartCanvas) {
+                console.error("Canvas element not found! Aborting graph render.");
                 return;
             }
             
             // 1. Get all filter states
             const filterGender = currentGraphGender;
-            const xAxisKey1 = xAxisSelect1.value;
-            const yAxisKey1 = yAxisSelect1.value;
-            let xAxisLabel1 = xAxisSelect1.options[xAxisSelect1.selectedIndex].text;
-            let yAxisLabel1 = yAxisSelect1.options[yAxisSelect1.selectedIndex].text;
-            
-            const xAxisKey2 = xAxisSelect2.value;
-            const yAxisKey2 = yAxisSelect2.value;
-            let xAxisLabel2 = xAxisSelect2.options[xAxisSelect2.selectedIndex].text;
-            let yAxisLabel2 = yAxisSelect2.options[yAxisSelect2.selectedIndex].text;
+            const xAxisKey = xAxisSelect.value;
+            const yAxisKey = yAxisSelect.value;
+            let xAxisLabel = xAxisSelect.options[xAxisSelect.selectedIndex].text;
+            let yAxisLabel = yAxisSelect.options[yAxisSelect.selectedIndex].text;
 
             // NEW: Adjust labels if 'diff' is selected
-            if (xAxisLabel1.includes('CoP Diff')) xAxisLabel1 = 'CoP Diff (cm) x100';
-            if (yAxisLabel1.includes('CoP Diff')) yAxisLabel1 = 'CoP Diff (cm) x100';
-            if (xAxisLabel2.includes('CoP Diff')) xAxisLabel2 = 'CoP Diff (cm) x100';
-            if (yAxisLabel2.includes('CoP Diff')) yAxisLabel2 = 'CoP Diff (cm) x100';
+            if (xAxisLabel.includes('CoP Diff')) xAxisLabel = 'CoP Diff (cm) x100';
+            if (yAxisLabel.includes('CoP Diff')) yAxisLabel = 'CoP Diff (cm) x100';
 
 
             // 2. Prepare data for charts (with outliers filtered)
             // regression-js needs data in [x, y] array format
-            const dataForChart1 = { Mann: [], Kvinne: [], Annet: [], All: [] };
-            const dataForChart2 = { Mann: [], Kvinne: [], Annet: [], All: [] };
+            const dataForChart = { Mann: [], Kvinne: [], Annet: [], All: [] };
 
             for (const entry of allEntries) {
                 // Get data for Chart 1
-                const x1 = entry[xAxisKey1];
-                const y1 = entry[yAxisKey1];
-                applyAndPushData(dataForChart1, x1, y1, xAxisKey1, yAxisKey1, entry.kjonn);
-                
-                // Get data for Chart 2
-                const x2 = entry[xAxisKey2];
-                const y2 = entry[yAxisKey2];
-                applyAndPushData(dataForChart2, x2, y2, xAxisKey2, yAxisKey2, entry.kjonn);
+                const x = entry[xAxisKey];
+                const y = entry[yAxisKey];
+                applyAndPushData(dataForChart, x, y, xAxisKey, yAxisKey, entry.kjonn);
             }
 
             // 3. Update Area Chart (Chart 1)
             updateChart(
                 chartInstances,
-                areaChartCanvas,
-                'areaChart',
-                dataForChart1,
-                areaStatsDisplay,
-                xAxisLabel1,
-                yAxisLabel1
-            );
-
-            // 4. Update Diff Chart (Chart 2)
-            updateChart(
-                chartInstances,
-                diffChartCanvas,
-                'diffChart',
-                dataForChart2,
-                diffStatsDisplay,
-                xAxisLabel2,
-                yAxisLabel2
+                chartCanvas,
+                'mainChart',
+                dataForChart,
+                statsDisplay,
+                xAxisLabel,
+                yAxisLabel
             );
         }
         
