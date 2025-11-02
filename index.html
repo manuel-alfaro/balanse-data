@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- NEW: regression-js is now imported as a module in the script below -->
     <style>
         /* Custom style to match Dash app */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; }
@@ -54,11 +55,10 @@
             font-size: 1.2rem;
         }
 
-        /* Modal Styles */
+        /* Modal styling */
         .age-card {
             background-color: #2d3748; /* gray-800 */
-            border: 1px solid #4a5568; /* gray-700 */
-            border-radius: 0.75rem;
+            border-radius: 0.75rem; /* rounded-xl */
             padding: 1rem;
             text-align: center;
         }
@@ -74,7 +74,7 @@
         }
         .text-balance { color: #34d399; } /* emerald-400 */
         .text-function { color: #60a5fa; } /* blue-400 */
-        .text-strength { color: #a78bfa; } /* violet-400 */
+        .text-strength { color: #c084fc; } /* purple-400 */
 
     </style>
 </head>
@@ -88,14 +88,14 @@
 
     <!-- Balance Age Modal -->
     <div id="age-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-md w-full text-center shadow-2xl">
+        <div class="bg-[#1a1c1f] border border-gray-700 p-6 rounded-lg max-w-lg w-full text-center shadow-2xl">
             <h3 id="modal-title" class="text-2xl text-white font-semibold mb-4">Balance Age Calculated</h3>
             <p id="modal-message" class="text-lg text-gray-300 mb-2">Your estimated balance age is:</p>
             <p id="modal-balance-age" class="text-5xl font-bold text-emerald-400 mb-6"></p>
             
-            <!-- Container for detailed age breakdown -->
+            <!-- NEW: Section for full report details -->
             <div id="modal-details" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <!-- Content is injected by JS -->
+                <!-- Content injected by JS -->
             </div>
             
             <button id="close-modal-btn" class="filter-button active w-full">Close</button>
@@ -139,7 +139,7 @@
                                 <select id="kjonn" class="name-input">
                                     <option value="Mann">Man</option>
                                     <option value="Kvinne">Woman</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Annet">Other</option>
                                 </select>
                             </div>
                             <div>
@@ -151,27 +151,27 @@
                                 <input type="number" step="0.01" id="diff" class="name-input" placeholder="e.g. 1.20" required>
                             </div>
 
-                            <!-- "Full Fitness Report" toggle button -->
+                            <!-- Full Fitness Report Button -->
                             <button type="button" id="toggle-fitness-report-btn" class="filter-button w-full !mt-6">
                                 Show Full Fitness Age Report
                             </button>
 
-                            <!-- Hidden fields for Full Fitness Report -->
-                            <div id="full-fitness-report-fields" class="hidden space-y-4 pt-4 border-t border-gray-700">
+                            <!-- Hidden Full Fitness Report Fields -->
+                            <div id="full-fitness-report-fields" class="hidden space-y-4 pt-4 border-t border-gray-700/50">
                                 <div>
                                     <label for="hopphoyde" class="block text-sm text-white font-medium mb-2">Jump Height (cm)</label>
-                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="e.g. 45.5">
+                                    <input type="number" step="0.1" id="hopphoyde" class="name-input" placeholder="e.g. 42.5">
                                 </div>
                                 <div>
                                     <label for="vekt" class="block text-sm text-white font-medium mb-2">Body Weight (kg)</label>
-                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="e.g. 80">
+                                    <input type="number" step="0.1" id="vekt" class="name-input" placeholder="e.g. 75.0">
                                 </div>
                                 <div>
                                     <label for="pull" class="block text-sm text-white font-medium mb-2">Pull Result (kg)</label>
-                                    <input type="number" step="0.1" id="pull" class="name-input" placeholder="e.g. 180">
+                                    <input type="number" step="0.1" id="pull" class="name-input" placeholder="e.g. 150">
                                 </div>
                             </div>
-                            
+
                             <button type="submit" id="submit-button" class="filter-button active w-full !mt-6">
                                 Add Entry
                             </button>
@@ -183,12 +183,12 @@
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
                     <h3 class="text-lg text-white font-semibold mb-4">Instructions</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg text-sm space-y-2">
-                        <p>Balance Test Instructions:</p>
+                        <p>Instructions for balance test:</p>
                         <ul class="list-disc list-inside pl-2">
-                            <li>Lift your foot approx. 10 cm off the ground.</li>
-                            <li>Keep your arms down by your sides.</li>
+                            <li>Lift your foot approx. 10 cm from the ground.</li>
+                            <li>Keep arms down by the side of the body.</li>
                             <li>Look straight ahead and stand as still as possible.</li>
-                            <li>Stand for 30 seconds on the right foot, then 30 seconds on the left foot.</li>
+                            <li>Stand for 30 seconds on the right foot and then 30 seconds on the left foot.</li>
                             <li>Without shoes.</li>
                         </ul>
                     </div>
@@ -199,22 +199,24 @@
                     <h3 class="text-lg text-white font-semibold mb-4">Statistics</h3>
                     <div class="bg-gray-800/40 p-4 rounded-lg space-y-3">
                         <div>
-                            <span class="font-medium text-white">Total entries:</span>
+                            <span class="font-medium text-white">Total Count:</span>
                             <span id="total-count" class="font-bold text-xl text-emerald-400 ml-2">0</span>
                         </div>
                         
                         <!-- Gender Stats -->
-                        <div class="border-t border-gray-600 pt-3">
-                            <h5 class="text-sm text-white font-medium mb-2">Gender Distribution:</h5>
-                            <div id="gender-stats" class="text-sm space-y-1">
+                        <div id="gender-stats" class="border-t border-gray-600 pt-3">
+                            <h5 class="text-sm text-white font-medium mb-2">Sex Distribution:</h5>
+                            <div class="text-sm space-y-1">
+                                <!-- Filled by JS -->
                                 <p class="text-gray-400">Loading data...</p>
                             </div>
                         </div>
-                        
+
                         <!-- Age Group Stats -->
-                        <div class="border-t border-gray-600 pt-3">
+                        <div id="age-group-stats" class="border-t border-gray-600 pt-3">
                             <h5 class="text-sm text-white font-medium mb-2">Age Groups:</h5>
-                            <div id="age-group-stats" class="text-sm space-y-1 overflow-x-auto">
+                            <div class="text-sm space-y-1">
+                                <!-- Filled by JS -->
                                 <p class="text-gray-400">Loading data...</p>
                             </div>
                         </div>
@@ -226,12 +228,14 @@
             <!-- Right Column (Graphs & Table) -->
             <div class="lg:w-2/3 flex flex-col gap-8">
 
-                <!-- Graph Section -->
+                <!-- DEBUG PANEL REMOVED -->
+
+                <!-- ENHANCED: Graph Section (2 Dynamic Charts) -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
-                    <h3 class="text-lg text-white font-semibold mb-4">Balance Data Visualization</h3>
-                    
-                    <!-- Filter buttons -->
-                    <div class="flex flex-col sm:flex-row justify-center gap-2 mb-4">
+                    <h3 class="text-lg text-white font-semibold mb-4">Data Visualization</h3>
+
+                    <!-- Global Filter buttons -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-2 mb-4 pb-4 border-b border-gray-700">
                         <div class="flex justify-center gap-2" id="graph-filter-buttons">
                             <button class="filter-button graph-filter active" data-gender="All">All</button>
                             <button class="filter-button graph-filter" data-gender="Mann">Men</button>
@@ -240,28 +244,71 @@
                         <div class="flex justify-center gap-2" id="regression-filter-buttons">
                             <button class="filter-button regression-filter active" data-type="exponential">Exponential</button>
                             <button class="filter-button regression-filter" data-type="linear">Linear</button>
+                            <button class="filter-button regression-filter" data-type="polynomial">Polynomial (2nd)</button>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Age vs Area -->
-                        <div>
-                            <h4 class="text-md text-white font-medium mb-1 text-center">Age vs. CoP Area</h4>
-                            <p id="area-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
-                            <div class="bg-gray-800/40 p-4 rounded-lg h-80">
-                                <canvas id="ageVsAreaChart"></canvas>
+                    <!-- Chart 1: Default Age vs Area -->
+                    <div class="mb-8">
+                        <!-- NEW: Axis Selectors for Chart 1 -->
+                        <!-- FIX: Removed sm:grid-cols-2 to force vertical stacking -->
+                        <div class="grid grid-cols-1 gap-4 mb-4">
+                            <div>
+                                <label for="x-axis-select-1" class="block text-sm text-white font-medium mb-2">Graph 1: X-Axis</label>
+                                <select id="x-axis-select-1" class="name-input">
+                                    <option value="alder" selected>Age</option>
+                                    <option value="areal">CoP Area</option>
+                                    <option value="diff">CoP Diff</option>
+                                    <option value="balanceAlder">Balance Age</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="y-axis-select-1" class="block text-sm text-white font-medium mb-2">Graph 1: Y-Axis</label>
+                                <select id="y-axis-select-1" class="name-input">
+                                    <option value="alder">Age</option>
+                                    <option value="areal" selected>CoP Area</option>
+                                    <option value="diff">CoP Diff</option>
+                                    <option value="balanceAlder">Balance Age</option>
+                                </select>
                             </div>
                         </div>
-                        <!-- Age vs Diff -->
-                        <div>
-                            <h4 class="text-md text-white font-medium mb-1 text-center">Age vs. CoP Diff</h4>
-                            <p id="diff-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
-                            <div class="bg-gray-800/40 p-4 rounded-lg h-80">
-                                <canvas id="ageVsDiffChart"></canvas>
+                        <p id="area-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
+                        <div class="bg-gray-800/40 p-4 rounded-lg h-[400px]">
+                            <canvas id="areaChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Default Age vs Diff -->
+                    <div>
+                        <!-- NEW: Axis Selectors for Chart 2 -->
+                        <!-- FIX: Removed sm:grid-cols-2 to force vertical stacking -->
+                        <div class="grid grid-cols-1 gap-4 mb-4">
+                            <div>
+                                <label for="x-axis-select-2" class="block text-sm text-white font-medium mb-2">Graph 2: X-Axis</label>
+                                <select id="x-axis-select-2" class="name-input">
+                                    <option value="alder" selected>Age</option>
+                                    <option value="areal">CoP Area</option>
+                                    <option value="diff">CoP Diff</option>
+                                    <option value="balanceAlder">Balance Age</option>
+                                </select>
                             </div>
+                            <div>
+                                <label for="y-axis-select-2" class="block text-sm text-white font-medium mb-2">Graph 2: Y-Axis</label>
+                                <select id="y-axis-select-2" class="name-input">
+                                    <option value="alder">Age</option>
+                                    <option value="areal">CoP Area</option>
+                                    <option value="diff" selected>CoP Diff</option>
+                                    <option value="balanceAlder">Balance Age</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p id="diff-stats-display" class="text-xs text-gray-400 text-center mb-2 h-4"></p>
+                        <div class="bg-gray-800/40 p-4 rounded-lg h-[400px]">
+                            <canvas id="diffChart"></canvas>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Table Section -->
                 <div class="bg-[#1a1c1f] border border-gray-700 p-5 rounded-lg">
@@ -280,7 +327,7 @@
                         <table class="w-full min-w-max text-sm text-left text-gray-400">
                             <thead class="text-xs text-gray-300 uppercase bg-gray-800/40 sticky top-0">
                                 <tr>
-                                    <th scope="col" class="py-3 px-2 text-center">Report</th>
+                                    <th scope="col" class="py-3 px-4 text-center">Report</th>
                                     <th scope="col" class="py-3 px-4">Test Leader</th>
                                     <th scope="col" class="py-3 px-4">Age</th>
                                     <th scope="col" class="py-3 px-4">Sex</th>
@@ -302,7 +349,6 @@
                         </table>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>
@@ -321,9 +367,10 @@
             updateDoc,
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // --- FIX V8: Import regression as an ES Module ---
+        import regression from 'https://esm.run/regression@2.0.1';
 
         // Hardcoded Firebase configuration for 'balanse-data'
-        // !! IMPORTANT: This is for demonstration. Use secure rules in production.
         const firebaseConfig = {
             apiKey: "AIzaSyCIYqq1_2eKdBw3u_FYUIFvo6VnJcLVliA",
             authDomain: "balanse-data.firebaseapp.com",
@@ -337,57 +384,51 @@
         // Global variables
         let db;
         let entriesCollection;
-        let allEntries = []; // Ensure it's a list from the start
+        let allEntries = []; // Ensures it's a list from the start
         let unsubscribeEntries = null; // To stop the listener
-        let currentRegressionType = 'exponential'; // NEW: Track regression state
-        let currentGraphGender = 'All'; // NEW: Track gender filter state
 
-        // --- NORMATIVE DATA & CALCULATION LOGIC ---
-
-        // Data based on user-provided images (2025-10-28)
-        // Adjusted: +5cm for all men.
+        // --- START OF JUMP DATA ---
+        // Data for Men (Jump Height in cm) - LAST ADJUSTED: +5cm for 30+
         const JUMP_DATA_MENN = [
-            { age: 8.5,  label:"8–9",  p5:22.0, p25:25.6, p50:28.8, p75:32.4, p95:37.5 },
-            { age: 10.5, label:"10–11", p5:23.8, p25:28.4, p50:32.2, p75:36.4, p95:40.9 },
-            { age: 12.5, label:"12–13", p5:25.8, p25:31.6, p50:35.7, p75:40.4, p95:48.6 },
-            { age: 14.5, label:"14–15", p5:27.4, p25:34.6, p50:39.1, p75:43.8, p95:51.0 },
-            { age: 16.5, label:"16–17", p5:27.8, p25:36.6, p50:42.3, p75:47.1, p95:55.4 },
-            { age: 18.5, label:"18–19", p5:30.2, p25:38.0, p50:43.6, p75:49.2, p95:57.2 },
-            { age: 22,   label:"20–24", p5:28.8, p25:36.8, p50:42.4, p75:48.0, p95:56.2 },
-            { age: 27,   label:"25–29", p5:27.5, p25:35.2, p50:40.4, p75:45.6, p95:53.1 },
-            // Adjusted: +5cm for 30+
-            { age: 32,   label:"30–34", p5:31.2, p25:38.2, p50:40.0, p75:42.6, p95:49.8 },
-            { age: 37,   label:"35–39", p5:29.8, p25:36.0, p50:40.6, p75:39.9, p95:46.4 },
-            { age: 42,   label:"40–44", p5:28.6, p25:34.2, p50:38.1, p75:37.1, p95:43.2 },
-            { age: 47,   label:"45–49", p5:23.1, p25:32.3, p50:35.8, p75:34.9, p95:40.6 },
-            // Fallback data (50+) - Adjusted +5cm
-            { age: 54.5, label:"50–59", p5:15.8, p25:19.2, p50:22.7, p75:25.8, p95:31.7 },
-            { age: 64.5, label:"60–69", p5:14.7, p25:17.6, p50:20.15,p75:22.9, p95:28.2 },
-            { age: 75,   label:"70–80", p5:5.0,  p25:15.9, p50:17.7, p75:21.0, p95:25.6 }
+            { age: 8.5,  label:"8–9",  p5:17.0, p25:20.6, p50:23.8, p75:27.4, p95:32.5 }, // 8-9
+            { age: 10.5, label:"10–11", p5:18.8, p25:23.4, p50:27.2, p75:31.4, p95:35.9 }, // 10-11
+            { age: 12.5, label:"12–13", p5:20.8, p25:26.6, p50:30.7, p75:35.4, p95:43.6 }, // 12-13
+            { age: 14.5, label:"14–15", p5:22.4, p25:29.6, p50:34.1, p75:38.8, p95:46.0 }, // 14-15
+            { age: 16.5, label:"16–17", p5:22.8, p25:31.6, p50:37.3, p75:42.1, p95:50.4 }, // 16-17
+            { age: 18.5, label:"18–19", p5:25.2, p25:33.0, p50:38.6, p75:44.2, p95:52.2 }, // 18-19
+            { age: 22,   label:"20–24", p5:23.8, p25:31.8, p50:37.4, p75:43.0, p95:51.2 }, // 20-24
+            { age: 27,   label:"25–29", p5:22.5, p25:30.2, p50:35.4, p75:40.6, p95:48.1 }, // 25-29
+            // 30+ have +5cm
+            { age: 32,   label:"30–34", p5:26.2, p25:33.2, p50:38.0, p75:42.6, p95:49.8 }, // 30-34
+            { age: 37,   label:"35–39", p5:24.8, p25:31.0, p50:35.6, p75:39.9, p95:46.4 }, // 35-39
+            { age: 42,   label:"40–44", p5:23.6, p25:29.2, p50:33.1, p75:37.1, p95:43.2 }, // 40-44
+            { age: 47,   label:"45–49", p5:18.1, p25:27.3, p50:30.8, p75:34.9, p95:40.6 }, // 45-49
+            { age: 54.5, label:"50–59", p5:15.8, p25:19.2, p50:22.7, p75:25.8, p95:31.7 }, // 50-59 (fallback +5)
+            { age: 64.5, label:"60–69", p5:14.7, p25:17.6, p50:20.15,p75:22.9, p95:28.2 }, // 60-69 (fallback +5)
+            { age: 75,   label:"70–80", p5:5.0,  p25:15.9, p50:17.7, p75:21.0, p95:25.6 }  // 70-80 (fallback +5)
         ];
-
-        // Data based on user-provided images (2025-10-28)
-        // Adjusted: +5cm for 30+
+        // Data for Women (Jump Height in cm) - LAST ADJUSTED: +5cm for 30+
         const JUMP_DATA_KVINNER = [
-            { age: 8.5,  label:"8–9",  p5:16.0, p25:19.8, p50:22.4, p75:25.3, p95:29.4 },
-            { age: 10.5, label:"10–11", p5:18.5, p25:22.2, p50:25.8, p75:28.9, p95:33.2 },
-            { age: 12.5, label:"12–13", p5:18.8, p25:23.4, p50:26.6, p75:30.0, p95:35.0 },
-            { age: 14.5, label:"14–15", p5:18.5, p25:23.5, p50:26.6, p75:29.9, p95:34.6 },
-            { age: 16.5, label:"16–17", p5:18.0, p25:22.4, p50:25.8, p75:29.2, p95:34.3 },
-            { age: 18.5, label:"18–19", p5:17.9, p25:22.2, p50:25.3, p75:28.6, p95:33.4 },
-            { age: 22,   label:"20–24", p5:17.0, p25:21.0, p50:24.4, p75:27.8, p95:32.5 },
-            { age: 27,   label:"25–29", p5:16.2, p25:20.0, p50:23.2, p75:26.4, p95:31.4 },
-            // Adjusted: +5cm for 30+
-            { age: 32,   label:"30–34", p5:20.6, p25:24.2, p50:27.2, p75:30.2, p95:35.0 },
-            { age: 37,   label:"35–39", p5:20.0, p25:23.4, p50:26.2, p75:29.2, p95:33.8 },
-            { age: 42,   label:"40–44", p5:15.0, p25:22.5, p50:25.0, p75:27.9, p95:32.6 },
-            { age: 47,   label:"45–49", p5:14.5, p25:21.8, p50:24.4, p75:26.9, p95:31.2 },
-            // Fallback data (50+) - Adjusted +5cm
-            { age: 54.5, label:"50–59", p5:14.0, p25:17.0, p50:20.5, p75:24.0, p95:28.0 },
-            { age: 64.5, label:"60–69", p5:13.0, p25:15.5, p50:18.0, p75:21.0, p95:25.0 },
-            { age: 75,   label:"70–80", p5:5.0,  p25:13.5, p50:15.5, p75:18.5, p95:22.0 }
+            { age: 8.5,  label:"8–9",  p5:16.0, p25:19.8, p50:22.4, p75:25.3, p95:29.4 }, // 8-9
+            { age: 10.5, label:"10–11", p5:18.5, p25:22.2, p50:25.8, p75:28.9, p95:33.2 }, // 10-11
+            { age: 12.5, label:"12–13", p5:18.8, p25:23.4, p50:26.6, p75:30.0, p95:35.0 }, // 12-13
+            { age: 14.5, label:"14–15", p5:18.5, p25:23.5, p50:26.6, p75:29.9, p95:34.6 }, // 14-15
+            { age: 16.5, label:"16–17", p5:18.0, p25:22.4, p50:25.8, p75:29.2, p95:34.3 }, // 16-17
+            { age: 18.5, label:"18–19", p5:17.9, p25:22.2, p50:25.3, p75:28.6, p95:33.4 }, // 18-19
+            { age: 22,   label:"20–24", p5:17.0, p25:21.0, p50:24.4, p75:27.8, p95:32.5 }, // 20-24
+            { age: 27,   label:"25–29", p5:16.2, p25:20.0, p50:23.2, p75:26.4, p95:31.4 }, // 25-29
+            // 30+ have +5cm
+            { age: 32,   label:"30–34", p5:20.6, p25:24.2, p50:27.2, p75:30.2, p95:35.0 }, // 30-34
+            { age: 37,   label:"35–39", p5:20.0, p25:23.4, p50:26.2, p75:29.2, p95:33.8 }, // 35-39
+            { age: 42,   label:"40–44", p5:15.0, p25:22.5, p50:25.0, p75:27.9, p95:32.6 }, // 40-44
+            { age: 47,   label:"45–49", p5:14.5, p25:21.8, p50:24.4, p75:26.9, p95:31.2 }, // 45-49
+            { age: 54.5, label:"50–59", p5:14.0, p25:17.0, p50:20.5, p75:24.0, p95:28.0 }, // 50-59 (fallback +5)
+            { age: 64.5, label:"60–69", p5:13.0, p25:15.5, p50:18.0, p75:21.0, p95:25.0 }, // 60-69 (fallback +5)
+            { age: 75,   label:"70–80", p5:5.0,  p25:13.5, p50:15.5, p75:18.5, p95:22.0 }  // 70-80 (fallback +5)
         ];
+        // --- END OF JUMP DATA ---
 
+        // --- START OF STRENGTH DATA ---
         const STRENGTH_MODEL = {
           male: { slope: 0.9607, intercept: 0.9399 },
           female: { slope: 0.7710, intercept: 1.4416 },
@@ -396,7 +437,7 @@
             "20-29_m": { mean: 1.0554, stdDev: 0.1545 }, "30-39_m": { mean: 1.0463, stdDev: 0.1411 },
             "40-49_m": { mean: 1.0234, stdDev: 0.1382 }, "50-59_m": { mean: 0.9800, stdDev: 0.1626 },
             "60-69_m": { mean: 0.8587, stdDev: 0.1127 }, "70-79_m": { mean: 0.7195, stdDev: 0.1766 },
-             "80+_m": { mean: 0.69, stdDev: 0.17 },
+             "80+_m": { mean: 0.69, stdDev: 0.17 }, // Added estimate for 80+ male
             "Under 10_f": { mean: 0.8631, stdDev: 0.1100 }, "10-19_f": { mean: 1.0489, stdDev: 0.1200 },
             "20-29_f": { mean: 1.1283, stdDev: 0.1625 }, "30-39_f": { mean: 1.1265, stdDev: 0.1728 },
             "40-49_f": { mean: 1.1329, stdDev: 0.2453 }, "50-59_f": { mean: 1.0346, stdDev: 0.1595 },
@@ -405,55 +446,50 @@
           },
           overall: { mean: 1.0168, stdDev: 0.1808 }
         };
+        // --- END OF STRENGTH DATA ---
 
-        // --- UI Elements ---
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const loadingMessage = document.getElementById('loading-message');
-        const dataTableBody = document.getElementById('data-table-body');
-        const filterInput = document.getElementById('filter-input');
-        const addForm = document.getElementById('add-entry-form');
-        const testlederInput = document.getElementById('testleder-input');
-        const totalCountEl = document.getElementById('total-count');
-        const genderStatsEl = document.getElementById('gender-stats');
-        const ageGroupStatsEl = document.getElementById('age-group-stats');
-        const downloadCsvButton = document.getElementById('download-csv-button');
+        // UI elements - DECLARED here, INITIALIZED in initializeUIElements()
+        let loadingOverlay, loadingMessage, dataTableBody, filterInput, addForm, testlederInput;
+        let totalCountEl, ageGroupStatsEl, genderStatsEl, downloadCsvButton;
+        let ageModal, modalTitle, modalMessage, modalBalanceAge, modalDetails, closeModalBtn;
+        let toggleFitnessReportBtn, fullFitnessReportFields;
         
-        // Modal UI
-        const ageModal = document.getElementById('age-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalBalanceAge = document.getElementById('modal-balance-age');
-        const modalDetails = document.getElementById('modal-details');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-
-        // Fitness Report UI
-        const toggleFitnessReportBtn = document.getElementById('toggle-fitness-report-btn');
-        const fullFitnessReportFields = document.getElementById('full-fitness-report-fields');
-        
-        // Graph UI
+        // ENHANCED: Graph UI
         const chartInstances = {
-            ageVsArea: null,
-            ageVsDiff: null
+            areaChart: null,
+            diffChart: null
         };
-        const ageVsAreaCanvas = document.getElementById('ageVsAreaChart');
-        const ageVsDiffCanvas = document.getElementById('ageVsDiffChart');
-        const graphFilterButtons = document.getElementById('graph-filter-buttons');
-        const regressionFilterButtons = document.getElementById('regression-filter-buttons'); // NEW
-        const areaStatsDisplay = document.getElementById('area-stats-display'); // NEW
-        const diffStatsDisplay = document.getElementById('diff-stats-display'); // NEW
+        
+        let areaStatsDisplay, diffStatsDisplay, graphFilterButtons, regressionFilterButtons;
+        let xAxisSelect1, yAxisSelect1, xAxisSelect2, yAxisSelect2;
+        // NEW: Add canvas elements here
+        let areaChartCanvas, diffChartCanvas;
+        // DEBUG PANEL VARS REMOVED
 
+        // Global graph state
+        let currentGraphGender = 'All';
+        let currentRegressionType = 'exponential';
         
         /**
          * Shows a popup modal with custom content.
+         * @param {string} title - The title of the modal
+         * @param {string} message - The main message
+         * @param {string} value - The value to display (e.g., age or emoji)
+         * @param {string} type - 'success', 'error', 'warning', 'info'
+         * @param {string} detailsHTML - Optional HTML for the details section
          */
-        function showModal(title, message, value, type = 'success', detailsHtml = '') {
+        function showModal(title, message, value, type = 'success', detailsHTML = '') {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             modalBalanceAge.textContent = value;
-            modalDetails.innerHTML = detailsHtml; // Inject the details HTML
+            
+            // Clear details
+            modalDetails.innerHTML = detailsHTML; // Set new details
             
             // Reset colors
-            modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400', 'text-white');
+            modalBalanceAge.classList.remove('text-emerald-400', 'text-red-500', 'text-yellow-400', 'text-blue-400');
+            modalBalanceAge.classList.remove('text-5xl', 'text-7xl');
+
 
             if (type === 'success') {
                 modalBalanceAge.classList.add('text-emerald-400');
@@ -463,13 +499,17 @@
                 modalBalanceAge.classList.add('text-yellow-400');
             } else if (type === 'info') {
                 modalBalanceAge.classList.add('text-blue-400');
-            } else if (type === 'report') {
-                modalBalanceAge.classList.add('text-white'); // For the main 'Fitness Age'
+            }
+            
+            // Adjust size based on content
+            if (detailsHTML) {
+                 modalBalanceAge.classList.add('text-7xl'); // Larger for overall score
+            } else {
+                 modalBalanceAge.classList.add('text-5xl'); // Standard size
             }
             
             ageModal.classList.remove('hidden');
         }
-
 
         /**
          * Main function that runs when the document is loaded
@@ -478,13 +518,17 @@
             try {
                 console.log("App initializing...");
                 
+                // NEW: Initialize all UI elements safely after DOM load
+                initializeUIElements();
+
                 // 1. Initialize Firebase App
                 const app = initializeApp(firebaseConfig);
                 
                 // 2. Initialize Firestore DB
                 db = getFirestore(app);
                 
-                // 3. Define the database path
+                // 3. Define the database path (MUST match Firestore rules)
+                // This is hardcoded so everyone sees the same data.
                 const dbPath = 'balanse-data-entries';
                 entriesCollection = collection(db, dbPath);
 
@@ -495,109 +539,167 @@
                 
                 // 5. Set up event listeners for UI
                 setupEventListeners();
+                console.log("Event listeners set up. App is ready.");
 
             } catch (error) {
-                console.error("Error during initialization:", error);
+                console.error("Initialization Error:", error);
                 loadingMessage.textContent = `Startup Error: ${error.message}`;
             }
         }
         
         /**
+         * NEW: Safely initializes all UI element variables after DOM load
+         */
+        function initializeUIElements() {
+            // DEBUG PANEL REMOVED
+            
+            // General UI
+            loadingOverlay = document.getElementById('loading-overlay');
+            loadingMessage = document.getElementById('loading-message');
+            dataTableBody = document.getElementById('data-table-body');
+            filterInput = document.getElementById('filter-input');
+            addForm = document.getElementById('add-entry-form');
+            testlederInput = document.getElementById('testleder-input');
+            totalCountEl = document.getElementById('total-count');
+            ageGroupStatsEl = document.getElementById('age-group-stats');
+            genderStatsEl = document.getElementById('gender-stats');
+            downloadCsvButton = document.getElementById('download-csv-button');
+            ageModal = document.getElementById('age-modal');
+            modalTitle = document.getElementById('modal-title');
+            modalMessage = document.getElementById('modal-message');
+            modalBalanceAge = document.getElementById('modal-balance-age');
+            modalDetails = document.getElementById('modal-details');
+            closeModalBtn = document.getElementById('close-modal-btn');
+            toggleFitnessReportBtn = document.getElementById('toggle-fitness-report-btn');
+            fullFitnessReportFields = document.getElementById('full-fitness-report-fields');
+            
+            // Graph-related elements
+            areaStatsDisplay = document.getElementById('area-stats-display');
+            diffStatsDisplay = document.getElementById('diff-stats-display');
+            graphFilterButtons = document.getElementById('graph-filter-buttons');
+            regressionFilterButtons = document.getElementById('regression-filter-buttons');
+            xAxisSelect1 = document.getElementById('x-axis-select-1');
+            yAxisSelect1 = document.getElementById('y-axis-select-1');
+            xAxisSelect2 = document.getElementById('x-axis-select-2');
+            yAxisSelect2 = document.getElementById('y-axis-select-2');
+
+            // --- CRITICAL FIX ---
+            // Get the canvas elements here
+            areaChartCanvas = document.getElementById('areaChart');
+            diffChartCanvas = document.getElementById('diffChart');
+        }
+
+        /**
          * Sets up listeners for UI elements
          */
         function setupEventListeners() {
-            // Listener for the 'Add' form
+            // Listener for 'Add' form
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const testleder = testlederInput.value.trim();
                 const alder = parseInt(document.getElementById('alder').value, 10);
-                const kjonn = document.getElementById('kjonn').value;
+                const kjonn = document.getElementById('kjonn').value; // Reads "Mann" or "Kvinne"
                 const areal = parseFloat(document.getElementById('areal').value);
                 const diff = parseFloat(document.getElementById('diff').value);
 
                 if (!testleder) {
-                    showModal("Missing Test Leader", "Please enter your 'Test Leader' name.", "⚠️", "warning");
+                    showModal(
+                        "Missing Test Leader", 
+                        "Please fill in your 'Test Leader' name.", 
+                        "⚠️", 
+                        "warning"
+                    );
                     testlederInput.focus();
                     return;
                 }
                 
                 if (isNaN(alder) || isNaN(areal) || isNaN(diff)) {
-                    showModal("Invalid Data", "Age, Area, and Diff must be valid numbers.", "⚠️", "warning");
+                    showModal(
+                        "Invalid Data", 
+                        "Age, Area, and Diff must be valid numbers.", 
+                        "⚠️", 
+                        "warning"
+                    );
                     return;
                 }
-                
-                // --- Get Full Fitness Report data (if visible) ---
-                const isFullReport = !fullFitnessReportFields.classList.contains('hidden');
-                const hopphoydeEl = document.getElementById('hopphoyde');
-                const vektEl = document.getElementById('vekt');
-                const pullEl = document.getElementById('pull');
 
-                let hopphoyde = null;
-                let vekt = null;
-                let pull = null;
-                
-                // Calculate Balance Age (always calculated)
+                // --- Start Age Calculation ---
+                // Always calculate balance age
                 const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
+                
+                let hopphoyde = NaN;
+                let vekt = NaN;
+                let pull = NaN;
+                let funksjonAlder = NaN;
+                let styrkeAlder = NaN;
+                let samletAlder = NaN;
 
+                // Check if full report fields are visible and filled
+                const isFullReport = !fullFitnessReportFields.classList.contains('hidden');
+                
                 if (isFullReport) {
-                    // Full report fields are visible, validate them
-                    hopphoyde = parseFloat(hopphoydeEl.value);
-                    vekt = parseFloat(vektEl.value);
-                    pull = parseFloat(pullEl.value);
-
+                    hopphoyde = parseFloat(document.getElementById('hopphoyde').value);
+                    vekt = parseFloat(document.getElementById('vekt').value);
+                    pull = parseFloat(document.getElementById('pull').value);
+                    
                     if (isNaN(hopphoyde) || isNaN(vekt) || isNaN(pull)) {
                          showModal(
-                            "Invalid Report Data", 
-                            "Jump Height, Weight, and Pull Result must be valid numbers for a full report.", 
-                            "⚠️", 
-                            "warning"
-                        );
+                             "Incomplete Report", 
+                             "For a full report, Jump Height, Weight, and Pull Result must all be valid numbers.", 
+                             "⚠️", 
+                             "warning"
+                         );
                         return;
                     }
                     
-                    // --- Calculate all ages for modal ---
-                    const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
-                    const styrkeAlder = calculateStrengthAge(alder, kjonn, vekt, pull);
+                    // All fields are valid, calculate other ages
+                    const jumpPercentile = calculateJumpPercentile(alder, kjonn, hopphoyde);
+                    funksjonAlder = calculateAgeFromPercentile(jumpPercentile, alder);
                     
-                    const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(Number.isFinite);
-                    const samletAlder = validAges.length > 0 ? validAges.reduce((a, b) => a + b, 0) / validAges.length : 0;
+                    const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pull);
+                    styrkeAlder = calculateAgeFromPercentile(strengthResult.percentile, alder);
+                    
+                    // Calculate overall age
+                    const ages = [balanseAlder, funksjonAlder, styrkeAlder].filter(isFinite);
+                    if (ages.length > 0) {
+                        samletAlder = ages.reduce((sum, age) => sum + age, 0) / ages.length;
+                    }
+                }
+                // --- End Age Calculation ---
 
-                    // Show "sexy" modal
-                    const detailsHtml = `
+                // --- Show Modal ---
+                if (isFullReport && !isNaN(samletAlder)) {
+                    // Show the "sexy" full report modal
+                    const detailsHTML = `
                         <div class="age-card">
-                            <h4 class="age-card-title">BALANCE AGE</h4>
-                            <p class="age-card-value text-balance">${balanseAlder.toFixed(1)}</p>
+                            <div class="age-card-title">Balance Age</div>
+                            <div class="age-card-value text-balance">${balanseAlder.toFixed(1)}</div>
                         </div>
                         <div class="age-card">
-                            <h4 class="age-card-title">FUNCTIONAL AGE</h4>
-                            <p class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</p>
+                            <div class="age-card-title">Functional Age</div>
+                            <div class="age-card-value text-function">${funksjonAlder.toFixed(1)}</div>
                         </div>
                         <div class="age-card">
-                            <h4 class="age-card-title">STRENGTH AGE</h4>
-                            <p class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</p>
+                            <div class="age-card-title">Strength Age</div>
+                            <div class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</div>
                         </div>
                     `;
                     showModal(
-                        "Full Fitness Report", 
-                        "Your estimated fitness age is:", 
-                        samletAlder.toFixed(1), 
-                        "report",
-                        detailsHtml
+                        "Full Fitness Age Report",
+                        "Your estimated overall fitness age is:",
+                        samletAlder.toFixed(1),
+                        "success",
+                        detailsHTML
                     );
-
                 } else {
-                    // --- Show simple modal (Balance Age only) ---
-                    if (!isNaN(balanseAlder)) {
-                        showModal(
-                            "Balance Age Calculated", 
-                            "Your estimated balance age is:", 
-                            balanseAlder.toFixed(1), 
-                            "success",
-                            "" // No details
-                        );
-                    } else {
-                        console.warn("Could not calculate balance age.");
-                    }
+                    // Show the simple balance age modal
+                    showModal(
+                        "Balance Age Calculated", 
+                        "Your estimated balance age is:", 
+                        balanseAlder.toFixed(1), 
+                        "success",
+                        "" // No details
+                    );
                 }
 
                 try {
@@ -640,172 +742,156 @@
             // Listener: Toggle Full Fitness Report
             toggleFitnessReportBtn.addEventListener('click', () => {
                 const isHidden = fullFitnessReportFields.classList.toggle('hidden');
-                if (isHidden) {
-                    toggleFitnessReportBtn.textContent = 'Show Full Fitness Age Report';
-                } else {
-                    toggleFitnessReportBtn.textContent = 'Hide Full Fitness Age Report';
-                }
+                toggleFitnessReportBtn.textContent = isHidden ? 'Show Full Fitness Age Report' : 'Hide Full Fitness Age Report';
             });
             
             // Listener: Graph filter buttons
             setupGraphFilters();
-            setupRegressionFilters(); // NEW
+            setupRegressionFilters();
+            
+            // NEW: Listeners for axis selection
+            xAxisSelect1.addEventListener('change', renderGraphs);
+            yAxisSelect1.addEventListener('change', renderGraphs);
+            xAxisSelect2.addEventListener('change', renderGraphs);
+            yAxisSelect2.addEventListener('change', renderGraphs);
         }
         
         // --- START OF CALCULATION FUNCTIONS ---
 
         /**
-         * Helper function to check for female sex, handling Norwegian/English data
+         * Calculates balance age based on sex and CoP area.
+         * @param {number} realAge - The person's actual age
+         * @param {string} sex - "Mann" or "Kvinne"
+         * @param {number} copArea - CoP Area in cm²
+         * @returns {number} - Estimated balance age, capped at realAge + 5
          */
-        function isFemale(sexString) {
-            if (!sexString) return false;
-            const s = sexString.toLowerCase();
-            return s === 'woman' || s === 'kvinne';
-        }
+        function calculateBalanceAge(realAge, sex, copArea) {
+            const area = parseFloat(copArea);
+            if (!isFinite(area)) return NaN;
+            
+            // NEW LOGIC: Choose formula based on person's actual age
+            if (realAge <= 35) {
+                // METHOD 1 (Age <= 35): 3.13 area gives 21 years
+                const minArea = 3.13;
+                const clippedArea = Math.max(minArea, area);
+                
+                const kvinneBaseAlder = 21 - (2.36 * minArea); // approx. 13.61
+                const mannBaseAlder = 21 - (2.41 * minArea);   // approx. 13.46
 
+                if (sex.toLowerCase() === "kvinne") {
+                    return Math.min(kvinneBaseAlder + 2.36 * clippedArea, realAge + 5);
+                }
+                return Math.min(mannBaseAlder + 2.41 * clippedArea, realAge + 5);
+
+            } else {
+                // METHOD 2 (Age > 35): The "original" formula (3.0 area gives ~33 years)
+                const minArea = 3.0;
+                const clippedArea = Math.max(minArea, area);
+
+                if (sex.toLowerCase() === "kvinne") {
+                    return Math.min(26.11 + 2.36 * clippedArea, realAge + 5);
+                }
+                return Math.min(25.47 + 2.41 * clippedArea, realAge + 5);
+            }
+        }
+        
         /**
-         * Finds the correct age group data from the jump tables.
-         * Uses new, more granular age groups.
+         * Gets the correct age group data from the jump tables.
+         * @param {number} age - The person's actual age
+         * @param {string} sex - "Mann" or "Kvinne"
+         * @returns {object} - The data object for the correct age group
          */
         function getAgeGroupData(age, sex) {
-            const dataSet = isFemale(sex) ? JUMP_DATA_KVINNER : JUMP_DATA_MENN;
-            if (age <= 9) return dataSet[0]; // 8-9
-            if (age <= 11) return dataSet[1]; // 10-11
-            if (age <= 13) return dataSet[2]; // 12-13
-            if (age <= 15) return dataSet[3]; // 14-15
-            if (age <= 17) return dataSet[4]; // 16-17
-            if (age <= 19) return dataSet[5]; // 18-19
-            if (age <= 24) return dataSet[6]; // 20-24
-            if (age <= 29) return dataSet[7]; // 25-29
-            if (age <= 34) return dataSet[8]; // 30-34
-            if (age <= 39) return dataSet[9]; // 35-39
+            const dataSet = sex.toLowerCase() === 'kvinne' ? JUMP_DATA_KVINNER : JUMP_DATA_MENN;
+            
+            // Handle new, specific age groups from image
+            if (age <= 9) return dataSet[0];   // 8-9
+            if (age <= 11) return dataSet[1];  // 10-11
+            if (age <= 13) return dataSet[2];  // 12-13
+            if (age <= 15) return dataSet[3];  // 14-15
+            if (age <= 17) return dataSet[4];  // 16-17
+            if (age <= 19) return dataSet[5];  // 18-19
+            if (age <= 24) return dataSet[6];  // 20-24
+            if (age <= 29) return dataSet[7];  // 25-29
+            if (age <= 34) return dataSet[8];  // 30-34
+            if (age <= 39) return dataSet[9];  // 35-39
             if (age <= 44) return dataSet[10]; // 40-44
             if (age <= 49) return dataSet[11]; // 45-49
+            
+            // Fallback for older groups (using older data structure)
             if (age <= 59) return dataSet[12]; // 50-59
             if (age <= 69) return dataSet[13]; // 60-69
             return dataSet[14]; // 70-80
         }
 
         /**
-         * Calculates percentile score (0-100) based on jump height, age, and sex.
+         * Calculates the jump percentile based on age, sex, and height.
+         * @param {number} age - Actual age
+         * @param {string} sex - "Mann" or "Kvinne"
+         * @param {number} jumpHeight - Jump height in cm
+         * @returns {number} - Percentile score (0-100)
          */
         function calculateJumpPercentile(age, sex, jumpHeight) {
              if (!isFinite(jumpHeight) || !isFinite(age)) return NaN;
              const g = getAgeGroupData(age, sex);
              const pts = [ {p:5, x:g.p5}, {p:25, x:g.p25}, {p:50, x:g.p50}, {p:75, x:g.p75}, {p:95, x:g.p95} ];
              
-             if (jumpHeight <= pts[0].x) { // Below P5
+             if (jumpHeight <= pts[0].x) {
+                 // Below P5, extrapolate towards P0
                  const m = (pts[1].p - pts[0].p) / (pts[1].x - pts[0].x || 1e-6);
-                 return Math.max(0.1, pts[0].p + (jumpHeight - pts[0].x) * m);
+                 return Math.max(0, pts[0].p + (jumpHeight - pts[0].x) * m);
              }
              for (let i = 0; i < pts.length - 1; i++) {
-                 if (jumpHeight <= pts[i+1].x) { // Between two points
+                 // Between two points
+                 if (jumpHeight <= pts[i+1].x) {
                      const m = (pts[i+1].p - pts[i].p) / (pts[i+1].x - pts[i].x || 1e-6);
                      return pts[i].p + (jumpHeight - pts[i].x) * m;
                  }
              }
-             // Above P95
+             // Above P95, extrapolate towards P100
              const m = (pts[pts.length-1].p - pts[pts.length-2].p) / (pts[pts.length-1].x - pts[pts.length-2].x || 1e-6);
-             return Math.min(99.9, pts[pts.length-1].p + (jumpHeight - pts[pts.length-1].x) * m);
+             return Math.min(100, pts[pts.length-1].p + (jumpHeight - pts[pts.length-1].x) * m);
         }
 
         /**
-         * Calculates Balance Age.
-         * Caps the age at max realAge + 5 years.
-         */
-        function calculateBalanceAge(realAge, sex, copArea) {
-            const area = parseFloat(copArea);
-            if (!isFinite(area)) return NaN;
-            
-            let calculatedAge;
-            
-            if (realAge <= 35) {
-                // METHOD 1 (Age <= 35)
-                const minArea = 3.13;
-                const clippedArea = Math.max(minArea, area);
-                const kvinneBaseAlder = 21 - (2.36 * minArea); // ~13.61
-                const mannBaseAlder = 21 - (2.41 * minArea);   // ~13.46
-                
-                if (isFemale(sex)) {
-                    calculatedAge = kvinneBaseAlder + 2.36 * clippedArea;
-                } else {
-                    calculatedAge = mannBaseAlder + 2.41 * clippedArea;
-                }
-            } else {
-                // METHOD 2 (Age > 35)
-                const minArea = 3.0;
-                const clippedArea = Math.max(minArea, area);
-                
-                if (isFemale(sex)) {
-                    calculatedAge = 26.11 + 2.36 * clippedArea;
-                } else {
-                    calculatedAge = 25.47 + 2.41 * clippedArea;
-                }
-            }
-            // Cap the age at realAge + 5
-            return Math.min(calculatedAge, realAge + 5);
-        }
-
-        /**
-         * Converts a percentile score (0-100) to an age based on the P0/P50/P100 model.
-         */
-        function calculateAgeFromPercentile(percentile, realAge) {
-            if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
-            
-            const p = Math.max(0, Math.min(100, percentile));
-            const minAge = 21; // P100 = 21
-            const midAge = realAge; // P50 = realAge
-            const maxAge = realAge + 5; // P0 = realAge + 5
-
-            if (p === 50) {
-                return midAge;
-            } else if (p > 50) {
-                // Between P50 and P100 (linear interpolation)
-                const factor = (p - 50) / 50; // (0 to 1)
-                return midAge - factor * (midAge - minAge);
-            } else { // p < 50
-                // Between P0 and P50 (linear interpolation)
-                const factor = p / 50; // (0 to 1)
-                return maxAge - factor * (maxAge - midAge);
-            }
-        }
-        
-        /**
-         * Calculates Functional (Jump) Age
-         */
-        function calculateJumpAge(realAge, sex, jumpHeight) {
-            const percentile = calculateJumpPercentile(realAge, sex, jumpHeight);
-            return calculateAgeFromPercentile(percentile, realAge);
-        }
-
-        /**
-         * Finds the age group for the strength model.
+         * Gets the strength age group key.
+         * @param {number} age - Actual age
+         * @returns {string} - Age group key (e.g., "20-29")
          */
         function getStrengthAgeGroup(age) {
-            if (age < 10) return 'Under 10'; if (age < 20) return '10-19';
-            if (age < 30) return '20-29'; if (age < 40) return '30-39';
-            if (age < 50) return '40-49'; if (age < 60) return '50-59';
-            if (age < 70) return '60-69'; if (age < 80) return '70-79';
-            return '80+';
+             if (age < 10) return 'Under 10'; if (age < 20) return '10-19';
+             if (age < 30) return '20-29'; if (age < 40) return '30-39';
+             if (age < 50) return '40-49'; if (age < 60) return '50-59';
+             if (age < 70) return '60-69'; if (age < 80) return '70-79';
+             return '80+';
         }
 
         /**
-         * Calculates Strength Percentile score.
+         * Calculates strength percentile.
+         * @param {string} gender - "Mann" or "Kvinne"
+         * @param {number} age - Actual age
+         * @param {number} weight - Body weight in kg
+         * @param {number} pull - Pull result in kg
+         * @returns {object} - Object with score and percentile
          */
         function calculateStrengthScoreAndPercentile(gender, age, weight, pull) {
             if (!isFinite(age) || !isFinite(weight) || !isFinite(pull) || weight <= 0 || pull < 0) {
                 return { score: NaN, percentile: NaN, error: "Invalid input values" };
             }
             try {
-                const genderKey = isFemale(gender) ? 'female' : 'male';
+                // NOTE: Using "kvinne" here for lookup
+                const genderKey = gender.toLowerCase() === 'kvinne' ? 'female' : 'male';
                 const model = STRENGTH_MODEL[genderKey];
+
                 const expectedLogPull = model.intercept + model.slope * Math.log(weight);
                 const expectedPull = Math.exp(expectedLogPull);
 
                 if (!isFinite(expectedPull) || expectedPull <= 0) {
                      return { score: NaN, percentile: NaN, error: "Calculation error (expected pull)" };
                 }
+
                 const strengthRatio = pull / expectedPull;
+
                 const ageGroup = getStrengthAgeGroup(age);
                 const groupKey = `${ageGroup}_${genderKey === 'female' ? 'f' : 'm'}`;
                 let groupStats = STRENGTH_MODEL.ageGroupAdjustments[groupKey];
@@ -813,40 +899,61 @@
 
                 if (groupStats && groupStats.stdDev > 0) {
                     zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
-                } else if (STRENGTH_MODEL.overall.stdDev > 0) { // Fallback
+                } else if (STRENGTH_MODEL.overall.stdDev > 0) { // Fallback to overall
+                     console.warn(`Using overall stats for strength calculation. Group: ${groupKey}`);
                     groupStats = STRENGTH_MODEL.overall;
                     zScore = (strengthRatio - groupStats.mean) / groupStats.stdDev;
                 } else {
                      return { score: NaN, percentile: NaN, error: "Calculation error (std dev zero)" };
                 }
+
+                // Simple Z-score to percentile approximation (fast)
+                const percentile = 50 * (1 + Math.tanh(zScore / Math.sqrt(2 * Math.PI)));
+                const clampedPercentile = Math.max(0, Math.min(100, percentile));
                 
-                // Simplified z-score to percentile
-                const p = 0.5 * (1 + (zScore / Math.sqrt(2)) / Math.sqrt(1 + (zScore*zScore/2))); // Basic approximation
-                const percentile = Math.max(0, Math.min(100, p * 100));
-                
-                 const clampedPercentile = Math.max(0, Math.min(100, percentile));
                  let finalScore = 50 + (zScore * 15);
                  finalScore = Math.max(0, Math.min(100, finalScore));
+
                 return { score: finalScore, percentile: clampedPercentile };
             } catch (error) {
+                console.error("Error in calculateStrengthScoreAndPercentile:", error);
                  return { score: NaN, percentile: NaN, error: "Calculation failed" };
             }
         }
-
+        
         /**
-         * Calculates Strength Age
+         * Translates a percentile score (0-100) into a fitness age.
+         * Uses the P0 = realAge+5, P50 = realAge, P100 = 21 model.
+         * @param {number} percentile - The score (0-100)
+         * @param {number} realAge - The person's actual age
+         * @returns {number} - The calculated fitness age
          */
-        function calculateStrengthAge(realAge, sex, weight, pull) {
-            const strengthResult = calculateStrengthScoreAndPercentile(sex, realAge, weight, pull);
-            const percentile = strengthResult.percentile;
-            return calculateAgeFromPercentile(percentile, realAge);
+        function calculateAgeFromPercentile(percentile, realAge) {
+            if (!isFinite(percentile) || !isFinite(realAge)) return NaN;
+
+            const p = Math.max(0, Math.min(100, percentile));
+            const minAge = 21; // P100 = 21
+            const avgAge = realAge; // P50 = realAge
+            const maxAge = realAge + 5; // P0 = realAge + 5
+
+            if (p === 50) {
+                return avgAge;
+            } else if (p > 50) {
+                // Between P50 and P100
+                // (p - 50) / 50 gives a 0-1 range
+                return avgAge - ((p - 50) / 50) * (avgAge - minAge);
+            } else {
+                // Between P0 and P50
+                // p / 50 gives a 0-1 range
+                return maxAge - (p / 50) * (maxAge - avgAge);
+            }
         }
 
         // --- END OF CALCULATION FUNCTIONS ---
         
 
         /**
-         * Sets up real-time listener to Firestore
+         * Sets up the real-time listener to Firestore
          */
         function setupSnapshots() {
             if (unsubscribeEntries) unsubscribeEntries(); // Stop old listener
@@ -863,7 +970,7 @@
                 allEntries.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 
                 renderTableAndStats(filterInput.value);
-                renderGraphs(); // Re-render graphs with new data
+                renderGraphs(); // Update graphs with new data
                 
                 if (loadingOverlay.style.display !== 'none') {
                     loadingOverlay.style.display = 'none';
@@ -873,8 +980,10 @@
                 loadingMessage.textContent = `Error fetching data: ${error.message}`;
                 dataTableBody.innerHTML = `<tr><td colspan="9" class="py-4 px-6 text-center text-red-500">Error: ${error.message}</td></tr>`;
                 
+                // Show error in overlay if it fails first time
                 if (loadingOverlay.style.display !== 'none') {
                     loadingMessage.textContent = "Error: Could not fetch data. Check Firestore rules.";
+                    // Don't hide overlay
                 }
             });
         }
@@ -883,7 +992,7 @@
          * Updates the table and statistics based on the filter
          */
         function renderTableAndStats(filterText = '') {
-            if (!allEntries) { 
+            if (!allEntries) { // Safety check
                 console.warn("renderTableAndStats called before allEntries is defined.");
                 allEntries = [];
             }
@@ -897,7 +1006,7 @@
         }
 
         /**
-         * Renders the data table
+         * Renders the table itself
          */
         function renderTable(entries) {
             dataTableBody.innerHTML = ''; // Clear table
@@ -914,30 +1023,25 @@
 
                 const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('en-GB') : 'N/A';
                 
-                // Check if it has full report data
+                // Check if full report data exists
                 const hasFullReport = entry.hopphoyde != null && entry.vekt != null && entry.pull != null;
                 const reportIcon = hasFullReport 
-                    ? `<button class="icon-button icon-button-report" data-action="view-report" title="View Full Report">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                           <path d="M9 4.804A7.968 7.968 0 001.153 8.624l-.013.028A7.968 7.968 0 0010 17c3.45 0 6.45-2.22 7.86-5.348l.013-.028A7.968 7.968 0 0011 4.804zM10 15c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7z" />
-                           <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                         </svg>
-                       </button>`
-                    : `<span class="opacity-30" title="No full report data">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                           <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.523l8.367 8.367zm1.414-1.414L6.523 5.11A6 6 0 0114.89 13.477z" clip-rule="evenodd" />
-                         </svg>
-                       </span>`;
+                    ? `<button class="icon-button icon-button-report" data-action="report" title="Show Full Report">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                            </svg>
+                        </button>`
+                    : `<span class="text-gray-700">-</span>`;
 
                 tr.innerHTML = `
-                    <td class="py-3 px-2 text-center">${reportIcon}</td>
+                    <td class="py-3 px-4 text-center">${reportIcon}</td>
                     <td class="py-3 px-4" data-field="testleder">${entry.testleder || ''}</td>
                     <td class="py-3 px-4" data-field="alder">${entry.alder}</td>
                     <td class="py-3 px-4" data-field="kjonn">${entry.kjonn}</td>
                     <td class="py-3 px-4" data-field="areal">${entry.areal}</td>
                     <td class="py-3 px-4" data-field="diff">${entry.diff}</td>
-                    <td class="py-3 px-4 text-balance font-medium" data-field="balanceAlder">${entry.balanceAlder?.toFixed(1) || 'N/A'}</td>
-                    <td class="py-3 px-4" data-field="createdAt">${timestamp}</td>
+                    <td class="py-3 px-4 text-emerald-400" data-field="balanceAlder">${entry.balanceAlder?.toFixed(1) || 'N/A'}</td>
+                    <td class="py-3 px-4 text-gray-500 text-xs">${timestamp}</td>
                     <td class="py-3 px-4 text-center space-x-2">
                         <button class="icon-button" data-action="edit" title="Edit">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
@@ -948,13 +1052,12 @@
                     </td>
                 `;
                 
-                // Add event listeners for the buttons
+                // Add event listeners for buttons
                 tr.querySelector('[data-action="edit"]').addEventListener('click', () => toggleEditEntry(entry.id));
                 tr.querySelector('[data-action="delete"]').addEventListener('click', () => deleteEntry(entry.id));
                 
-                const reportButton = tr.querySelector('[data-action="view-report"]');
-                if (reportButton) {
-                    reportButton.addEventListener('click', () => viewFullReport(entry));
+                if (hasFullReport) {
+                    tr.querySelector('[data-action="report"]').addEventListener('click', () => showReportForEntry(entry.id));
                 }
 
                 dataTableBody.appendChild(tr);
@@ -962,401 +1065,104 @@
         }
         
         /**
-         * Handles clicking the "View Report" icon in the table.
-         */
-        function viewFullReport(entry) {
-            const { alder, kjonn, areal, hopphoyde, vekt, pull } = entry;
-            
-            // Recalculate all ages
-            const balanseAlder = calculateBalanceAge(alder, kjonn, areal);
-            const funksjonsAlder = calculateJumpAge(alder, kjonn, hopphoyde);
-            const styrkeAlder = calculateStrengthAge(alder, kjonn, vekt, pull);
-            
-            const validAges = [balanseAlder, funksjonsAlder, styrkeAlder].filter(Number.isFinite);
-            const samletAlder = validAges.length > 0 ? validAges.reduce((a, b) => a + b, 0) / validAges.length : 0;
-
-            const detailsHtml = `
-                <div class="age-card">
-                    <h4 class="age-card-title">BALANCE AGE</h4>
-                    <p class="age-card-value text-balance">${balanseAlder.toFixed(1)}</p>
-                </div>
-                <div class="age-card">
-                    <h4 class="age-card-title">FUNCTIONAL AGE</h4>
-                    <p class="age-card-value text-function">${funksjonsAlder.toFixed(1)}</p>
-                </div>
-                <div class="age-card">
-                    <h4 class="age-card-title">STRENGTH AGE</h4>
-                    <p class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</p>
-                </div>
-            `;
-            
-            showModal(
-                `Report for ${entry.testleder}`, 
-                "Estimated fitness age is:", 
-                samletAlder.toFixed(1), 
-                "report",
-                detailsHtml
-            );
-        }
-
-        
-        /**
          * Updates the statistics panel
          */
         function renderStats(entries) {
             totalCountEl.textContent = entries.length;
 
-            // Gender stats
-            const genderCounts = { 'Mann': 0, 'Kvinne': 0, 'Other': 0 };
-            const ageGroups = {};
-            /*
-            '0-19': { total: 0, 'Mann': 0, 'Kvinne': 0, 'Other': 0 },
-            */
-
-            const ageBrackets = ['0-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70+'];
-            ageBrackets.forEach(group => {
-                ageGroups[group] = { total: 0, 'Mann': 0, 'Kvinne': 0, 'Other': 0 };
-            });
+            const ageGroups = {
+                '0-19': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '20-29': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '30-39': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '40-49': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '50-59': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '60-69': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 },
+                '70+': { total: 0, Mann: 0, Kvinne: 0, Annet: 0 }
+            };
+            
+            const genderCounts = { 'Mann': 0, 'Kvinne': 0, 'Annet': 0 };
 
             entries.forEach(entry => {
-                const kjonn = entry.kjonn in genderCounts ? entry.kjonn : 'Other';
-                genderCounts[kjonn]++;
-
                 const alder = entry.alder;
-                let group;
-                if (alder <= 19) group = '0-19';
-                else if (alder <= 29) group = '20-29';
-                else if (alder <= 39) group = '30-39';
-                else if (alder <= 49) group = '40-49';
-                else if (alder <= 59) group = '50-59';
-                else if (alder <= 69) group = '60-69';
-                else group = '70+';
+                const kjonn = entry.kjonn || 'Annet';
                 
-                ageGroups[group].total++;
-                ageGroups[group][kjonn]++;
+                // Tally gender
+                if (kjonn === 'Mann') genderCounts['Mann']++;
+                else if (kjonn === 'Kvinne') genderCounts['Kvinne']++;
+                else genderCounts['Annet']++;
+
+                // Tally age groups
+                let groupKey = '70+';
+                if (alder <= 19) groupKey = '0-19';
+                else if (alder <= 29) groupKey = '20-29';
+                else if (alder <= 39) groupKey = '30-39';
+                else if (alder <= 49) groupKey = '40-49';
+                else if (alder <= 59) groupKey = '50-59';
+                else if (alder <= 69) groupKey = '60-69';
+                
+                ageGroups[groupKey].total++;
+                if (ageGroups[groupKey][kjonn] !== undefined) {
+                    ageGroups[groupKey][kjonn]++;
+                }
             });
 
             // Render Gender Stats
-            genderStatsEl.innerHTML = '';
-            for (const [gender, count] of Object.entries(genderCounts)) {
-                 if (count > 0) {
-                    const p = document.createElement('p');
-                    p.innerHTML = `<span class="text-gray-400">${gender}:</span> <span class="font-medium text-white ml-2">${count}</span>`;
-                    genderStatsEl.appendChild(p);
-                }
-            }
-
-            // Render Age Group Stats
-            ageGroupStatsEl.innerHTML = `
-                <table class="w-full min-w-full text-left text-xs">
-                    <thead class="text-gray-400">
-                        <tr>
-                            <th class="py-1 pr-2">Group</th>
-                            <th class="py-1 px-2 text-center">Total</th>
-                            <th class="py-1 px-2 text-center">M</th>
-                            <th class="py-1 px-2 text-center">W</th>
-                            <th class="py-1 pl-2 text-center">O</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-white"></tbody>
-                </table>
+            genderStatsEl.innerHTML = `
+                <h5 class="text-sm text-white font-medium mb-2">Sex Distribution:</h5>
+                <div class="text-sm space-y-1">
+                    <p><span class="text-gray-400">Men:</span> <span class="font-medium text-white ml-2">${genderCounts['Mann']}</span></p>
+                    <p><span class="text-gray-400">Women:</span> <span class="font-medium text-white ml-2">${genderCounts['Kvinne']}</span></p>
+                    <p><span class="text-gray-400">Other:</span> <span class="font-medium text-white ml-2">${genderCounts['Annet']}</span></p>
+                </div>
             `;
-            const ageTableBody = ageGroupStatsEl.querySelector('tbody');
-            
-            for (const group of ageBrackets) {
-                const data = ageGroups[group];
-                if (data.total > 0) {
-                    const tr = document.createElement('tr');
-                    tr.className = 'border-t border-gray-700/50';
-                    tr.innerHTML = `
-                        <td class="py-1 pr-2 font-medium">${group}</td>
-                        <td class="py-1 px-2 text-center text-emerald-400 font-bold">${data.total}</td>
-                        <td class="py-1 px-2 text-center">${data['Mann']}</td>
-                        <td class="py-1 px-2 text-center">${data['Kvinne']}</td>
-                        <td class="py-1 pl-2 text-center">${data['Other']}</td>
+
+            // Render Age Stats (Table)
+            ageGroupStatsEl.innerHTML = ''; // Clear
+            const table = document.createElement('table');
+            table.className = 'w-full text-left text-xs';
+            table.innerHTML = `
+                <thead class="text-gray-400">
+                    <tr>
+                        <th class="pb-1 font-medium">Group</th>
+                        <th class="pb-1 font-medium text-center">Total</th>
+                        <th class="pb-1 font-medium text-center">M</th>
+                        <th class="pb-1 font-medium text-center">W</th>
+                        <th class="pb-1 font-medium text-center">O</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700/50"></tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+
+            let hasData = false;
+            for (const [group, counts] of Object.entries(ageGroups)) {
+                if (counts.total > 0) {
+                    hasData = true;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="py-1">${group}</td>
+                        <td class="py-1 text-center font-medium text-white">${counts.total}</td>
+                        <td class="py-1 text-center text-gray-300">${counts.Mann}</td>
+                        <td class="py-1 text-center text-gray-300">${counts.Kvinne}</td>
+                        <td class="py-1 text-center text-gray-300">${counts.Annet}</td>
                     `;
-                    ageTableBody.appendChild(tr);
+                    tbody.appendChild(row);
                 }
             }
             
-            if (entries.length === 0) {
-                genderStatsEl.innerHTML = '<p class="text-gray-400">No data selected.</p>';
+            if (!hasData) {
                 ageGroupStatsEl.innerHTML = '<p class="text-gray-400">No data selected.</p>';
-            }
-        }
-        
-        // --- START GRAPH FUNCTIONS ---
-
-        /**
-         * Calculates linear regression.
-         * Returns slope (b) and intercept (a).
-         */
-        function calculateLinearRegression(data) {
-            if (data.length < 2) return { a: 0, b: 0 };
-            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, n = data.length;
-
-            for (const p of data) {
-                sumX += p.x;
-                sumY += p.y;
-                sumXY += p.x * p.y;
-                sumXX += p.x * p.x;
-            }
-
-            const b = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-            const a = (sumY - b * sumX) / n;
-            return { a, b };
-        }
-
-        /**
-         * Calculates exponential regression.
-         * Returns a and b for y = a * e^(b*x)
-         */
-        function calculateExponentialRegression(data) {
-            if (data.length < 2) return { a: 0, b: 0 };
-
-            // Transform data to linear form: log(y) = log(a) + b*x
-            const transformedData = data.filter(p => p.y > 0).map(p => ({
-                x: p.x,
-                logY: Math.log(p.y)
-            }));
-
-            if (transformedData.length < 2) return { a: 0, b: 0 };
-
-            let sumX = 0, sumLogY = 0, sumXLogY = 0, sumXX = 0, n = transformedData.length;
-            
-            for (const p of transformedData) {
-                sumX += p.x;
-                sumLogY += p.logY;
-                sumXLogY += p.x * p.logY;
-                sumXX += p.x * p.x;
-            }
-
-            // Calculate slope (b) and intercept (logA) of the linear regression
-            const b = (n * sumXLogY - sumX * sumLogY) / (n * sumXX - sumX * sumX);
-            const logA = (sumLogY - b * sumX) / n;
-            
-            // Convert back to exponential form: y = a * e^(b*x)
-            const a = Math.exp(logA);
-            return { a, b };
-        }
-        
-        /**
-         * Calculates R and R-squared values for a dataset and its trend.
-         */
-        function calculateRValues(data, a, b, isExponential) {
-            if (data.length < 2) return { r: NaN, r2: NaN };
-
-            let yMean = 0;
-            let n = data.length;
-            const points = [];
-            
-            // For exponential, we calculate R² on the log-transformed data
-            if (isExponential) {
-                // NEW CHECK for invalid 'a' parameter from regression
-                if (a <= 0 || !isFinite(a)) return { r: NaN, r2: NaN }; 
-
-                const logData = data.filter(p => p.y > 0).map(p => ({ x: p.x, y: Math.log(p.y) }));
-                if (logData.length < 2) return { r: NaN, r2: NaN };
-                
-                const logA = Math.log(a);
-                n = logData.length;
-                yMean = logData.reduce((sum, p) => sum + p.y, 0) / n;
-                
-                let ssTot = 0; // Total sum of squares
-                let ssRes = 0; // Residual sum of squares
-                
-                for (const p of logData) {
-                    const predictedLogY = logA + b * p.x;
-                    ssTot += Math.pow(p.y - yMean, 2);
-                    ssRes += Math.pow(p.y - predictedLogY, 2);
-                }
-                const r2 = 1 - (ssRes / ssTot);
-                return { r: Math.sqrt(r2), r2: r2 };
-
             } else {
-                // For linear, we use the standard Pearson R formula
-                let sumX = 0, sumY = 0, sumXX = 0, sumYY = 0, sumXY = 0;
-                
-                for (const p of data) {
-                    sumX += p.x;
-                    sumY += p.y;
-                    sumXX += p.x * p.x;
-                    sumYY += p.y * p.y;
-                    sumXY += p.x * p.y;
-                }
-                
-                const numerator = (n * sumXY - sumX * sumY);
-                const denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
-                
-                if (denominator === 0) return { r: NaN, r2: NaN };
-                
-                const r = numerator / denominator;
-                return { r: r, r2: r * r };
+                ageGroupStatsEl.appendChild(table);
             }
         }
-
-        /**
-         * Renders both scatter plots
-         */
-        function renderGraphs() {
-            if (!allEntries || allEntries.length === 0) return;
-            
-            const filterGender = currentGraphGender;
-
-            // 1. Filter data based on selected gender
-            const filteredEntries = allEntries.filter(entry => {
-                if (filterGender === 'All') return true;
-                return entry.kjonn === filterGender;
-            });
-
-            // 2. Prepare data for charts (with outliers filtered)
-            const areaData = filteredEntries.map(e => ({ x: e.alder, y: e.areal })).filter(e => e.x > 0 && e.y > 0 && e.y <= 30);
-            const diffData = filteredEntries.map(e => ({ x: e.alder, y: e.diff })).filter(e => e.x > 0 && e.y > 0 && e.y <= 0.75);
-            
-            let areaTrendline, areaStats, diffTrendline, diffStats;
-            const minX = Math.min(...allEntries.map(e => e.alder), 18);
-            const maxX = Math.max(...allEntries.map(e => e.alder), 70);
-            
-            // 3. Calculate Trendlines and Stats
-            if (currentRegressionType === 'linear') {
-                const areaParams = calculateLinearRegression(areaData);
-                areaTrendline = [{ x: minX, y: areaParams.a + areaParams.b * minX }, { x: maxX, y: areaParams.a + areaParams.b * maxX }];
-                areaStats = calculateRValues(areaData, areaParams.a, areaParams.b, false);
-                
-                const diffParams = calculateLinearRegression(diffData);
-                diffTrendline = [{ x: minX, y: diffParams.a + diffParams.b * minX }, { x: maxX, y: diffParams.a + diffParams.b * maxX }];
-                diffStats = calculateRValues(diffData, diffParams.a, diffParams.b, false);
-                
-            } else { // Exponential
-                const areaParams = calculateExponentialRegression(areaData);
-                areaTrendline = [];
-                for(let x = minX; x <= maxX; x++) areaTrendline.push({x: x, y: areaParams.a * Math.exp(areaParams.b * x)});
-                areaStats = calculateRValues(areaData, areaParams.a, areaParams.b, true);
-                
-                const diffParams = calculateExponentialRegression(diffData);
-                diffTrendline = [];
-                for(let x = minX; x <= maxX; x++) diffTrendline.push({x: x, y: diffParams.a * Math.exp(diffParams.b * x)});
-                diffStats = calculateRValues(diffData, diffParams.a, diffParams.b, true);
-            }
-            
-            // 4. Update Stats Display
-            areaStatsDisplay.textContent = areaStats.r ? `R: ${areaStats.r.toFixed(3)}, R²: ${areaStats.r2.toFixed(3)}` : 'N/A (not enough data)';
-            diffStatsDisplay.textContent = diffStats.r ? `R: ${diffStats.r.toFixed(3)}, R²: ${diffStats.r2.toFixed(3)}` : 'N/A (not enough data)';
-
-            // 5. Create Chart Configuration
-            const chartConfig = (chartData, trendData, label) => ({
-                type: 'scatter',
-                data: {
-                    datasets: [
-                        {
-                            label: 'Data Points',
-                            data: chartData,
-                            backgroundColor: 'rgba(16, 185, 129, 0.6)', // emerald-500
-                            borderColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 1,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                        },
-                        {
-                            label: `${currentRegressionType.charAt(0).toUpperCase() + currentRegressionType.slice(1)} Trend`,
-                            data: trendData,
-                            type: 'line',
-                            borderColor: 'rgba(239, 68, 68, 0.7)', // red-500
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            position: 'bottom',
-                            title: { display: true, text: 'Age', color: '#9ca3af' },
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        y: {
-                            title: { display: true, text: label, color: '#9ca3af' },
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: { color: '#9ca3af' }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    if (context.dataset.label.includes('Trend')) return null;
-                                    return `Age: ${context.parsed.x}, ${label}: ${context.parsed.y}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // 6. Destroy old charts and create new ones
-            if (chartInstances.ageVsArea) chartInstances.ageVsArea.destroy();
-            if (chartInstances.ageVsDiff) chartInstances.ageVsDiff.destroy();
-            
-            if (ageVsAreaCanvas && areaData.length > 0) {
-                chartInstances.ageVsArea = new Chart(ageVsAreaCanvas, chartConfig(areaData, areaTrendline, 'CoP Area'));
-            }
-            if (ageVsDiffCanvas && diffData.length > 0) {
-                chartInstances.ageVsDiff = new Chart(ageVsDiffCanvas, chartConfig(diffData, diffTrendline, 'CoP Diff'));
-            }
-        }
-        
-        /**
-         * Sets up event listeners for graph filter buttons
-         */
-        function setupGraphFilters() {
-            graphFilterButtons.addEventListener('click', (e) => {
-                if (e.target.classList.contains('graph-filter')) {
-                    graphFilterButtons.querySelectorAll('.graph-filter').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    e.target.classList.add('active');
-                    currentGraphGender = e.target.dataset.gender; // Update state
-                    renderGraphs(); // Re-render graphs
-                }
-            });
-        }
-        
-        /**
-         * Sets up event listeners for regression filter buttons
-         */
-        function setupRegressionFilters() {
-            regressionFilterButtons.addEventListener('click', (e) => {
-                if (e.target.classList.contains('regression-filter')) {
-                    regressionFilterButtons.querySelectorAll('.regression-filter').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    e.target.classList.add('active');
-                    currentRegressionType = e.target.dataset.type; // Update state
-                    renderGraphs(); // Re-render graphs
-                }
-            });
-        }
-        
-        // --- END GRAPH FUNCTIONS ---
-
 
         /**
          * Deletes an entry
          */
         async function deleteEntry(id) {
             // NOTE: Using a custom modal instead of window.confirm
-            // For this quick implementation, we'll skip confirmation
-            // In a real app, you'd build a custom confirmation modal
+            // For now, just delete directly. A custom confirm modal could be added.
             // const isConfirmed = window.confirm("Are you sure you want to delete this entry?");
             // if (!isConfirmed) return;
             
@@ -1388,15 +1194,14 @@
                     const field = td.dataset.field;
                     const value = td.textContent;
                     
-                    // Don't edit calculated fields or timestamp
-                    if (field === 'balanceAlder' || field === 'createdAt') return;
-                    
+                    if (field === 'balanceAlder') return; // Don't edit calculated field
+
                     if (field === 'kjonn') {
                         td.innerHTML = `
                             <select class="table-input" data-original-value="${value}">
-                                <option value="Mann" ${value === 'Mann' ? 'selected' : ''}>Man</option>
+                                <option value="Mann">Man</option>
                                 <option value="Kvinne" ${value === 'Kvinne' ? 'selected' : ''}>Woman</option>
-                                <option value="Other" ${value === 'Other' ? 'selected' : ''}>Other</option>
+                                <option value="Annet" ${value === 'Annet' ? 'selected' : ''}>Other</option>
                             </select>
                         `;
                     } else {
@@ -1406,7 +1211,7 @@
                     }
                 });
             } else {
-                // Switch back (Save changes)
+                // Change back (Save changes)
                 saveEntryChanges(id);
             }
         }
@@ -1424,7 +1229,7 @@
             
             const updates = {};
             let hasChanges = false;
-            let needsRecalculation = false;
+            let needsRecalculate = false;
             
             tr.querySelectorAll('td[data-field]').forEach(td => {
                 const input = td.querySelector('input, select');
@@ -1436,14 +1241,20 @@
 
                 if (newValue !== originalValue) {
                     hasChanges = true;
-                    if (field === 'alder') updates.alder = parseInt(newValue, 10);
-                    else if (field === 'areal') updates.areal = parseFloat(newValue);
-                    else if (field === 'diff') updates.diff = parseFloat(newValue);
-                    else updates[field] = newValue;
-                    
-                    if (['alder', 'kjonn', 'areal'].includes(field)) {
-                        needsRecalculation = true;
+                    if (field === 'alder') {
+                        updates.alder = parseInt(newValue, 10);
+                        needsRecalculate = true;
                     }
+                    else if (field === 'areal') {
+                        updates.areal = parseFloat(newValue);
+                        needsRecalculate = true;
+                    }
+                    else if (field === 'diff') updates.diff = parseFloat(newValue);
+                    else if (field === 'kjonn') {
+                        updates.kjonn = newValue;
+                        needsRecalculate = true;
+                    }
+                    else updates[field] = newValue;
                 }
                 
                 // Set back to plain text
@@ -1451,16 +1262,19 @@
             });
             
             // Recalculate Balance Age if needed
-            if (needsRecalculation) {
-                const newAlder = updates.alder !== undefined ? updates.alder : parseInt(tr.querySelector('td[data-field="alder"]').textContent);
-                const newKjonn = updates.kjonn !== undefined ? updates.kjonn : tr.querySelector('td[data-field="kjonn"]').textContent;
-                const newAreal = updates.areal !== undefined ? updates.areal : parseFloat(tr.querySelector('td[data-field="areal"]').textContent);
+            if (needsRecalculate) {
+                const newAge = updates.alder !== undefined ? updates.alder : parseInt(tr.querySelector('td[data-field="alder"]').textContent);
+                const newSex = updates.kjonn !== undefined ? updates.kjonn : tr.querySelector('td[data-field="kjonn"]').textContent;
+                const newArea = updates.areal !== undefined ? updates.areal : parseFloat(tr.querySelector('td[data-field="areal"]').textContent);
                 
-                updates.balanceAlder = calculateBalanceAge(newAlder, newKjonn, newAreal);
+                updates.balanceAlder = calculateBalanceAge(newAge, newSex, newArea);
+                
+                // Update the cell in the table immediately
+                tr.querySelector('td[data-field="balanceAlder"]').textContent = updates.balanceAlder.toFixed(1);
             }
-            
+
             // If there are changes, update the database
-            if (hasChanges || needsRecalculation) {
+            if (hasChanges || needsRecalculate) {
                 try {
                     const docRef = doc(db, entriesCollection.path, id);
                     await updateDoc(docRef, updates);
@@ -1471,6 +1285,59 @@
             }
         }
         
+        /**
+         * Shows the full report modal for a specific entry
+         */
+        function showReportForEntry(id) {
+            const entry = allEntries.find(e => e.id === id);
+            if (!entry) return;
+
+            const { alder, kjonn, areal, hopphoyde, vekt, pull } = entry;
+            
+            if (hopphoyde == null || vekt == null || pull == null) {
+                showModal("Error", "This entry does not contain full fitness data.", "ℹ️", "info");
+                return;
+            }
+
+            // All data is present, run calculations
+            const balanseAlder = entry.balanceAlder; // Already calculated
+            
+            const jumpPercentile = calculateJumpPercentile(alder, kjonn, hopphoyde);
+            const funksjonAlder = calculateAgeFromPercentile(jumpPercentile, alder);
+            
+            const strengthResult = calculateStrengthScoreAndPercentile(kjonn, alder, vekt, pull);
+            const styrkeAlder = calculateAgeFromPercentile(strengthResult.percentile, alder);
+            
+            const ages = [balanseAlder, funksjonAlder, styrkeAlder].filter(isFinite);
+            let samletAlder = NaN;
+            if (ages.length > 0) {
+                samletAlder = ages.reduce((sum, age) => sum + age, 0) / ages.length;
+            }
+
+            // Show the "sexy" full report modal
+            const detailsHTML = `
+                <div class="age-card">
+                    <div class="age-card-title">Balance Age</div>
+                    <div class="age-card-value text-balance">${balanseAlder.toFixed(1)}</div>
+                </div>
+                <div class="age-card">
+                    <div class="age-card-title">Functional Age</div>
+                    <div class="age-card-value text-function">${funksjonAlder.toFixed(1)}</div>
+                </div>
+                <div class="age-card">
+                    <div class="age-card-title">Strength Age</div>
+                    <div class="age-card-value text-strength">${styrkeAlder.toFixed(1)}</div>
+                </div>
+            `;
+            showModal(
+                `Report for ${entry.testleder}`,
+                "Estimated overall fitness age is:",
+                samletAlder.toFixed(1),
+                "success",
+                detailsHTML
+            );
+        }
+
         /**
          * Downloads filtered data as CSV
          */
@@ -1485,7 +1352,11 @@
                 return;
             }
 
-            const headers = ["TestLeader", "Age", "Sex", "CoPArea(cm²)", "CoPDiff(cm)", "BalanceAge", "Timestamp", "JumpHeight(cm)", "Weight(kg)", "Pull(kg)"];
+            const headers = [
+                "Testleder", "Alder", "Kjønn", "Areal (cm²)", "Diff (cm)", "Balansealder", 
+                "Hopphøyde (cm)", "Vekt (kg)", "Pull (kg)", "Tidsstempel"
+            ];
+            
             const rows = filteredEntries.map(entry => {
                 const timestamp = entry.createdAt?.seconds ? new Date(entry.createdAt.seconds * 1000).toLocaleString('en-GB') : 'N/A';
                 return [
@@ -1495,10 +1366,10 @@
                     entry.areal,
                     entry.diff,
                     entry.balanceAlder?.toFixed(2) || 'N/A',
-                    `"${timestamp}"`,
                     entry.hopphoyde || 'N/A',
                     entry.vekt || 'N/A',
-                    entry.pull || 'N/A'
+                    entry.pull || 'N/A',
+                    `"${timestamp}"`
                 ].join(',');
             });
 
@@ -1509,20 +1380,324 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "balance_data.csv");
+            link.setAttribute("download", "balanse_data.csv");
             document.body.appendChild(link); // Required for Firefox
             link.click();
             document.body.removeChild(link);
         }
+        
+        // --- START GRAPH FUNCTIONS ---
 
-        // Run the main function when the page is ready
-        document.addEventListener('DOMContentLoaded', main);
+        /**
+         * Renders the two scatter plots (Area and Diff)
+         */
+        function renderGraphs() {
+            // --- FIX V8: Simplified check ---
+            if (!allEntries) { 
+                console.warn(`renderGraphs ABORTED: Data not ready (allEntries is null).`);
+                return;
+            }
+            if (typeof regression === 'undefined') {
+                // This check is now a fallback, it *shouldn'T* be hit if the import worked.
+                console.error(`renderGraphs FAILED: regression module is still undefined.`);
+                return;
+            }
+            
+            // Check if canvases were found during init
+            if (!areaChartCanvas || !diffChartCanvas) {
+                console.error("renderGraphs ABORTED: Canvas elements were not found on init.");
+                return;
+            }
+            
+            // 1. Get all filter states
+            const filterGender = currentGraphGender;
+            const xAxisKey1 = xAxisSelect1.value;
+            const yAxisKey1 = yAxisSelect1.value;
+            const xAxisLabel1 = xAxisSelect1.options[xAxisSelect1.selectedIndex].text;
+            const yAxisLabel1 = yAxisSelect1.options[yAxisSelect1.selectedIndex].text;
+            const xAxisKey2 = xAxisSelect2.value;
+            const yAxisKey2 = yAxisSelect2.value;
+            const xAxisLabel2 = xAxisSelect2.options[xAxisSelect2.selectedIndex].text;
+            const yAxisLabel2 = yAxisSelect2.options[yAxisSelect2.selectedIndex].text;
+
+            // 2. Prepare data for charts (with outliers filtered)
+            // Sort all data into gender-specific buckets first
+            const dataForChart1_Men = [];
+            const dataForChart1_Women = [];
+            const dataForChart1_Other = [];
+            const dataForChart2_Men = [];
+            const dataForChart2_Women = [];
+            const dataForChart2_Other = [];
+
+            for (const entry of allEntries) {
+                // Get data for Chart 1
+                const x1 = entry[xAxisKey1];
+                const y1 = entry[yAxisKey1];
+                // Get data for Chart 2
+                const x2 = entry[xAxisKey2];
+                const y2 = entry[yAxisKey2];
+                
+                if (entry.kjonn === 'Mann') {
+                    applyAndPushData(dataForChart1_Men, x1, y1, xAxisKey1, yAxisKey1);
+                    applyAndPushData(dataForChart2_Men, x2, y2, xAxisKey2, yAxisKey2);
+                } else if (entry.kjonn === 'Kvinne') {
+                    applyAndPushData(dataForChart1_Women, x1, y1, xAxisKey1, yAxisKey1);
+                    applyAndPushData(dataForChart2_Women, x2, y2, xAxisKey2, yAxisKey2);
+                } else {
+                    applyAndPushData(dataForChart1_Other, x1, y1, xAxisKey1, yAxisKey1);
+                    applyAndPushData(dataForChart2_Other, x2, y2, xAxisKey2, yAxisKey2);
+                }
+            }
+
+            // 3. Create dataset objects based on filter
+            const datasets1 = [];
+            const datasets2 = [];
+            const allDataForTrend1 = [];
+            const allDataForTrend2 = [];
+            
+            const colorMen = 'rgba(96, 165, 250, 0.6)'; // blue-400
+            const colorWomen = 'rgba(239, 68, 68, 0.6)'; // red-500 (NEW CONTRAST)
+            const colorOther = 'rgba(156, 163, 175, 0.6)'; // gray-400
+
+            if (currentGraphGender === 'All') {
+                datasets1.push({ label: 'Men', data: dataForChart1_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
+                datasets1.push({ label: 'Women', data: dataForChart1_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
+                datasets1.push({ label: 'Other', data: dataForChart1_Other.map(p => ({ x: p[0], y: p[1] })), color: colorOther });
+                allDataForTrend1.push(...dataForChart1_Men, ...dataForChart1_Women, ...dataForChart1_Other);
+
+                datasets2.push({ label: 'Men', data: dataForChart2_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
+                datasets2.push({ label: 'Women', data: dataForChart2_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
+                datasets2.push({ label: 'Other', data: dataForChart2_Other.map(p => ({ x: p[0], y: p[1] })), color: colorOther });
+                allDataForTrend2.push(...dataForChart2_Men, ...dataForChart2_Women, ...dataForChart2_Other);
+
+            } else if (currentGraphGender === 'Mann') {
+                datasets1.push({ label: 'Men', data: dataForChart1_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
+                allDataForTrend1.push(...dataForChart1_Men);
+
+                datasets2.push({ label: 'Men', data: dataForChart2_Men.map(p => ({ x: p[0], y: p[1] })), color: colorMen });
+                allDataForTrend2.push(...dataForChart2_Men);
+
+            } else if (currentGraphGender === 'Kvinne') {
+                datasets1.push({ label: 'Women', data: dataForChart1_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
+                allDataForTrend1.push(...dataForChart1_Women);
+
+                datasets2.push({ label: 'Women', data: dataForChart2_Women.map(p => ({ x: p[0], y: p[1] })), color: colorWomen });
+                allDataForTrend2.push(...dataForChart2_Women);
+            }
+            
+            // 4. Update Area Chart (Chart 1)
+            updateChart(
+                chartInstances,
+                areaChartCanvas,
+                'areaChart',
+                datasets1, // Pass the array of dataset objects
+                allDataForTrend1, // Pass the combined data for regression
+                areaStatsDisplay,
+                xAxisLabel1,
+                yAxisLabel1
+            );
+
+            // 5. Update Diff Chart (Chart 2)
+            updateChart(
+                chartInstances,
+                diffChartCanvas,
+                'diffChart',
+                datasets2, // Pass the array of dataset objects
+                allDataForTrend2, // Pass the combined data for regression
+                diffStatsDisplay,
+                xAxisLabel2,
+                yAxisLabel2
+            );
+        }
+        
+        /**
+         * Helper function to apply filters and push valid data
+         */
+        function applyAndPushData(dataArray, x, y, xKey, yKey) {
+            // Check for valid numbers
+            if (x == null || y == null || !isFinite(x) || !isFinite(y) || x < 0 || y < 0) {
+                return;
+            }
+            
+            // Apply outlier filters based on Y-axis
+            if (yKey === 'areal' && y > 30) {
+                return;
+            }
+            if (yKey === 'diff' && y > 0.75) { // User requested filters back, using original 0.75
+                return;
+            }
+
+            // Apply outlier filters based on X-axis (if it's one of these)
+            if (xKey === 'areal' && x > 30) {
+                return;
+            }
+            if (xKey === 'diff' && x > 0.75) { // User requested filters back, using original 0.75
+                return;
+            }
+            
+            // All valid data points will now be added
+            dataArray.push([x, y]);
+        }
+
+
+        /**
+         * Helper function to create/update a single chart instance
+         */
+        function updateChart(instances, canvas, chartId, dataSetObjects, allDataForTrend, statsEl, xLabel, yLabel) {
+            let regressionResult = null;
+            let trendData = [];
+            let statsText = 'N/A (not enough data)';
+
+            // FIX: Only try regression if there are enough points
+            if (allDataForTrend.length >= 2) {
+                try {
+                    // --- FIX V8: Use imported 'regression' module directly ---
+                    if (currentRegressionType === 'linear') {
+                        regressionResult = regression.linear(allDataForTrend, { precision: 3 });
+                    } else if (currentRegressionType === 'polynomial') {
+                        regressionResult = regression.polynomial(allDataForTrend, { order: 2, precision: 3 });
+                    } else { // Default to exponential
+                        regressionResult = regression.exponential(allDataForTrend, { precision: 3 });
+                    }
+                    
+                    if (regressionResult) {
+                        trendData = regressionResult.points.map(p => ({ x: p[0], y: p[1] }));
+                        trendData.sort((a, b) => a.x - b.x); // Ensure line draws correctly
+                        statsText = `R²: ${regressionResult.r2.toFixed(3)} | ${regressionResult.string}`;
+                    }
+                } catch (error) {
+                    console.error(`Regression calculation failed for ${chartId}: ${error.message}`);
+                    statsText = 'N/A (calculation error)';
+                    trendData = [];
+                }
+            }
+            
+            if (!statsEl) {
+                console.error(`statsEl for ${chartId} ('${statsEl}') is NULL. Cannot display stats.`);
+            } else {
+                statsEl.textContent = statsText;
+            }
+
+            const chartConfig = {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        // Map the data objects to Chart.js datasets
+                        ...dataSetObjects.map(ds => ({
+                            label: ds.label,
+                            data: ds.data,
+                            backgroundColor: ds.color,
+                            borderColor: ds.color.replace('0.6', '1'),
+                            borderWidth: 1,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                        })),
+                        // Add the trendline dataset
+                        {
+                            label: `${currentRegressionType.charAt(0).toUpperCase() + currentRegressionType.slice(1)} Trend`,
+                            data: trendData,
+                            type: 'line',
+                            borderColor: 'rgba(234, 179, 8, 0.7)', // yellow-500 (NEW TRENDLINE)
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: xLabel, color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: yLabel, color: '#9ca3af' },
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#9ca3af' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label.toLowerCase().includes('trend')) {
+                                        return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
+                                    }
+                                    // It's a data point
+                                    const genderLabel = context.dataset.label; // "Men", "Women", or "Other"
+                                    return `${genderLabel} - ${xLabel}: ${context.parsed.x}, ${yLabel}: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            // FIX: Always destroy and recreate the chart.
+            if (instances[chartId]) {
+                instances[chartId].destroy();
+            }
+            
+            if (canvas) {
+                instances[chartId] = new Chart(canvas, chartConfig);
+            } else {
+                console.error(`Cannot create chart for ${chartId}: CANVAS is NULL.`);
+            }
+        }
+        
+        
+        /**
+         * Sets up listeners for graph gender filter buttons
+         */
+        function setupGraphFilters() {
+            graphFilterButtons.addEventListener('click', (e) => {
+                if (e.target.classList.contains('graph-filter')) {
+                    // Update active state
+                    graphFilterButtons.querySelectorAll('.graph-filter').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    // Update global state
+                    currentGraphGender = e.target.dataset.gender;
+                    // Re-render graphs
+                    renderGraphs();
+                }
+            });
+        }
+        
+        /**
+         * Sets up listeners for regression type filter buttons
+         */
+        function setupRegressionFilters() {
+             regressionFilterButtons.addEventListener('click', (e) => {
+                if (e.target.classList.contains('regression-filter')) {
+                    // Update active state
+                    regressionFilterButtons.querySelectorAll('.regression-filter').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    // Update global state
+                    currentRegressionType = e.target.dataset.type;
+                    // Re-render graphs
+                    renderGraphs();
+                }
+            });
+        }
+        
+        // --- END GRAPH FUNCTIONS ---
+
+
+        // Run the main function when the page AND all scripts are fully loaded
+        window.addEventListener('load', main);
     </script>
 
 </body>
 </html>
-
-
-
 
 
